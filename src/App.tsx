@@ -1,4 +1,5 @@
 
+import React from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -14,12 +15,11 @@ import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/admin/ProtectedRoute";
-import React from 'react';
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <React.StrictMode>
+const App = () => {
+  return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
@@ -43,7 +43,7 @@ const App = () => (
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
-  </React.StrictMode>
-);
+  );
+};
 
 export default App;

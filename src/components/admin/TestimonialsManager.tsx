@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useToast } from '@/hooks/use-toast';
@@ -14,19 +13,9 @@ import { Badge } from '@/components/ui/badge';
 import { Pencil, Trash2, Plus, Star, StarOff, User } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { fetchDataFromTable, insertDataToTable, updateDataInTable, deleteDataFromTable } from '@/utils/supabaseHelpers';
+import { Tables } from '@/integrations/supabase/types';
 
-interface Testimonial {
-  id: string;
-  client_name: string;
-  client_title: string;
-  client_company: string | null;
-  avatar_url: string | null;
-  review_text: string;
-  rating: number;
-  is_featured: boolean;
-  created_at: string;
-  updated_at: string;
-}
+type Testimonial = Tables['testimonials']['Row'];
 
 const defaultTestimonial = {
   client_name: '',
@@ -52,7 +41,7 @@ const TestimonialsManager = () => {
 
   const loadTestimonials = async () => {
     setLoading(true);
-    const data = await fetchDataFromTable<Testimonial>('testimonials', { orderBy: 'created_at' });
+    const data = await fetchDataFromTable('testimonials', { orderBy: 'created_at' });
     setTestimonials(data);
     setLoading(false);
   };
@@ -114,7 +103,7 @@ const TestimonialsManager = () => {
   };
 
   const toggleFeatured = async (testimonial: Testimonial) => {
-    const updatedTestimonial = await updateDataInTable<Testimonial>(
+    const updatedTestimonial = await updateDataInTable(
       'testimonials', 
       testimonial.id, 
       { is_featured: !testimonial.is_featured }

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useToast } from '@/hooks/use-toast';
@@ -13,23 +12,15 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Pencil, Trash2, Plus, Star, StarOff } from 'lucide-react';
 import { fetchDataFromTable, insertDataToTable, updateDataInTable, deleteDataFromTable } from '@/utils/supabaseHelpers';
+import { Tables } from '@/integrations/supabase/types';
 
-interface Service {
-  id: string;
-  title: string;
-  description: string;
-  icon_name: string;
-  price: number | null;
-  is_featured: boolean;
-  created_at: string;
-  updated_at: string;
-}
+type Service = Tables['services']['Row'];
 
 const defaultService = {
   title: '',
   description: '',
   icon_name: 'sparkles',
-  price: null,
+  price: null as number | null,
   is_featured: false
 };
 
@@ -47,7 +38,7 @@ const ServicesManager = () => {
 
   const loadServices = async () => {
     setLoading(true);
-    const data = await fetchDataFromTable<Service>('services', { orderBy: 'created_at' });
+    const data = await fetchDataFromTable('services', { orderBy: 'created_at' });
     setServices(data);
     setLoading(false);
   };
@@ -105,7 +96,7 @@ const ServicesManager = () => {
   };
 
   const toggleFeatured = async (service: Service) => {
-    const updatedService = await updateDataInTable<Service>(
+    const updatedService = await updateDataInTable(
       'services', 
       service.id, 
       { is_featured: !service.is_featured }

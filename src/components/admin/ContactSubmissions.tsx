@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,17 +11,9 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { fetchDataFromTable, updateDataInTable, deleteDataFromTable } from '@/utils/supabaseHelpers';
+import { Tables } from '@/integrations/supabase/types';
 
-interface ContactSubmission {
-  id: string;
-  name: string;
-  email: string;
-  phone: string | null;
-  message: string;
-  status: string;
-  created_at: string;
-  updated_at: string;
-}
+type ContactSubmission = Tables['contact_submissions']['Row'];
 
 const ContactSubmissions = () => {
   const [submissions, setSubmissions] = useState<ContactSubmission[]>([]);
@@ -37,7 +28,7 @@ const ContactSubmissions = () => {
 
   const loadSubmissions = async () => {
     setLoading(true);
-    const data = await fetchDataFromTable<ContactSubmission>('contact_submissions', { orderBy: 'created_at', ascending: false });
+    const data = await fetchDataFromTable('contact_submissions', { orderBy: 'created_at', ascending: false });
     setSubmissions(data);
     setLoading(false);
   };
@@ -84,7 +75,7 @@ const ContactSubmissions = () => {
   const handleStatusChange = async (value: string) => {
     if (!currentSubmission) return;
 
-    const updatedSubmission = await updateDataInTable<ContactSubmission>(
+    const updatedSubmission = await updateDataInTable(
       'contact_submissions', 
       currentSubmission.id, 
       { status: value }

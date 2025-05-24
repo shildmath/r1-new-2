@@ -13,9 +13,9 @@ import { Badge } from '@/components/ui/badge';
 import { Pencil, Trash2, Plus, Star, StarOff, User } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { fetchDataFromTable, insertDataToTable, updateDataInTable, deleteDataFromTable } from '@/utils/supabaseHelpers';
-import { Tables } from '@/integrations/supabase/types';
+import { Database } from '@/integrations/supabase/types';
 
-type Testimonial = Tables['testimonials']['Row'];
+type Testimonial = Database['public']['Tables']['testimonials']['Row'];
 
 const defaultTestimonial = {
   client_name: '',

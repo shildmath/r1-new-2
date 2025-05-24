@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Mail, Phone, MapPin, Facebook, Instagram, Linkedin, Twitter, Youtube } from 'lucide-react';
 
-const Footer = () => {
+const EnhancedFooter = () => {
   const socialLinks = [
     { icon: Facebook, href: "https://facebook.com", label: "Facebook" },
     { icon: Instagram, href: "https://instagram.com", label: "Instagram" },
@@ -170,4 +170,4 @@ const Footer = () => {
   );
 };
 
-export default Footer;
+export default EnhancedFooter;

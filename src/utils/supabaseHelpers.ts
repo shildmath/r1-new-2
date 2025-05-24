@@ -1,7 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { TablesInsert, TablesUpdate, Database } from '@/integrations/supabase/types';
+import { Database } from '@/integrations/supabase/types';
 
 // Define a type for table names
 type TableName = keyof Database['public']['Tables'];
@@ -10,7 +10,7 @@ type TableName = keyof Database['public']['Tables'];
 export const fetchDataFromTable = async <T extends TableName>(
   tableName: T,
   options: { orderBy?: string; ascending?: boolean } = {}
-): Promise<Database['public']['Tables'][T]['Row'][]> => {
+) => {
   try {
     let query = supabase.from(tableName).select('*');
     
@@ -24,7 +24,7 @@ export const fetchDataFromTable = async <T extends TableName>(
       throw error;
     }
     
-    return (data || []) as Database['public']['Tables'][T]['Row'][];
+    return data || [];
   } catch (error: any) {
     console.error(`Error fetching ${String(tableName)}:`, error.message);
     toast({
@@ -39,8 +39,8 @@ export const fetchDataFromTable = async <T extends TableName>(
 // Generic insert function
 export const insertDataToTable = async <T extends TableName>(
   tableName: T,
-  data: TablesInsert<T>
-): Promise<Database['public']['Tables'][T]['Row'] | null> => {
+  data: any
+) => {
   try {
     const { data: insertedData, error } = await supabase
       .from(tableName)
@@ -57,7 +57,7 @@ export const insertDataToTable = async <T extends TableName>(
       description: `New entry added to ${String(tableName)}`,
     });
     
-    return insertedData as Database['public']['Tables'][T]['Row'];
+    return insertedData;
   } catch (error: any) {
     console.error(`Error inserting into ${String(tableName)}:`, error.message);
     toast({
@@ -73,8 +73,8 @@ export const insertDataToTable = async <T extends TableName>(
 export const updateDataInTable = async <T extends TableName>(
   tableName: T,
   id: string,
-  data: TablesUpdate<T>
-): Promise<Database['public']['Tables'][T]['Row'] | null> => {
+  data: any
+) => {
   try {
     const { data: updatedData, error } = await supabase
       .from(tableName)
@@ -92,7 +92,7 @@ export const updateDataInTable = async <T extends TableName>(
       description: `Entry in ${String(tableName)} has been updated`,
     });
     
-    return updatedData as Database['public']['Tables'][T]['Row'];
+    return updatedData;
   } catch (error: any) {
     console.error(`Error updating ${String(tableName)}:`, error.message);
     toast({

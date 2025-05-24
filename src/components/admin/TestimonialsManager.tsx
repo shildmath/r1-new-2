@@ -16,8 +16,10 @@ import { fetchDataFromTable, insertDataToTable, updateDataInTable, deleteDataFro
 import { Database } from '@/integrations/supabase/types';
 
 type Testimonial = Database['public']['Tables']['testimonials']['Row'];
+type TestimonialInsert = Database['public']['Tables']['testimonials']['Insert'];
+type TestimonialUpdate = Database['public']['Tables']['testimonials']['Update'];
 
-const defaultTestimonial = {
+const defaultTestimonial: TestimonialInsert = {
   client_name: '',
   client_title: '',
   client_company: '',
@@ -33,7 +35,7 @@ const TestimonialsManager = () => {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [currentTestimonial, setCurrentTestimonial] = useState<Partial<Testimonial>>(defaultTestimonial);
+  const [currentTestimonial, setCurrentTestimonial] = useState<TestimonialInsert>(defaultTestimonial);
 
   useEffect(() => {
     loadTestimonials();
@@ -61,7 +63,15 @@ const TestimonialsManager = () => {
 
   const handleOpenDialog = (testimonial?: Testimonial) => {
     if (testimonial) {
-      setCurrentTestimonial(testimonial);
+      setCurrentTestimonial({
+        client_name: testimonial.client_name,
+        client_title: testimonial.client_title,
+        client_company: testimonial.client_company,
+        avatar_url: testimonial.avatar_url,
+        review_text: testimonial.review_text,
+        rating: testimonial.rating,
+        is_featured: testimonial.is_featured
+      });
       setIsEditing(true);
     } else {
       setCurrentTestimonial(defaultTestimonial);
@@ -80,8 +90,11 @@ const TestimonialsManager = () => {
     e.preventDefault();
     
     try {
-      if (isEditing && currentTestimonial.id) {
-        await updateDataInTable('testimonials', currentTestimonial.id, currentTestimonial);
+      if (isEditing && testimonials.find(t => t.client_name === currentTestimonial.client_name)) {
+        const testimonialToUpdate = testimonials.find(t => t.client_name === currentTestimonial.client_name);
+        if (testimonialToUpdate) {
+          await updateDataInTable('testimonials', testimonialToUpdate.id, currentTestimonial as TestimonialUpdate);
+        }
       } else {
         await insertDataToTable('testimonials', currentTestimonial);
       }

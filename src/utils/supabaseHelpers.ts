@@ -24,7 +24,7 @@ export const fetchDataFromTable = async <T extends TableName>(
       throw error;
     }
     
-    return data as Database['public']['Tables'][T]['Row'][];
+    return (data || []) as Database['public']['Tables'][T]['Row'][];
   } catch (error: any) {
     console.error(`Error fetching ${String(tableName)}:`, error.message);
     toast({

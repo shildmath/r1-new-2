@@ -15,12 +15,14 @@ import { fetchDataFromTable, insertDataToTable, updateDataInTable, deleteDataFro
 import { Database } from '@/integrations/supabase/types';
 
 type Service = Database['public']['Tables']['services']['Row'];
+type ServiceInsert = Database['public']['Tables']['services']['Insert'];
+type ServiceUpdate = Database['public']['Tables']['services']['Update'];
 
-const defaultService = {
+const defaultService: ServiceInsert = {
   title: '',
   description: '',
   icon_name: 'sparkles',
-  price: null as number | null,
+  price: null,
   is_featured: false
 };
 
@@ -30,7 +32,7 @@ const ServicesManager = () => {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [currentService, setCurrentService] = useState<Partial<Service>>(defaultService);
+  const [currentService, setCurrentService] = useState<ServiceInsert>(defaultService);
 
   useEffect(() => {
     loadServices();
@@ -54,7 +56,13 @@ const ServicesManager = () => {
 
   const handleOpenDialog = (service?: Service) => {
     if (service) {
-      setCurrentService(service);
+      setCurrentService({
+        title: service.title,
+        description: service.description,
+        icon_name: service.icon_name,
+        price: service.price,
+        is_featured: service.is_featured
+      });
       setIsEditing(true);
     } else {
       setCurrentService(defaultService);
@@ -73,8 +81,11 @@ const ServicesManager = () => {
     e.preventDefault();
     
     try {
-      if (isEditing && currentService.id) {
-        await updateDataInTable('services', currentService.id, currentService);
+      if (isEditing && services.find(s => s.title === currentService.title)) {
+        const serviceToUpdate = services.find(s => s.title === currentService.title);
+        if (serviceToUpdate) {
+          await updateDataInTable('services', serviceToUpdate.id, currentService as ServiceUpdate);
+        }
       } else {
         await insertDataToTable('services', currentService);
       }

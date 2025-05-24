@@ -13,6 +13,7 @@ import StrategyCall from "./pages/StrategyCall";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import NotFound from "./pages/NotFound";
+import ProtectedRoute from "./components/admin/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -30,7 +31,11 @@ const App = () => (
           <Route path="/contact" element={<Contact />} />
           <Route path="/strategy-call" element={<StrategyCall />} />
           <Route path="/admin" element={<AdminLogin />} />
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/dashboard" element={
+            <ProtectedRoute>
+              <AdminDashboard />
+            </ProtectedRoute>
+          } />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

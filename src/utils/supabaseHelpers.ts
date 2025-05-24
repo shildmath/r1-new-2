@@ -7,8 +7,8 @@ import { Database } from '@/integrations/supabase/types';
 type TableName = keyof Database['public']['Tables'];
 
 // Generic fetch function
-export const fetchDataFromTable = async <T extends TableName>(
-  tableName: T,
+export const fetchDataFromTable = async (
+  tableName: TableName,
   options: { orderBy?: string; ascending?: boolean } = {}
 ) => {
   try {
@@ -37,8 +37,8 @@ export const fetchDataFromTable = async <T extends TableName>(
 };
 
 // Generic insert function
-export const insertDataToTable = async <T extends TableName>(
-  tableName: T,
+export const insertDataToTable = async (
+  tableName: TableName,
   data: any
 ) => {
   try {
@@ -70,8 +70,8 @@ export const insertDataToTable = async <T extends TableName>(
 };
 
 // Generic update function
-export const updateDataInTable = async <T extends TableName>(
-  tableName: T,
+export const updateDataInTable = async (
+  tableName: TableName,
   id: string,
   data: any
 ) => {
@@ -79,7 +79,7 @@ export const updateDataInTable = async <T extends TableName>(
     const { data: updatedData, error } = await supabase
       .from(tableName)
       .update(data)
-      .eq('id', id)
+      .eq('id' as any, id)
       .select()
       .single();
     
@@ -110,7 +110,7 @@ export const deleteDataFromTable = async (
   id: string
 ): Promise<boolean> => {
   try {
-    const { error } = await supabase.from(tableName).delete().eq('id', id);
+    const { error } = await supabase.from(tableName).delete().eq('id' as any, id);
     
     if (error) {
       throw error;

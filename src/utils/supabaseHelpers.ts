@@ -1,9 +1,13 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { TablesInsert, TablesUpdate, Tables } from '@/integrations/supabase/types';
 
 // Generic fetch function
-export const fetchDataFromTable = async <T>(tableName: string, options: any = {}) => {
+export const fetchDataFromTable = async <T extends keyof Tables>(
+  tableName: T,
+  options: any = {}
+): Promise<Tables[T]['Row'][]> => {
   try {
     let query = supabase.from(tableName).select('*');
     
@@ -17,7 +21,7 @@ export const fetchDataFromTable = async <T>(tableName: string, options: any = {}
       throw error;
     }
     
-    return data as T[];
+    return data as Tables[T]['Row'][];
   } catch (error: any) {
     console.error(`Error fetching ${tableName}:`, error.message);
     toast({
@@ -30,9 +34,16 @@ export const fetchDataFromTable = async <T>(tableName: string, options: any = {}
 };
 
 // Generic insert function
-export const insertDataToTable = async <T>(tableName: string, data: any): Promise<T | null> => {
+export const insertDataToTable = async <T extends keyof Tables>(
+  tableName: T,
+  data: TablesInsert[T]
+): Promise<Tables[T]['Row'] | null> => {
   try {
-    const { data: insertedData, error } = await supabase.from(tableName).insert(data).select().single();
+    const { data: insertedData, error } = await supabase
+      .from(tableName)
+      .insert(data)
+      .select()
+      .single();
     
     if (error) {
       throw error;
@@ -43,7 +54,7 @@ export const insertDataToTable = async <T>(tableName: string, data: any): Promis
       description: `New entry added to ${tableName}`,
     });
     
-    return insertedData as T;
+    return insertedData as Tables[T]['Row'];
   } catch (error: any) {
     console.error(`Error inserting into ${tableName}:`, error.message);
     toast({
@@ -56,7 +67,11 @@ export const insertDataToTable = async <T>(tableName: string, data: any): Promis
 };
 
 // Generic update function
-export const updateDataInTable = async <T>(tableName: string, id: string, data: any): Promise<T | null> => {
+export const updateDataInTable = async <T extends keyof Tables>(
+  tableName: T,
+  id: string,
+  data: TablesUpdate[T]
+): Promise<Tables[T]['Row'] | null> => {
   try {
     const { data: updatedData, error } = await supabase
       .from(tableName)
@@ -74,7 +89,7 @@ export const updateDataInTable = async <T>(tableName: string, id: string, data: 
       description: `Entry in ${tableName} has been updated`,
     });
     
-    return updatedData as T;
+    return updatedData as Tables[T]['Row'];
   } catch (error: any) {
     console.error(`Error updating ${tableName}:`, error.message);
     toast({
@@ -87,7 +102,10 @@ export const updateDataInTable = async <T>(tableName: string, id: string, data: 
 };
 
 // Generic delete function
-export const deleteDataFromTable = async (tableName: string, id: string): Promise<boolean> => {
+export const deleteDataFromTable = async <T extends keyof Tables>(
+  tableName: T,
+  id: string
+): Promise<boolean> => {
   try {
     const { error } = await supabase.from(tableName).delete().eq('id', id);
     

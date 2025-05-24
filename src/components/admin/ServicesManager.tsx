@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useToast } from '@/hooks/use-toast';
@@ -39,7 +40,7 @@ const ServicesManager = () => {
   const loadServices = async () => {
     setLoading(true);
     const data = await fetchDataFromTable('services', { orderBy: 'created_at' });
-    setServices(data);
+    setServices(data as Service[]);
     setLoading(false);
   };
 
@@ -103,7 +104,7 @@ const ServicesManager = () => {
     );
     
     if (updatedService) {
-      setServices(services.map(s => s.id === service.id ? updatedService : s));
+      setServices(services.map(s => s.id === service.id ? updatedService as Service : s));
     }
   };
 

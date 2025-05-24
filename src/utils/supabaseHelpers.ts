@@ -3,11 +3,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { TablesInsert, TablesUpdate, Tables } from '@/integrations/supabase/types';
 
+// Define a type for table names
+type TableName = keyof Tables;
+
 // Generic fetch function
-export const fetchDataFromTable = async <T extends keyof Tables>(
-  tableName: T,
-  options: any = {}
-): Promise<Tables[T]['Row'][]> => {
+export const fetchDataFromTable = async (
+  tableName: TableName,
+  options: { orderBy?: string; ascending?: boolean } = {}
+): Promise<Tables[TableName]['Row'][]> => {
   try {
     let query = supabase.from(tableName).select('*');
     
@@ -21,11 +24,11 @@ export const fetchDataFromTable = async <T extends keyof Tables>(
       throw error;
     }
     
-    return data as Tables[T]['Row'][];
+    return data as Tables[TableName]['Row'][];
   } catch (error: any) {
-    console.error(`Error fetching ${tableName}:`, error.message);
+    console.error(`Error fetching ${String(tableName)}:`, error.message);
     toast({
-      title: `Error fetching ${tableName}`,
+      title: `Error fetching ${String(tableName)}`,
       description: error.message,
       variant: "destructive"
     });
@@ -34,10 +37,10 @@ export const fetchDataFromTable = async <T extends keyof Tables>(
 };
 
 // Generic insert function
-export const insertDataToTable = async <T extends keyof Tables>(
-  tableName: T,
-  data: TablesInsert[T]
-): Promise<Tables[T]['Row'] | null> => {
+export const insertDataToTable = async (
+  tableName: TableName,
+  data: TablesInsert[TableName]
+): Promise<Tables[TableName]['Row'] | null> => {
   try {
     const { data: insertedData, error } = await supabase
       .from(tableName)
@@ -51,12 +54,12 @@ export const insertDataToTable = async <T extends keyof Tables>(
     
     toast({
       title: "Created Successfully",
-      description: `New entry added to ${tableName}`,
+      description: `New entry added to ${String(tableName)}`,
     });
     
-    return insertedData as Tables[T]['Row'];
+    return insertedData as Tables[TableName]['Row'];
   } catch (error: any) {
-    console.error(`Error inserting into ${tableName}:`, error.message);
+    console.error(`Error inserting into ${String(tableName)}:`, error.message);
     toast({
       title: `Error creating entry`,
       description: error.message,
@@ -67,11 +70,11 @@ export const insertDataToTable = async <T extends keyof Tables>(
 };
 
 // Generic update function
-export const updateDataInTable = async <T extends keyof Tables>(
-  tableName: T,
+export const updateDataInTable = async (
+  tableName: TableName,
   id: string,
-  data: TablesUpdate[T]
-): Promise<Tables[T]['Row'] | null> => {
+  data: TablesUpdate[TableName]
+): Promise<Tables[TableName]['Row'] | null> => {
   try {
     const { data: updatedData, error } = await supabase
       .from(tableName)
@@ -86,12 +89,12 @@ export const updateDataInTable = async <T extends keyof Tables>(
     
     toast({
       title: "Updated Successfully",
-      description: `Entry in ${tableName} has been updated`,
+      description: `Entry in ${String(tableName)} has been updated`,
     });
     
-    return updatedData as Tables[T]['Row'];
+    return updatedData as Tables[TableName]['Row'];
   } catch (error: any) {
-    console.error(`Error updating ${tableName}:`, error.message);
+    console.error(`Error updating ${String(tableName)}:`, error.message);
     toast({
       title: `Error updating entry`,
       description: error.message,
@@ -102,8 +105,8 @@ export const updateDataInTable = async <T extends keyof Tables>(
 };
 
 // Generic delete function
-export const deleteDataFromTable = async <T extends keyof Tables>(
-  tableName: T,
+export const deleteDataFromTable = async (
+  tableName: TableName,
   id: string
 ): Promise<boolean> => {
   try {
@@ -115,12 +118,12 @@ export const deleteDataFromTable = async <T extends keyof Tables>(
     
     toast({
       title: "Deleted Successfully",
-      description: `Entry from ${tableName} has been removed`,
+      description: `Entry from ${String(tableName)} has been removed`,
     });
     
     return true;
   } catch (error: any) {
-    console.error(`Error deleting from ${tableName}:`, error.message);
+    console.error(`Error deleting from ${String(tableName)}:`, error.message);
     toast({
       title: `Error deleting entry`,
       description: error.message,

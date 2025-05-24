@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -29,7 +30,7 @@ const ContactSubmissions = () => {
   const loadSubmissions = async () => {
     setLoading(true);
     const data = await fetchDataFromTable('contact_submissions', { orderBy: 'created_at', ascending: false });
-    setSubmissions(data);
+    setSubmissions(data as ContactSubmission[]);
     setLoading(false);
   };
 
@@ -82,8 +83,8 @@ const ContactSubmissions = () => {
     );
     
     if (updatedSubmission) {
-      setSubmissions(submissions.map(s => s.id === currentSubmission.id ? updatedSubmission : s));
-      setCurrentSubmission(updatedSubmission);
+      setSubmissions(submissions.map(s => s.id === currentSubmission.id ? updatedSubmission as ContactSubmission : s));
+      setCurrentSubmission(updatedSubmission as ContactSubmission);
     }
   };
 
@@ -102,7 +103,7 @@ const ContactSubmissions = () => {
         `"${submission.phone?.replace(/"/g, '""') || 'N/A'}"`,
         `"${submission.message.replace(/"/g, '""')}"`,
         `"${submission.status}"`,
-        `"${formatDate(submission.created_at)}"`
+        `"${formatDate(submission.created_at!)}"`
       ];
       csvRows.push(row.join(','));
     }
@@ -190,12 +191,12 @@ const ContactSubmissions = () => {
                         <TableCell className="text-sm">{submission.email}</TableCell>
                         <TableCell className="text-sm">{submission.phone || 'N/A'}</TableCell>
                         <TableCell>
-                          <Badge className={getStatusColor(submission.status)}>
+                          <Badge className={getStatusColor(submission.status || 'New')}>
                             {submission.status || 'New'}
                           </Badge>
                         </TableCell>
                         <TableCell className="text-sm text-gray-500">
-                          {formatDate(submission.created_at)}
+                          {formatDate(submission.created_at!)}
                         </TableCell>
                         <TableCell>
                           <div className="flex space-x-1">
@@ -241,7 +242,7 @@ const ContactSubmissions = () => {
           <DialogHeader>
             <DialogTitle>Contact Submission Details</DialogTitle>
             <DialogDescription>
-              Submitted on {currentSubmission && formatDate(currentSubmission.created_at)}
+              Submitted on {currentSubmission && formatDate(currentSubmission.created_at!)}
             </DialogDescription>
           </DialogHeader>
           
@@ -254,7 +255,7 @@ const ContactSubmissions = () => {
                 </div>
                 <div>
                   <Label className="text-sm text-gray-500">Status</Label>
-                  <Badge className={getStatusColor(currentSubmission.status)}>
+                  <Badge className={getStatusColor(currentSubmission.status || 'New')}>
                     {currentSubmission.status || 'New'}
                   </Badge>
                 </div>
@@ -334,7 +335,7 @@ const ContactSubmissions = () => {
               <div>
                 <Label className="text-sm">Status</Label>
                 <Select
-                  defaultValue={currentSubmission.status}
+                  defaultValue={currentSubmission.status || 'New'}
                   onValueChange={handleStatusChange}
                 >
                   <SelectTrigger>

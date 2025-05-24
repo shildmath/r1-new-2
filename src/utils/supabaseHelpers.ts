@@ -36,6 +36,15 @@ export const fetchDataFromTable = async (
   }
 };
 
+// Specific fetch functions for type safety
+export const fetchTestimonials = async (options: { orderBy?: string; ascending?: boolean } = {}) => {
+  return fetchDataFromTable('testimonials', options) as Promise<Database['public']['Tables']['testimonials']['Row'][]>;
+};
+
+export const fetchServices = async (options: { orderBy?: string; ascending?: boolean } = {}) => {
+  return fetchDataFromTable('services', options) as Promise<Database['public']['Tables']['services']['Row'][]>;
+};
+
 // Generic insert function
 export const insertDataToTable = async (
   tableName: TableName,
@@ -79,7 +88,7 @@ export const updateDataInTable = async (
     const { data: updatedData, error } = await supabase
       .from(tableName)
       .update(data)
-      .eq('id' as any, id)
+      .eq('id', id)
       .select()
       .single();
     
@@ -110,7 +119,7 @@ export const deleteDataFromTable = async (
   id: string
 ): Promise<boolean> => {
   try {
-    const { error } = await supabase.from(tableName).delete().eq('id' as any, id);
+    const { error } = await supabase.from(tableName).delete().eq('id', id);
     
     if (error) {
       throw error;

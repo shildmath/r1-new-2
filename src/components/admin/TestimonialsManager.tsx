@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useToast } from '@/hooks/use-toast';
@@ -12,12 +13,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Pencil, Trash2, Plus, Star, StarOff, User } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { fetchDataFromTable, insertDataToTable, updateDataInTable, deleteDataFromTable } from '@/utils/supabaseHelpers';
+import { fetchTestimonials, insertDataToTable, updateDataInTable, deleteDataFromTable } from '@/utils/supabaseHelpers';
 import { Database } from '@/integrations/supabase/types';
 
 type Testimonial = Database['public']['Tables']['testimonials']['Row'];
 type TestimonialInsert = Database['public']['Tables']['testimonials']['Insert'];
-type TestimonialUpdate = Database['public']['Tables']['testimonials']['Update'];
 
 const defaultTestimonial: TestimonialInsert = {
   client_name: '',
@@ -43,7 +43,7 @@ const TestimonialsManager = () => {
 
   const loadTestimonials = async () => {
     setLoading(true);
-    const data = await fetchDataFromTable('testimonials', { orderBy: 'created_at' });
+    const data = await fetchTestimonials({ orderBy: 'created_at' });
     setTestimonials(data);
     setLoading(false);
   };
@@ -93,7 +93,7 @@ const TestimonialsManager = () => {
       if (isEditing && testimonials.find(t => t.client_name === currentTestimonial.client_name)) {
         const testimonialToUpdate = testimonials.find(t => t.client_name === currentTestimonial.client_name);
         if (testimonialToUpdate) {
-          await updateDataInTable('testimonials', testimonialToUpdate.id, currentTestimonial as TestimonialUpdate);
+          await updateDataInTable('testimonials', testimonialToUpdate.id, currentTestimonial);
         }
       } else {
         await insertDataToTable('testimonials', currentTestimonial);
@@ -120,7 +120,7 @@ const TestimonialsManager = () => {
       'testimonials', 
       testimonial.id, 
       { is_featured: !testimonial.is_featured }
-    );
+    ) as Testimonial;
     
     if (updatedTestimonial) {
       setTestimonials(testimonials.map(t => t.id === testimonial.id ? updatedTestimonial : t));

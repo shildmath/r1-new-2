@@ -33,6 +33,180 @@ export type Database = {
         }
         Relationships: []
       }
+      contact_submissions: {
+        Row: {
+          created_at: string | null
+          email: string
+          id: string
+          message: string
+          name: string
+          phone: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          id?: string
+          message: string
+          name: string
+          phone?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          id?: string
+          message?: string
+          name?: string
+          phone?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      services: {
+        Row: {
+          created_at: string | null
+          description: string
+          icon_name: string
+          id: string
+          is_featured: boolean | null
+          price: number | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description: string
+          icon_name: string
+          id?: string
+          is_featured?: boolean | null
+          price?: number | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string
+          icon_name?: string
+          id?: string
+          is_featured?: boolean | null
+          price?: number | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      site_settings: {
+        Row: {
+          created_at: string | null
+          id: string
+          setting_group: string
+          setting_key: string
+          setting_value: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          setting_group: string
+          setting_key: string
+          setting_value: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          setting_group?: string
+          setting_key?: string
+          setting_value?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      strategy_calls: {
+        Row: {
+          booking_date: string | null
+          company: string | null
+          created_at: string | null
+          email: string
+          goals: string
+          id: string
+          name: string
+          phone: string
+          status: string | null
+          updated_at: string | null
+          website: string | null
+        }
+        Insert: {
+          booking_date?: string | null
+          company?: string | null
+          created_at?: string | null
+          email: string
+          goals: string
+          id?: string
+          name: string
+          phone: string
+          status?: string | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Update: {
+          booking_date?: string | null
+          company?: string | null
+          created_at?: string | null
+          email?: string
+          goals?: string
+          id?: string
+          name?: string
+          phone?: string
+          status?: string | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Relationships: []
+      }
+      testimonials: {
+        Row: {
+          avatar_url: string | null
+          client_company: string | null
+          client_name: string
+          client_title: string
+          created_at: string | null
+          id: string
+          is_featured: boolean | null
+          rating: number
+          review_text: string
+          updated_at: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          client_company?: string | null
+          client_name: string
+          client_title: string
+          created_at?: string | null
+          id?: string
+          is_featured?: boolean | null
+          rating: number
+          review_text: string
+          updated_at?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          client_company?: string | null
+          client_name?: string
+          client_title?: string
+          created_at?: string | null
+          id?: string
+          is_featured?: boolean | null
+          rating?: number
+          review_text?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

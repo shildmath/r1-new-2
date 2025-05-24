@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,48 +7,67 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Save, Mail, Phone, MapPin, Facebook, Twitter, Linkedin, Instagram } from 'lucide-react';
+import { fetchSettings, updateSettings } from '@/utils/supabaseHelpers';
+
+interface GroupedSettings {
+  [group: string]: Record<string, string>;
+}
 
 const SiteSettings = () => {
   const { toast } = useToast();
-  const [settings, setSettings] = useState({
-    // Contact Information
-    email: "hello@aiadmaxify.com",
-    phone: "+1 (555) 123-4567",
-    address: "123 Innovation Drive, Tech City, TC 12345",
-    
-    // Social Media Links
-    facebook: "https://facebook.com/aiadmaxify",
-    twitter: "https://twitter.com/aiadmaxify",
-    linkedin: "https://linkedin.com/company/aiadmaxify",
-    instagram: "https://instagram.com/aiadmaxify",
-    
-    // Company Information
-    companyName: "AIAdMaxify",
-    tagline: "AI-Powered Marketing Solutions",
-    heroDescription: "Transform your business with cutting-edge AI marketing strategies that deliver measurable results and drive sustainable growth.",
-    
-    // Statistics
-    clientSatisfaction: "97%",
-    averageROI: "17X",
-    happyClients: "2500+",
-    revenueGenerated: "$250M+"
+  const [settings, setSettings] = useState<GroupedSettings>({
+    contact: {},
+    social: {},
+    company: {},
+    statistics: {}
   });
+  const [loading, setLoading] = useState(true);
+  const [savingGroup, setSavingGroup] = useState<string | null>(null);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  useEffect(() => {
+    loadSettings();
+  }, []);
+
+  const loadSettings = async () => {
+    setLoading(true);
+    const data = await fetchSettings();
+    setSettings(data);
+    setLoading(false);
+  };
+
+  const handleInputChange = (group: string, key: string, value: string) => {
     setSettings({
       ...settings,
-      [e.target.name]: e.target.value
+      [group]: {
+        ...settings[group],
+        [key]: value
+      }
     });
   };
 
-  const handleSave = (section: string) => {
-    // TODO: Save to Supabase
-    console.log(`Saving ${section} settings:`, settings);
-    toast({
-      title: "Settings Saved",
-      description: `${section} settings have been updated successfully.`,
-    });
+  const handleSave = async (group: string) => {
+    if (!settings[group]) return;
+    
+    setSavingGroup(group);
+    
+    const updatesArray = Object.entries(settings[group]).map(([key, value]) => ({
+      group,
+      key,
+      value
+    }));
+    
+    const success = await updateSettings(updatesArray);
+    
+    setSavingGroup(null);
   };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -76,38 +95,44 @@ const SiteSettings = () => {
               <div>
                 <label className="text-sm font-medium text-gray-700 mb-2 block">Email Address</label>
                 <Input
-                  name="email"
-                  type="email"
-                  value={settings.email}
-                  onChange={handleInputChange}
+                  value={settings.contact?.email || ''}
+                  onChange={(e) => handleInputChange('contact', 'email', e.target.value)}
                   placeholder="contact@company.com"
                 />
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700 mb-2 block">Phone Number</label>
                 <Input
-                  name="phone"
-                  value={settings.phone}
-                  onChange={handleInputChange}
+                  value={settings.contact?.phone || ''}
+                  onChange={(e) => handleInputChange('contact', 'phone', e.target.value)}
                   placeholder="+1 (555) 123-4567"
                 />
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700 mb-2 block">Business Address</label>
                 <Textarea
-                  name="address"
-                  value={settings.address}
-                  onChange={handleInputChange}
+                  value={settings.contact?.address || ''}
+                  onChange={(e) => handleInputChange('contact', 'address', e.target.value)}
                   placeholder="123 Business St, City, State 12345"
                   rows={3}
                 />
               </div>
               <Button 
-                onClick={() => handleSave('Contact Information')}
+                onClick={() => handleSave('contact')}
                 className="w-full bg-gradient-to-r from-purple-600 to-blue-600"
+                disabled={savingGroup === 'contact'}
               >
-                <Save className="w-4 h-4 mr-2" />
-                Save Contact Info
+                {savingGroup === 'contact' ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4 mr-2" />
+                    Save Contact Info
+                  </>
+                )}
               </Button>
             </CardContent>
           </Card>
@@ -134,9 +159,8 @@ const SiteSettings = () => {
                   Facebook
                 </label>
                 <Input
-                  name="facebook"
-                  value={settings.facebook}
-                  onChange={handleInputChange}
+                  value={settings.social?.facebook || ''}
+                  onChange={(e) => handleInputChange('social', 'facebook', e.target.value)}
                   placeholder="https://facebook.com/yourpage"
                 />
               </div>
@@ -146,9 +170,8 @@ const SiteSettings = () => {
                   Twitter
                 </label>
                 <Input
-                  name="twitter"
-                  value={settings.twitter}
-                  onChange={handleInputChange}
+                  value={settings.social?.twitter || ''}
+                  onChange={(e) => handleInputChange('social', 'twitter', e.target.value)}
                   placeholder="https://twitter.com/yourhandle"
                 />
               </div>
@@ -158,9 +181,8 @@ const SiteSettings = () => {
                   LinkedIn
                 </label>
                 <Input
-                  name="linkedin"
-                  value={settings.linkedin}
-                  onChange={handleInputChange}
+                  value={settings.social?.linkedin || ''}
+                  onChange={(e) => handleInputChange('social', 'linkedin', e.target.value)}
                   placeholder="https://linkedin.com/company/yourcompany"
                 />
               </div>
@@ -170,18 +192,27 @@ const SiteSettings = () => {
                   Instagram
                 </label>
                 <Input
-                  name="instagram"
-                  value={settings.instagram}
-                  onChange={handleInputChange}
+                  value={settings.social?.instagram || ''}
+                  onChange={(e) => handleInputChange('social', 'instagram', e.target.value)}
                   placeholder="https://instagram.com/yourhandle"
                 />
               </div>
               <Button 
-                onClick={() => handleSave('Social Media')}
+                onClick={() => handleSave('social')}
                 className="w-full bg-gradient-to-r from-purple-600 to-blue-600"
+                disabled={savingGroup === 'social'}
               >
-                <Save className="w-4 h-4 mr-2" />
-                Save Social Links
+                {savingGroup === 'social' ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4 mr-2" />
+                    Save Social Links
+                  </>
+                )}
               </Button>
             </CardContent>
           </Card>
@@ -202,34 +233,41 @@ const SiteSettings = () => {
               <div>
                 <label className="text-sm font-medium text-gray-700 mb-2 block">Company Name</label>
                 <Input
-                  name="companyName"
-                  value={settings.companyName}
-                  onChange={handleInputChange}
+                  value={settings.company?.companyName || ''}
+                  onChange={(e) => handleInputChange('company', 'companyName', e.target.value)}
                 />
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700 mb-2 block">Tagline</label>
                 <Input
-                  name="tagline"
-                  value={settings.tagline}
-                  onChange={handleInputChange}
+                  value={settings.company?.tagline || ''}
+                  onChange={(e) => handleInputChange('company', 'tagline', e.target.value)}
                 />
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700 mb-2 block">Hero Description</label>
                 <Textarea
-                  name="heroDescription"
-                  value={settings.heroDescription}
-                  onChange={handleInputChange}
+                  value={settings.company?.heroDescription || ''}
+                  onChange={(e) => handleInputChange('company', 'heroDescription', e.target.value)}
                   rows={4}
                 />
               </div>
               <Button 
-                onClick={() => handleSave('Company Information')}
+                onClick={() => handleSave('company')}
                 className="w-full bg-gradient-to-r from-purple-600 to-blue-600"
+                disabled={savingGroup === 'company'}
               >
-                <Save className="w-4 h-4 mr-2" />
-                Save Company Info
+                {savingGroup === 'company' ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4 mr-2" />
+                    Save Company Info
+                  </>
+                )}
               </Button>
             </CardContent>
           </Card>
@@ -251,42 +289,48 @@ const SiteSettings = () => {
                 <div>
                   <label className="text-sm font-medium text-gray-700 mb-2 block">Client Satisfaction</label>
                   <Input
-                    name="clientSatisfaction"
-                    value={settings.clientSatisfaction}
-                    onChange={handleInputChange}
+                    value={settings.statistics?.clientSatisfaction || ''}
+                    onChange={(e) => handleInputChange('statistics', 'clientSatisfaction', e.target.value)}
                   />
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-700 mb-2 block">Average ROI</label>
                   <Input
-                    name="averageROI"
-                    value={settings.averageROI}
-                    onChange={handleInputChange}
+                    value={settings.statistics?.averageROI || ''}
+                    onChange={(e) => handleInputChange('statistics', 'averageROI', e.target.value)}
                   />
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-700 mb-2 block">Happy Clients</label>
                   <Input
-                    name="happyClients"
-                    value={settings.happyClients}
-                    onChange={handleInputChange}
+                    value={settings.statistics?.happyClients || ''}
+                    onChange={(e) => handleInputChange('statistics', 'happyClients', e.target.value)}
                   />
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-700 mb-2 block">Revenue Generated</label>
                   <Input
-                    name="revenueGenerated"
-                    value={settings.revenueGenerated}
-                    onChange={handleInputChange}
+                    value={settings.statistics?.revenueGenerated || ''}
+                    onChange={(e) => handleInputChange('statistics', 'revenueGenerated', e.target.value)}
                   />
                 </div>
               </div>
               <Button 
-                onClick={() => handleSave('Statistics')}
+                onClick={() => handleSave('statistics')}
                 className="w-full bg-gradient-to-r from-purple-600 to-blue-600"
+                disabled={savingGroup === 'statistics'}
               >
-                <Save className="w-4 h-4 mr-2" />
-                Save Statistics
+                {savingGroup === 'statistics' ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4 mr-2" />
+                    Save Statistics
+                  </>
+                )}
               </Button>
             </CardContent>
           </Card>

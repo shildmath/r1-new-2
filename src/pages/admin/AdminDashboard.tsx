@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,7 +7,11 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ContactSubmissions from '@/components/admin/ContactSubmissions';
 import StrategyCallSubmissions from '@/components/admin/StrategyCallSubmissions';
+import ServicesManager from '@/components/admin/ServicesManager';
+import TestimonialsManager from '@/components/admin/TestimonialsManager';
 import SiteSettings from '@/components/admin/SiteSettings';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 import { 
   Users, 
   MessageSquare, 
@@ -20,74 +24,158 @@ import {
   Plus,
   Download,
   Bell,
-  Search
+  Search,
+  LogOut
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const AdminDashboard = () => {
+  const { toast } = useToast();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("dashboard");
+  const [stats, setStats] = useState({
+    contactForms: 0,
+    strategyCalls: 0,
+    services: 0,
+    testimonials: 0
+  });
+  const [loading, setLoading] = useState(true);
+  const [recentActivity, setRecentActivity] = useState<any[]>([]);
 
-  const stats = [
-    {
-      title: "Total Clients",
-      value: "2,500",
-      change: "+12%",
-      icon: Users,
-      color: "text-blue-600",
-      bgColor: "bg-blue-50"
-    },
+  useEffect(() => {
+    loadDashboardData();
+  }, []);
+
+  const loadDashboardData = async () => {
+    setLoading(true);
+    try {
+      // Load stats
+      const [contactsRes, callsRes, servicesRes, testimonialsRes] = await Promise.all([
+        supabase.from('contact_submissions').select('id', { count: 'exact', head: true }),
+        supabase.from('strategy_calls').select('id', { count: 'exact', head: true }),
+        supabase.from('services').select('id', { count: 'exact', head: true }),
+        supabase.from('testimonials').select('id', { count: 'exact', head: true })
+      ]);
+
+      setStats({
+        contactForms: contactsRes.count || 0,
+        strategyCalls: callsRes.count || 0,
+        services: servicesRes.count || 0,
+        testimonials: testimonialsRes.count || 0
+      });
+
+      // Load recent activity
+      const recentContactsRes = await supabase
+        .from('contact_submissions')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(3);
+
+      const recentCallsRes = await supabase
+        .from('strategy_calls')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(3);
+
+      const combinedActivity = [
+        ...(recentContactsRes.data || []).map(item => ({
+          ...item,
+          type: 'contact',
+          action: 'submitted contact form'
+        })),
+        ...(recentCallsRes.data || []).map(item => ({
+          ...item,
+          type: 'strategy_call',
+          action: 'booked strategy call'
+        }))
+      ];
+
+      // Sort by created_at desc
+      combinedActivity.sort((a, b) => 
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+
+      setRecentActivity(combinedActivity.slice(0, 5));
+      
+    } catch (error) {
+      console.error('Error loading dashboard data:', error);
+      toast({
+        title: 'Error loading dashboard data',
+        description: 'There was a problem fetching dashboard information.',
+        variant: 'destructive'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await supabase.auth.signOut();
+      toast({
+        title: "Signed out successfully",
+      });
+      navigate('/admin');
+    } catch (error) {
+      console.error('Sign out error:', error);
+      toast({
+        title: "Error signing out",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const formatTimeAgo = (dateString: string) => {
+    const now = new Date();
+    const date = new Date(dateString);
+    const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+    
+    let interval = seconds / 31536000;
+    if (interval > 1) return Math.floor(interval) + ' years ago';
+    
+    interval = seconds / 2592000;
+    if (interval > 1) return Math.floor(interval) + ' months ago';
+    
+    interval = seconds / 86400;
+    if (interval > 1) return Math.floor(interval) + ' days ago';
+    
+    interval = seconds / 3600;
+    if (interval > 1) return Math.floor(interval) + ' hours ago';
+    
+    interval = seconds / 60;
+    if (interval > 1) return Math.floor(interval) + ' minutes ago';
+    
+    return Math.floor(seconds) + ' seconds ago';
+  };
+
+  const dashboardStats = [
     {
       title: "Contact Forms",
-      value: "89",
-      change: "+23%",
+      value: stats.contactForms.toString(),
       icon: MessageSquare,
       color: "text-green-600",
       bgColor: "bg-green-50"
     },
     {
       title: "Strategy Calls",
-      value: "34",
-      change: "+8%",
+      value: stats.strategyCalls.toString(),
       icon: Calendar,
       color: "text-purple-600",
       bgColor: "bg-purple-50"
     },
     {
-      title: "Revenue",
-      value: "$2.1M",
-      change: "+15%",
-      icon: TrendingUp,
+      title: "Services",
+      value: stats.services.toString(),
+      icon: Settings,
+      color: "text-blue-600",
+      bgColor: "bg-blue-50"
+    },
+    {
+      title: "Testimonials",
+      value: stats.testimonials.toString(),
+      icon: Users,
       color: "text-orange-600",
       bgColor: "bg-orange-50"
-    }
-  ];
-
-  const recentActivity = [
-    {
-      id: 1,
-      type: "contact",
-      name: "John Smith",
-      email: "john@example.com",
-      action: "submitted contact form",
-      time: "2 hours ago",
-      status: "New"
-    },
-    {
-      id: 2,
-      type: "strategy_call",
-      name: "Sarah Wilson",
-      email: "sarah@company.com",
-      action: "booked strategy call",
-      time: "4 hours ago",
-      status: "Scheduled"
-    },
-    {
-      id: 3,
-      type: "contact",
-      name: "Mike Johnson",
-      email: "mike@business.com",
-      action: "submitted contact form",
-      time: "6 hours ago",
-      status: "Contacted"
     }
   ];
 
@@ -116,9 +204,14 @@ const AdminDashboard = () => {
                 <Search className="w-4 h-4 mr-2" />
                 Search
               </Button>
-              <Button size="sm" className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700">
-                <Download className="w-4 h-4 mr-2" />
-                Export Data
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="border-red-200 text-red-600 hover:bg-red-50"
+                onClick={handleSignOut}
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Sign Out
               </Button>
             </div>
           </div>
@@ -141,11 +234,11 @@ const AdminDashboard = () => {
             <TabsTrigger value="services" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
               Services
             </TabsTrigger>
+            <TabsTrigger value="testimonials" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+              Testimonials
+            </TabsTrigger>
             <TabsTrigger value="settings" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
               Site Settings
-            </TabsTrigger>
-            <TabsTrigger value="analytics" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
-              Analytics
             </TabsTrigger>
           </TabsList>
 
@@ -153,7 +246,7 @@ const AdminDashboard = () => {
           <TabsContent value="dashboard" className="space-y-8">
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {stats.map((stat, index) => (
+              {dashboardStats.map((stat, index) => (
                 <motion.div
                   key={index}
                   initial={{ opacity: 0, y: 20 }}
@@ -173,7 +266,7 @@ const AdminDashboard = () => {
                     <CardContent>
                       <div className="text-2xl font-bold text-gray-900">{stat.value}</div>
                       <p className="text-xs text-green-600 font-medium">
-                        {stat.change} from last month
+                        View all {stat.title.toLowerCase()}
                       </p>
                     </CardContent>
                   </Card>
@@ -196,38 +289,48 @@ const AdminDashboard = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    {recentActivity.map((activity, index) => (
-                      <motion.div
-                        key={activity.id}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.3, delay: index * 0.1 }}
-                        className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 transition-colors"
-                      >
-                        <div className="flex items-center space-x-3">
-                          <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
-                            {activity.type === 'contact' ? (
-                              <Mail className="w-4 h-4 text-white" />
-                            ) : (
-                              <Phone className="w-4 h-4 text-white" />
-                            )}
-                          </div>
-                          <div>
-                            <p className="font-medium text-gray-900">{activity.name}</p>
-                            <p className="text-sm text-gray-600">{activity.action}</p>
-                            <p className="text-xs text-gray-500">{activity.email}</p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <Badge variant={activity.status === 'New' ? 'default' : 'secondary'} className="mb-1">
-                            {activity.status}
-                          </Badge>
-                          <p className="text-xs text-gray-500">{activity.time}</p>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </div>
+                  {loading ? (
+                    <div className="flex justify-center py-8">
+                      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {recentActivity.length === 0 ? (
+                        <p className="text-center py-8 text-gray-500">No recent activity found.</p>
+                      ) : (
+                        recentActivity.map((activity, index) => (
+                          <motion.div
+                            key={activity.id}
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.3, delay: index * 0.1 }}
+                            className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 transition-colors"
+                          >
+                            <div className="flex items-center space-x-3">
+                              <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
+                                {activity.type === 'contact' ? (
+                                  <Mail className="w-4 h-4 text-white" />
+                                ) : (
+                                  <Phone className="w-4 h-4 text-white" />
+                                )}
+                              </div>
+                              <div>
+                                <p className="font-medium text-gray-900">{activity.name}</p>
+                                <p className="text-sm text-gray-600">{activity.action}</p>
+                                <p className="text-xs text-gray-500">{activity.email}</p>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <Badge variant={activity.status === 'New' ? 'default' : 'secondary'} className="mb-1">
+                                {activity.status || 'New'}
+                              </Badge>
+                              <p className="text-xs text-gray-500">{formatTimeAgo(activity.created_at)}</p>
+                            </div>
+                          </motion.div>
+                        ))
+                      )}
+                    </div>
+                  )}
                   <Button 
                     variant="outline" 
                     className="w-full mt-4"
@@ -257,6 +360,14 @@ const AdminDashboard = () => {
                   <Button 
                     className="w-full justify-start bg-white border border-gray-200 text-gray-700 hover:bg-gray-50" 
                     variant="outline"
+                    onClick={() => setActiveTab("testimonials")}
+                  >
+                    <Users className="w-4 h-4 mr-2" />
+                    Add New Testimonial
+                  </Button>
+                  <Button 
+                    className="w-full justify-start bg-white border border-gray-200 text-gray-700 hover:bg-gray-50" 
+                    variant="outline"
                     onClick={() => setActiveTab("settings")}
                   >
                     <Settings className="w-4 h-4 mr-2" />
@@ -278,14 +389,6 @@ const AdminDashboard = () => {
                     <Calendar className="w-4 h-4 mr-2" />
                     Manage Strategy Calls
                   </Button>
-                  <Button 
-                    className="w-full justify-start bg-white border border-gray-200 text-gray-700 hover:bg-gray-50" 
-                    variant="outline"
-                    onClick={() => setActiveTab("analytics")}
-                  >
-                    <BarChart3 className="w-4 h-4 mr-2" />
-                    View Analytics
-                  </Button>
                 </CardContent>
               </Card>
             </div>
@@ -302,55 +405,18 @@ const AdminDashboard = () => {
           </TabsContent>
 
           {/* Services Tab */}
-          <TabsContent value="services" className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold text-gray-900">Manage Services</h2>
-              <Button className="bg-gradient-to-r from-purple-600 to-blue-600">
-                <Plus className="w-4 h-4 mr-2" />
-                Add New Service
-              </Button>
-            </div>
-            <Card className="border-0 shadow-lg">
-              <CardContent className="p-8 text-center">
-                <p className="text-gray-500">Service management interface coming soon...</p>
-                <p className="text-sm text-gray-400 mt-2">This will integrate with Supabase for full CRUD operations</p>
-              </CardContent>
-            </Card>
+          <TabsContent value="services">
+            <ServicesManager />
+          </TabsContent>
+
+          {/* Testimonials Tab */}
+          <TabsContent value="testimonials">
+            <TestimonialsManager />
           </TabsContent>
 
           {/* Site Settings Tab */}
           <TabsContent value="settings">
             <SiteSettings />
-          </TabsContent>
-
-          {/* Analytics Tab */}
-          <TabsContent value="analytics" className="space-y-6">
-            <h2 className="text-2xl font-bold text-gray-900">Analytics & Reports</h2>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <Card className="border-0 shadow-lg">
-                <CardHeader>
-                  <CardTitle>Traffic Overview</CardTitle>
-                  <CardDescription>Website visitor analytics</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-64 bg-gradient-to-br from-purple-50 to-blue-50 rounded-lg flex items-center justify-center">
-                    <p className="text-gray-500">Analytics integration with Supabase coming soon</p>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="border-0 shadow-lg">
-                <CardHeader>
-                  <CardTitle>Conversion Rates</CardTitle>
-                  <CardDescription>Form submission analytics</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-64 bg-gradient-to-br from-green-50 to-teal-50 rounded-lg flex items-center justify-center">
-                    <p className="text-gray-500">Real-time conversion tracking coming soon</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
           </TabsContent>
         </Tabs>
       </main>

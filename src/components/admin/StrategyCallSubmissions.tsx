@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,20 +11,9 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { fetchDataFromTable, updateDataInTable, deleteDataFromTable } from '@/utils/supabaseHelpers';
+import { Tables } from '@/integrations/supabase/types';
 
-interface StrategyCall {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  company: string | null;
-  website: string | null;
-  goals: string;
-  status: string;
-  booking_date: string | null;
-  created_at: string;
-  updated_at: string;
-}
+type StrategyCall = Tables['strategy_calls']['Row'];
 
 const StrategyCallSubmissions = () => {
   const [submissions, setSubmissions] = useState<StrategyCall[]>([]);
@@ -40,8 +28,8 @@ const StrategyCallSubmissions = () => {
 
   const loadSubmissions = async () => {
     setLoading(true);
-    const data = await fetchDataFromTable<StrategyCall>('strategy_calls', { orderBy: 'created_at', ascending: false });
-    setSubmissions(data);
+    const data = await fetchDataFromTable('strategy_calls', { orderBy: 'created_at', ascending: false });
+    setSubmissions(data as StrategyCall[]);
     setLoading(false);
   };
 
@@ -87,30 +75,30 @@ const StrategyCallSubmissions = () => {
   const handleStatusChange = async (value: string) => {
     if (!currentSubmission) return;
 
-    const updatedSubmission = await updateDataInTable<StrategyCall>(
+    const updatedSubmission = await updateDataInTable(
       'strategy_calls', 
       currentSubmission.id, 
       { status: value }
     );
     
     if (updatedSubmission) {
-      setSubmissions(submissions.map(s => s.id === currentSubmission.id ? updatedSubmission : s));
-      setCurrentSubmission(updatedSubmission);
+      setSubmissions(submissions.map(s => s.id === currentSubmission.id ? updatedSubmission as StrategyCall : s));
+      setCurrentSubmission(updatedSubmission as StrategyCall);
     }
   };
 
   const handleBookingDateChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!currentSubmission) return;
     
-    const updatedSubmission = await updateDataInTable<StrategyCall>(
+    const updatedSubmission = await updateDataInTable(
       'strategy_calls',
       currentSubmission.id,
       { booking_date: e.target.value ? new Date(e.target.value).toISOString() : null }
     );
     
     if (updatedSubmission) {
-      setSubmissions(submissions.map(s => s.id === currentSubmission.id ? updatedSubmission : s));
-      setCurrentSubmission(updatedSubmission);
+      setSubmissions(submissions.map(s => s.id === currentSubmission.id ? updatedSubmission as StrategyCall : s));
+      setCurrentSubmission(updatedSubmission as StrategyCall);
     }
   };
 

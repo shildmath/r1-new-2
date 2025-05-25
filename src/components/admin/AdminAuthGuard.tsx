@@ -4,9 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Lock, Mail, AlertCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface AdminAuthGuardProps {
   children: React.ReactNode;
@@ -16,34 +14,30 @@ const AdminAuthGuard = ({ children }: AdminAuthGuardProps) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
-  const [formData, setFormData] = useState({ email: '', password: '' });
-  const [authLoading, setAuthLoading] = useState(false);
-  const [error, setError] = useState('');
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    checkAuthStatus();
+    checkAuthAndAdminStatus();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('Auth state changed:', event, session?.user?.id);
       
       if (event === 'SIGNED_IN' && session) {
         setIsAuthenticated(true);
-        // Defer admin check to prevent deadlock
-        setTimeout(async () => {
-          await checkAdminStatus(session.user.id);
-        }, 0);
+        await checkAdminStatus(session.user.id);
       } else if (event === 'SIGNED_OUT') {
         setIsAuthenticated(false);
         setIsAdmin(false);
         setLoading(false);
+        navigate('/admin/login');
       }
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [navigate]);
 
-  const checkAuthStatus = async () => {
+  const checkAuthAndAdminStatus = async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       console.log('Current session:', session?.user?.id);
@@ -54,11 +48,13 @@ const AdminAuthGuard = ({ children }: AdminAuthGuardProps) => {
       } else {
         setIsAuthenticated(false);
         setLoading(false);
+        navigate('/admin/login');
       }
     } catch (error) {
       console.error('Auth check error:', error);
       setIsAuthenticated(false);
       setLoading(false);
+      navigate('/admin/login');
     }
   };
 
@@ -69,21 +65,19 @@ const AdminAuthGuard = ({ children }: AdminAuthGuardProps) => {
         .from('admin_users')
         .select('*')
         .eq('id', userId)
-        .single();
+        .maybeSingle();
 
       console.log('Admin check result:', { data, error });
 
       if (error) {
-        if (error.code === 'PGRST116') {
-          // No rows returned - user is not an admin
-          setIsAdmin(false);
-        } else {
-          console.error('Admin check error:', error);
-          setIsAdmin(false);
-        }
-      } else {
+        console.error('Admin check error:', error);
+        setIsAdmin(false);
+      } else if (data) {
         setIsAdmin(true);
         console.log('User is admin:', data);
+      } else {
+        console.log('User is not admin');
+        setIsAdmin(false);
       }
     } catch (error) {
       console.error('Admin verification error:', error);
@@ -93,48 +87,13 @@ const AdminAuthGuard = ({ children }: AdminAuthGuardProps) => {
     }
   };
 
-  const handleSignIn = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setAuthLoading(true);
-    setError('');
-
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: formData.email,
-        password: formData.password
-      });
-
-      if (error) {
-        throw error;
-      }
-
-      console.log('Sign in successful:', data.user?.id);
-      
-      toast({
-        title: "Login Successful",
-        description: "Welcome to the admin dashboard!",
-      });
-
-      // The auth state change handler will take care of redirecting
-    } catch (error: any) {
-      console.error('Sign in error:', error);
-      setError(error.message || 'Authentication failed');
-      toast({
-        title: "Login Failed",
-        description: error.message || 'Please check your credentials and try again.',
-        variant: "destructive",
-      });
-    } finally {
-      setAuthLoading(false);
-    }
-  };
-
   const handleSignOut = async () => {
     try {
       await supabase.auth.signOut();
       toast({
         title: "Signed out successfully",
       });
+      navigate('/admin/login');
     } catch (error) {
       console.error('Sign out error:', error);
     }
@@ -152,67 +111,8 @@ const AdminAuthGuard = ({ children }: AdminAuthGuardProps) => {
   }
 
   if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <div className="mx-auto w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center mb-4">
-              <Lock className="w-6 h-6 text-white" />
-            </div>
-            <CardTitle className="text-2xl font-bold text-gray-900">Admin Login</CardTitle>
-            <CardDescription>
-              Access the AIAdMaxify admin dashboard
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSignIn} className="space-y-4">
-              {error && (
-                <div className="bg-red-50 p-3 rounded-lg flex items-start gap-2 text-red-800">
-                  <AlertCircle className="h-5 w-5 text-red-600 mt-0.5" />
-                  <p className="text-sm">{error}</p>
-                </div>
-              )}
-              
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="rushiwankhede0503@gmail.com"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="pl-10"
-                    required
-                  />
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="Enter your password"
-                    value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    className="pl-10"
-                    required
-                  />
-                </div>
-              </div>
-
-              <Button type="submit" className="w-full bg-purple-600 hover:bg-purple-700" disabled={authLoading}>
-                {authLoading ? 'Signing In...' : 'Sign In'}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-      </div>
-    );
+    // This should not show as we redirect to login
+    return null;
   }
 
   if (!isAdmin) {

@@ -25,8 +25,14 @@ const AdminAuthGuard = ({ children }: AdminAuthGuardProps) => {
     checkAuthStatus();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth state changed:', event, session?.user?.id);
+      
       if (event === 'SIGNED_IN' && session) {
-        await checkAdminStatus(session.user.id);
+        setIsAuthenticated(true);
+        // Defer admin check to prevent deadlock
+        setTimeout(async () => {
+          await checkAdminStatus(session.user.id);
+        }, 0);
       } else if (event === 'SIGNED_OUT') {
         setIsAuthenticated(false);
         setIsAdmin(false);
@@ -40,6 +46,7 @@ const AdminAuthGuard = ({ children }: AdminAuthGuardProps) => {
   const checkAuthStatus = async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
+      console.log('Current session:', session?.user?.id);
       
       if (session) {
         setIsAuthenticated(true);
@@ -57,17 +64,26 @@ const AdminAuthGuard = ({ children }: AdminAuthGuardProps) => {
 
   const checkAdminStatus = async (userId: string) => {
     try {
+      console.log('Checking admin status for user:', userId);
       const { data, error } = await supabase
         .from('admin_users')
         .select('*')
         .eq('id', userId)
         .single();
 
+      console.log('Admin check result:', { data, error });
+
       if (error) {
-        console.error('Admin check error:', error);
-        setIsAdmin(false);
+        if (error.code === 'PGRST116') {
+          // No rows returned - user is not an admin
+          setIsAdmin(false);
+        } else {
+          console.error('Admin check error:', error);
+          setIsAdmin(false);
+        }
       } else {
         setIsAdmin(true);
+        console.log('User is admin:', data);
       }
     } catch (error) {
       console.error('Admin verification error:', error);
@@ -83,7 +99,7 @@ const AdminAuthGuard = ({ children }: AdminAuthGuardProps) => {
     setError('');
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: formData.email,
         password: formData.password
       });
@@ -92,11 +108,16 @@ const AdminAuthGuard = ({ children }: AdminAuthGuardProps) => {
         throw error;
       }
 
+      console.log('Sign in successful:', data.user?.id);
+      
       toast({
         title: "Login Successful",
         description: "Welcome to the admin dashboard!",
       });
+
+      // The auth state change handler will take care of redirecting
     } catch (error: any) {
+      console.error('Sign in error:', error);
       setError(error.message || 'Authentication failed');
       toast({
         title: "Login Failed",
@@ -122,7 +143,10 @@ const AdminAuthGuard = ({ children }: AdminAuthGuardProps) => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
       </div>
     );
   }

@@ -1,4 +1,3 @@
-
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -9,43 +8,39 @@ import Footer from '@/components/Footer';
 import ContactForm from '@/components/ContactForm';
 import ContactInfo from '@/components/ContactInfo';
 import { ArrowRight, CheckCircle } from 'lucide-react';
-
 const Contact = () => {
-  const reasons = [
-    {
-      icon: CheckCircle,
-      title: "Free Consultation",
-      description: "Get expert advice on your marketing strategy at no cost"
-    },
-    {
-      icon: CheckCircle,
-      title: "Custom Strategy",
-      description: "Receive a tailored marketing plan for your business"
-    },
-    {
-      icon: CheckCircle,
-      title: "Quick Response",
-      description: "We respond to all inquiries within 24 hours"
-    },
-    {
-      icon: CheckCircle,
-      title: "No Obligation",
-      description: "No pressure, just valuable insights and recommendations"
-    }
-  ];
-
-  return (
-    <>
+  const reasons = [{
+    icon: CheckCircle,
+    title: "Free Consultation",
+    description: "Get expert advice on your marketing strategy at no cost"
+  }, {
+    icon: CheckCircle,
+    title: "Custom Strategy",
+    description: "Receive a tailored marketing plan for your business"
+  }, {
+    icon: CheckCircle,
+    title: "Quick Response",
+    description: "We respond to all inquiries within 24 hours"
+  }, {
+    icon: CheckCircle,
+    title: "No Obligation",
+    description: "No pressure, just valuable insights and recommendations"
+  }];
+  return <>
       <Navbar />
       
       {/* Hero Section */}
       <section className="bg-gradient-primary text-white page-with-navbar section-padding overflow-hidden">
         <div className="max-w-7xl mx-auto text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-          >
+          <motion.div initial={{
+          opacity: 0,
+          y: 20
+        }} animate={{
+          opacity: 1,
+          y: 0
+        }} transition={{
+          duration: 0.8
+        }}>
             <Badge className="bg-accent text-white mb-6 text-lg px-4 py-2">
               Get In Touch
             </Badge>
@@ -62,11 +57,9 @@ const Contact = () => {
                   Book Strategy Call <ArrowRight className="ml-2" size={20} />
                 </Button>
               </Link>
-              <Button 
-                variant="outline" 
-                className="agency-btn-outline text-lg px-8 py-4"
-                onClick={() => document.getElementById('contact-form')?.scrollIntoView({ behavior: 'smooth' })}
-              >
+              <Button variant="outline" onClick={() => document.getElementById('contact-form')?.scrollIntoView({
+              behavior: 'smooth'
+            })} className="agency-btn-outline text-lg px-8 py-4 text-green-600">
                 Send Message
               </Button>
             </div>
@@ -77,12 +70,15 @@ const Contact = () => {
       {/* Contact Info Section */}
       <section className="bg-white section-padding">
         <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="text-center mb-16"
-          >
+          <motion.div initial={{
+          opacity: 0,
+          y: 20
+        }} whileInView={{
+          opacity: 1,
+          y: 0
+        }} transition={{
+          duration: 0.8
+        }} className="text-center mb-16">
             <h2 className="text-3xl md:text-5xl font-serif font-bold text-primary mb-6">
               Let's <span className="gradient-text">Connect</span>
             </h2>
@@ -102,12 +98,15 @@ const Contact = () => {
             <ContactForm />
 
             {/* Why Contact Us */}
-            <motion.div
-              initial={{ opacity: 0, x: 50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8 }}
-              className="space-y-8"
-            >
+            <motion.div initial={{
+            opacity: 0,
+            x: 50
+          }} whileInView={{
+            opacity: 1,
+            x: 0
+          }} transition={{
+            duration: 0.8
+          }} className="space-y-8">
               <div>
                 <h3 className="text-3xl font-serif font-bold text-primary mb-6">
                   Why <span className="gradient-text">Contact Us</span>?
@@ -119,14 +118,16 @@ const Contact = () => {
               </div>
 
               <div className="space-y-6">
-                {reasons.map((reason, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: index * 0.1 }}
-                    className="flex items-start space-x-4 group"
-                  >
+                {reasons.map((reason, index) => <motion.div key={index} initial={{
+                opacity: 0,
+                y: 20
+              }} whileInView={{
+                opacity: 1,
+                y: 0
+              }} transition={{
+                duration: 0.6,
+                delay: index * 0.1
+              }} className="flex items-start space-x-4 group">
                     <div className="w-8 h-8 bg-gradient-to-br from-accent to-primary rounded-full flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
                       <reason.icon size={16} className="text-white" />
                     </div>
@@ -134,8 +135,7 @@ const Contact = () => {
                       <h4 className="font-semibold text-primary mb-2">{reason.title}</h4>
                       <p className="text-gray-600">{reason.description}</p>
                     </div>
-                  </motion.div>
-                ))}
+                  </motion.div>)}
               </div>
 
               <Card className="bg-gradient-to-br from-accent to-primary text-white border-0">
@@ -158,8 +158,6 @@ const Contact = () => {
       </section>
 
       <Footer />
-    </>
-  );
+    </>;
 };
-
 export default Contact;

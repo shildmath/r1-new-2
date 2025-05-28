@@ -218,12 +218,25 @@ const Index = () => {
               className="relative"
             >
               <div className="relative bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20 shadow-2xl">
+                {/* Working Team Image */}
+                <div className="relative mb-6">
+                  <img 
+                    src="https://images.unsplash.com/photo-1605810230434-7631ac76ec81?w=400&h=300&fit=crop" 
+                    alt="Our Working Team"
+                    className="w-full h-64 object-cover rounded-2xl shadow-lg"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent rounded-2xl" />
+                </div>
+                
+                {/* Rotating Animation Below */}
                 <motion.div
                   animate={{ rotate: 360 }}
                   transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                  className="flex justify-center mb-4"
                 >
-                  <BarChart3 size={200} className="text-purple-400 mx-auto mb-4" />
+                  <BarChart3 size={120} className="text-purple-400" />
                 </motion.div>
+                
                 <div className="text-center">
                   <h3 className="text-2xl font-bold mb-2">Real Client Growth</h3>
                   <p className="text-gray-300">Average results in 90 days</p>

@@ -39,7 +39,7 @@ const Contact = () => {
       <Navbar />
       
       {/* Hero Section */}
-      <section className="bg-gradient-primary text-white pt-24 section-padding overflow-hidden">
+      <section className="bg-gradient-primary text-white page-with-navbar section-padding overflow-hidden">
         <div className="max-w-7xl mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}

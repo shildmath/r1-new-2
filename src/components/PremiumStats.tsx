@@ -1,9 +1,12 @@
 
+import React from 'react';
 import { motion } from 'framer-motion';
 import { TrendingUp, Users, Award, DollarSign } from 'lucide-react';
 import { Graph } from '@/components/ui/graph';
 
 const PremiumStats = () => {
+  console.log('PremiumStats component rendering');
+  
   const roiData = [
     { name: 'Q1', value: 0 },
     { name: 'Q2', value: 5 },

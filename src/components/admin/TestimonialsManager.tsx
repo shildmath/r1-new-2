@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -23,6 +23,8 @@ const defaultTestimonial: TestimonialInsert = {
 };
 
 const TestimonialsManager = () => {
+  console.log('TestimonialsManager component rendering');
+  
   const { toast } = useToast();
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [loading, setLoading] = useState(true);
@@ -31,17 +33,31 @@ const TestimonialsManager = () => {
   const [currentTestimonial, setCurrentTestimonial] = useState<TestimonialInsert>(defaultTestimonial);
 
   useEffect(() => {
+    console.log('TestimonialsManager useEffect triggered');
     loadTestimonials();
   }, []);
 
   const loadTestimonials = async () => {
+    console.log('Loading testimonials...');
     setLoading(true);
-    const data = await fetchTestimonials({ orderBy: 'created_at' });
-    setTestimonials(data);
-    setLoading(false);
+    try {
+      const data = await fetchTestimonials({ orderBy: 'created_at' });
+      console.log('Testimonials loaded:', data);
+      setTestimonials(data);
+    } catch (error) {
+      console.error('Error loading testimonials:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load testimonials",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleOpenDialog = (testimonial?: Testimonial) => {
+    console.log('Opening dialog for testimonial:', testimonial);
     if (testimonial) {
       setCurrentTestimonial({
         client_name: testimonial.client_name,
@@ -61,6 +77,7 @@ const TestimonialsManager = () => {
   };
 
   const handleCloseDialog = () => {
+    console.log('Closing dialog');
     setDialogOpen(false);
     setCurrentTestimonial(defaultTestimonial);
     setIsEditing(false);
@@ -68,42 +85,84 @@ const TestimonialsManager = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Submitting testimonial:', currentTestimonial);
     
     try {
       if (isEditing && testimonials.find(t => t.client_name === currentTestimonial.client_name)) {
         const testimonialToUpdate = testimonials.find(t => t.client_name === currentTestimonial.client_name);
         if (testimonialToUpdate) {
           await updateDataInTable('testimonials', testimonialToUpdate.id, currentTestimonial);
+          toast({
+            title: "Success",
+            description: "Testimonial updated successfully",
+          });
         }
       } else {
         await insertDataToTable('testimonials', currentTestimonial);
+        toast({
+          title: "Success",
+          description: "Testimonial created successfully",
+        });
       }
       
       loadTestimonials();
       handleCloseDialog();
     } catch (error) {
       console.error('Error saving testimonial:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save testimonial",
+        variant: "destructive",
+      });
     }
   };
 
   const handleDelete = async (id: string) => {
+    console.log('Deleting testimonial with id:', id);
     if (window.confirm('Are you sure you want to delete this testimonial?')) {
-      const success = await deleteDataFromTable('testimonials', id);
-      if (success) {
-        setTestimonials(testimonials.filter(testimonial => testimonial.id !== id));
+      try {
+        const success = await deleteDataFromTable('testimonials', id);
+        if (success) {
+          setTestimonials(testimonials.filter(testimonial => testimonial.id !== id));
+          toast({
+            title: "Success",
+            description: "Testimonial deleted successfully",
+          });
+        }
+      } catch (error) {
+        console.error('Error deleting testimonial:', error);
+        toast({
+          title: "Error",
+          description: "Failed to delete testimonial",
+          variant: "destructive",
+        });
       }
     }
   };
 
   const toggleFeatured = async (testimonial: Testimonial) => {
-    const updatedTestimonial = await updateDataInTable(
-      'testimonials', 
-      testimonial.id, 
-      { is_featured: !testimonial.is_featured }
-    ) as Testimonial;
-    
-    if (updatedTestimonial) {
-      setTestimonials(testimonials.map(t => t.id === testimonial.id ? updatedTestimonial : t));
+    console.log('Toggling featured status for testimonial:', testimonial.id);
+    try {
+      const updatedTestimonial = await updateDataInTable(
+        'testimonials', 
+        testimonial.id, 
+        { is_featured: !testimonial.is_featured }
+      ) as Testimonial;
+      
+      if (updatedTestimonial) {
+        setTestimonials(testimonials.map(t => t.id === testimonial.id ? updatedTestimonial : t));
+        toast({
+          title: "Success",
+          description: `Testimonial ${updatedTestimonial.is_featured ? 'featured' : 'unfeatured'}`,
+        });
+      }
+    } catch (error) {
+      console.error('Error toggling featured status:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update testimonial",
+        variant: "destructive",
+      });
     }
   };
 

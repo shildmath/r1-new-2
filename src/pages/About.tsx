@@ -5,185 +5,196 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-import { ArrowRight, Award, Users, Target, Brain, TrendingUp, Zap, Calendar, Star, Trophy, Shield, Globe } from 'lucide-react';
+import EnhancedFooter from '@/components/EnhancedFooter';
+import { 
+  ArrowRight, 
+  Award, 
+  Users, 
+  Target, 
+  Globe,
+  Linkedin,
+  Twitter,
+  Mail,
+  Brain,
+  TrendingUp,
+  Zap
+} from 'lucide-react';
 
 const About = () => {
+  const stats = [
+    { value: "500+", label: "Clients Served", icon: Users },
+    { value: "97%", label: "Success Rate", icon: Target },
+    { value: "15+", label: "Industries", icon: Globe },
+    { value: "$50M+", label: "Revenue Generated", icon: TrendingUp }
+  ];
+
   const teamMembers = [
     {
-      name: "Alex Rivera",
+      name: "Alex Rodriguez",
       position: "CEO & Founder",
       image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&crop=face",
-      bio: "Former Google marketing executive with 12+ years in AI-powered digital marketing. Led campaigns for Fortune 500 companies generating over $100M in revenue.",
-      expertise: ["AI Marketing Strategy", "Growth Hacking", "Team Leadership"]
+      bio: "10+ years of digital marketing expertise with a focus on AI-driven strategies. Former Google marketing lead with a passion for transforming businesses.",
+      expertise: ["AI Marketing", "Strategy", "Leadership"],
+      social: {
+        linkedin: "https://linkedin.com",
+        twitter: "https://twitter.com",
+        email: "alex@aiadmaxify.com"
+      }
     },
     {
-      name: "Sarah Kim",
-      position: "Head of AI & Data Science",
-      image: "https://images.unsplash.com/photo-1494790108755-2616b612b47c?w=300&h=300&fit=crop&crop=face",
-      bio: "PhD in Machine Learning from MIT. Previously at Facebook's AI division, developing algorithmic marketing solutions used by millions of businesses.",
-      expertise: ["Machine Learning", "Predictive Analytics", "Algorithm Development"]
+      name: "Sarah Johnson",
+      position: "Head of AI Strategy",
+      image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=300&h=300&fit=crop&crop=face",
+      bio: "AI researcher and marketing strategist with a PhD in Machine Learning. Specializes in developing cutting-edge AI solutions for marketing automation.",
+      expertise: ["Machine Learning", "AI Automation", "Data Science"],
+      social: {
+        linkedin: "https://linkedin.com",
+        twitter: "https://twitter.com",
+        email: "sarah@aiadmaxify.com"
+      }
     },
     {
-      name: "Marcus Johnson",
+      name: "Michael Chen",
       position: "Creative Director",
       image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&h=300&fit=crop&crop=face",
-      bio: "Award-winning creative director with 10+ years experience. Former creative lead at top agencies, creating campaigns for Nike, Apple, and Tesla.",
-      expertise: ["Brand Strategy", "Creative Campaigns", "Visual Storytelling"]
+      bio: "Award-winning creative director with 8+ years of experience in brand storytelling and visual design. Expert in creating compelling campaigns.",
+      expertise: ["Brand Design", "Creative Strategy", "Content Creation"],
+      social: {
+        linkedin: "https://linkedin.com",
+        twitter: "https://twitter.com",
+        email: "michael@aiadmaxify.com"
+      }
     },
     {
-      name: "Emily Chen",
-      position: "Head of Performance Marketing",
+      name: "Emily Davis",
+      position: "Performance Marketing Lead",
       image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=300&h=300&fit=crop&crop=face",
-      bio: "Performance marketing expert who's managed over $50M in ad spend. Specialized in scaling startups from $0 to $10M+ in revenue through paid channels.",
-      expertise: ["PPC Management", "Conversion Optimization", "Analytics"]
+      bio: "Performance marketing expert with proven track record of scaling campaigns to 7-figure revenues. Google Ads and Facebook Blueprint certified.",
+      expertise: ["PPC Advertising", "Analytics", "ROI Optimization"],
+      social: {
+        linkedin: "https://linkedin.com",
+        twitter: "https://twitter.com",
+        email: "emily@aiadmaxify.com"
+      }
     },
     {
-      name: "David Martinez",
+      name: "David Park",
       position: "SEO & Content Strategist",
+      image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=300&h=300&fit=crop&crop=face",
+      bio: "SEO specialist with expertise in technical SEO and content marketing. Has helped 200+ businesses achieve first-page Google rankings.",
+      expertise: ["SEO", "Content Marketing", "Technical Optimization"],
+      social: {
+        linkedin: "https://linkedin.com",
+        twitter: "https://twitter.com",
+        email: "david@aiadmaxify.com"
+      }
+    },
+    {
+      name: "Lisa Thompson",
+      position: "Social Media Director",
+      image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=300&h=300&fit=crop&crop=face",
+      bio: "Social media strategist with 6+ years of experience building communities and driving engagement across all major platforms.",
+      expertise: ["Social Media", "Community Building", "Influencer Marketing"],
+      social: {
+        linkedin: "https://linkedin.com",
+        twitter: "https://twitter.com",
+        email: "lisa@aiadmaxify.com"
+      }
+    },
+    {
+      name: "James Wilson",
+      position: "Data Analytics Manager",
+      image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=300&h=300&fit=crop&crop=face",
+      bio: "Data scientist and analytics expert specializing in marketing attribution and predictive modeling. Former Amazon data analyst.",
+      expertise: ["Data Analytics", "Predictive Modeling", "Attribution"],
+      social: {
+        linkedin: "https://linkedin.com",
+        twitter: "https://twitter.com",
+        email: "james@aiadmaxify.com"
+      }
+    },
+    {
+      name: "Maria Garcia",
+      position: "Client Success Manager",
+      image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=300&h=300&fit=crop&crop=face",
+      bio: "Client relationship expert with 7+ years of experience ensuring client satisfaction and driving account growth. Certified in customer success.",
+      expertise: ["Client Relations", "Account Management", "Growth Strategy"],
+      social: {
+        linkedin: "https://linkedin.com",
+        twitter: "https://twitter.com",
+        email: "maria@aiadmaxify.com"
+      }
+    },
+    {
+      name: "Robert Kim",
+      position: "Video Marketing Specialist",
+      image: "https://images.unsplash.com/photo-1566492031773-4f4e44671d66?w=300&h=300&fit=crop&crop=face",
+      bio: "Video production and marketing expert with Emmy Award recognition. Specializes in creating viral video content and YouTube growth strategies.",
+      expertise: ["Video Production", "YouTube Marketing", "Viral Content"],
+      social: {
+        linkedin: "https://linkedin.com",
+        twitter: "https://twitter.com",
+        email: "robert@aiadmaxify.com"
+      }
+    },
+    {
+      name: "Jennifer Lee",
+      position: "Email Marketing Specialist",
+      image: "https://images.unsplash.com/photo-1551836022-deb4988cc6c0?w=300&h=300&fit=crop&crop=face",
+      bio: "Email marketing expert with proven track record of achieving 40%+ open rates and 8%+ CTR. Certified in marketing automation platforms.",
+      expertise: ["Email Marketing", "Automation", "List Building"],
+      social: {
+        linkedin: "https://linkedin.com",
+        twitter: "https://twitter.com",
+        email: "jennifer@aiadmaxify.com"
+      }
+    },
+    {
+      name: "Daniel Brown",
+      position: "Conversion Rate Optimization Expert",
       image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&h=300&fit=crop&crop=face",
-      bio: "SEO expert who's helped 200+ businesses achieve first-page rankings. Former content strategist at HubSpot, developing strategies for high-growth companies.",
-      expertise: ["Technical SEO", "Content Strategy", "Link Building"]
+      bio: "CRO specialist with expertise in A/B testing and user experience optimization. Has improved conversion rates for 300+ websites.",
+      expertise: ["A/B Testing", "UX Optimization", "Funnel Analysis"],
+      social: {
+        linkedin: "https://linkedin.com",
+        twitter: "https://twitter.com",
+        email: "daniel@aiadmaxify.com"
+      }
     },
     {
-      name: "Jessica Taylor",
-      position: "Client Success Director",
+      name: "Grace Wong",
+      position: "Brand Strategist",
       image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=300&h=300&fit=crop&crop=face",
-      bio: "Client relationship expert with 8+ years experience. Maintains 98% client retention rate and ensures every client achieves their growth objectives.",
-      expertise: ["Client Relations", "Project Management", "Success Strategy"]
-    },
-    {
-      name: "Ryan O'Connor",
-      position: "VP of Technology",
-      image: "https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?w=300&h=300&fit=crop&crop=face",
-      bio: "Full-stack engineer with expertise in AI integration. Former lead developer at Amazon, specializing in scalable marketing automation platforms.",
-      expertise: ["AI Integration", "Marketing Automation", "System Architecture"]
-    },
-    {
-      name: "Lisa Wang",
-      position: "Social Media Strategist",
-      image: "https://images.unsplash.com/photo-1507101105822-7472b28e22ac?w=300&h=300&fit=crop&crop=face",
-      bio: "Social media expert who's grown brands from 0 to 1M+ followers. Specializes in viral content creation and community management.",
-      expertise: ["Social Strategy", "Content Creation", "Community Building"]
-    }
-  ];
-
-  const awards = [
-    {
-      title: "Best AI Marketing Agency 2024",
-      organization: "Marketing Excellence Awards",
-      year: "2024",
-      icon: Trophy
-    },
-    {
-      title: "Top 10 Digital Marketing Agencies",
-      organization: "Forbes",
-      year: "2024",
-      icon: Star
-    },
-    {
-      title: "Innovation in AI Marketing",
-      organization: "TechCrunch Awards",
-      year: "2023",
-      icon: Brain
-    },
-    {
-      title: "Client Choice Award",
-      organization: "Clutch.co",
-      year: "2023",
-      icon: Shield
-    },
-    {
-      title: "Global Marketing Excellence",
-      organization: "IAB Awards",
-      year: "2023",
-      icon: Globe
-    },
-    {
-      title: "Fastest Growing Agency",
-      organization: "Inc. 5000",
-      year: "2022",
-      icon: TrendingUp
-    }
-  ];
-
-  const journey = [
-    {
-      year: "2017",
-      title: "Company Founded",
-      description: "Started with a vision to democratize AI-powered marketing for businesses of all sizes.",
-      milestone: "Founded by Alex Rivera with $50K seed funding"
-    },
-    {
-      year: "2018",
-      title: "First AI Algorithm",
-      description: "Developed our proprietary AI content optimization algorithm, achieving 300% better engagement rates.",
-      milestone: "Served first 25 clients with 250% average ROI"
-    },
-    {
-      year: "2019",
-      title: "Team Expansion",
-      description: "Grew to 15 team members and launched our comprehensive marketing automation platform.",
-      milestone: "Reached $1M in annual revenue"
-    },
-    {
-      year: "2020",
-      title: "Market Leadership",
-      description: "Became a recognized leader in AI marketing, helping businesses thrive during challenging times.",
-      milestone: "Helped 500+ businesses pivot their marketing strategies"
-    },
-    {
-      year: "2021",
-      title: "International Expansion",
-      description: "Expanded services globally and launched advanced predictive analytics for marketing campaigns.",
-      milestone: "Opened offices in 3 countries, $5M revenue"
-    },
-    {
-      year: "2022",
-      title: "Innovation Awards",
-      description: "Won multiple industry awards for innovation in AI marketing and client satisfaction.",
-      milestone: "98% client satisfaction rate, 1000+ active clients"
-    },
-    {
-      year: "2023",
-      title: "Platform Revolution",
-      description: "Launched next-generation AI platform with real-time optimization and predictive insights.",
-      milestone: "$15M revenue, named top agency by Forbes"
-    },
-    {
-      year: "2024",
-      title: "Industry Leadership",
-      description: "Continued innovation with advanced AI models and expanded service offerings.",
-      milestone: "2500+ clients served, $25M revenue milestone"
-    },
-    {
-      year: "2025",
-      title: "Future Vision",
-      description: "Expanding AI capabilities and aiming to serve 10,000+ businesses worldwide.",
-      milestone: "Targeting $50M revenue and global market leadership"
+      bio: "Brand strategy consultant with 9+ years of experience helping companies build strong brand identities and market positioning.",
+      expertise: ["Brand Strategy", "Market Research", "Positioning"],
+      social: {
+        linkedin: "https://linkedin.com",
+        twitter: "https://twitter.com",
+        email: "grace@aiadmaxify.com"
+      }
     }
   ];
 
   const values = [
     {
       icon: Brain,
-      title: "AI-First Approach",
-      description: "We leverage cutting-edge artificial intelligence to deliver data-driven results that traditional agencies can't match."
-    },
-    {
-      icon: Target,
-      title: "Results-Driven",
-      description: "Every strategy, campaign, and decision is made with one goal in mind: delivering measurable, profitable growth for our clients."
+      title: "Innovation First",
+      description: "We leverage cutting-edge AI technology to stay ahead of the curve and deliver unprecedented results for our clients."
     },
     {
       icon: Users,
-      title: "Client Partnership",
-      description: "We don't just work for you, we work with you. Your success is our success, and we're committed to long-term partnerships."
+      title: "Client-Centric",
+      description: "Every strategy is tailored to our clients' unique needs and goals. Your success is our success."
     },
     {
       icon: TrendingUp,
-      title: "Continuous Innovation",
-      description: "The digital landscape evolves rapidly. We stay ahead of trends and continuously innovate our strategies and technologies."
+      title: "Results-Driven",
+      description: "We focus on measurable outcomes and ROI. Every campaign is optimized for maximum performance."
+    },
+    {
+      icon: Zap,
+      title: "Agile Execution",
+      description: "We move fast and adapt quickly to market changes, ensuring our clients stay competitive."
     }
   ];
 
@@ -192,215 +203,79 @@ const About = () => {
       <Navbar />
       
       {/* Hero Section */}
-      <section className="bg-gradient-primary text-white pt-24 section-padding overflow-hidden">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8 }}
-            >
-              <Badge className="bg-accent text-white mb-6 text-lg px-4 py-2">
-                Award-Winning Agency
-              </Badge>
-              <h1 className="text-4xl md:text-6xl font-serif font-bold mb-6">
-                Pioneering the Future of 
-                <span className="gradient-text"> AI Marketing</span>
-              </h1>
-              <p className="text-xl text-gray-300 mb-8 leading-relaxed">
-                Founded in 2017, AIAdMaxify has been at the forefront of AI-powered digital marketing, 
-                helping over 2,500 businesses achieve unprecedented growth through innovative strategies 
-                and cutting-edge technology.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Link to="/strategy-call">
-                  <Button className="agency-btn text-lg px-8 py-4">
-                    Work With Us <ArrowRight className="ml-2" size={20} />
-                  </Button>
-                </Link>
-                <Button variant="outline" className="agency-btn-outline text-lg px-8 py-4">
-                  View Our Journey
-                </Button>
-              </div>
-            </motion.div>
+      <section className="bg-gradient-to-br from-gray-900 via-purple-900 to-black text-white pt-24 section-padding relative overflow-hidden">
+        <div className="absolute inset-0">
+          <motion.div
+            animate={{ 
+              scale: [1, 1.2, 1],
+              rotate: [0, 180, 360]
+            }}
+            transition={{ 
+              duration: 20,
+              repeat: Infinity,
+              ease: "linear"
+            }}
+            className="absolute top-1/4 left-1/4 w-64 h-64 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 float-animation"
+          />
+        </div>
 
-            <motion.div
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="relative"
-            >
-              <div className="relative">
-                <img 
-                  src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600&h=400&fit=crop" 
-                  alt="Team collaboration" 
-                  className="rounded-2xl shadow-2xl"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-primary/20 to-transparent rounded-2xl"></div>
-              </div>
-              <div className="absolute -bottom-6 -right-6 bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
-                <div className="grid grid-cols-2 gap-6 text-center">
-                  <div>
-                    <div className="text-2xl font-bold text-accent mb-1">8+</div>
-                    <div className="text-gray-300 text-sm">Years Experience</div>
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-accent mb-1">2500+</div>
-                    <div className="text-gray-300 text-sm">Clients Served</div>
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-accent mb-1">$250M+</div>
-                    <div className="text-gray-300 text-sm">Revenue Generated</div>
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-accent mb-1">17X</div>
-                    <div className="text-gray-300 text-sm">Average ROI</div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </div>
+        <div className="max-w-7xl mx-auto text-center relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="slide-up"
+          >
+            <Badge className="bg-blue-600 text-white mb-6 text-lg px-4 py-2 pulse-glow">
+              Meet Our Team
+            </Badge>
+            <h1 className="text-5xl md:text-7xl font-bold mb-6 bounce-in">
+              The <span className="bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">Minds Behind</span> the Magic
+            </h1>
+            <p className="text-xl text-gray-300 max-w-3xl mx-auto mb-8 fade-in">
+              We're a team of passionate marketers, data scientists, and AI experts dedicated to 
+              transforming businesses through innovative digital marketing strategies.
+            </p>
+          </motion.div>
         </div>
       </section>
 
-      {/* Company Journey Section */}
+      {/* Stats Section */}
       <section className="bg-white section-padding">
         <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-3xl md:text-5xl font-serif font-bold text-primary mb-6">
-              Our <span className="gradient-text">Journey</span>
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              From a small startup to industry leaders - here's how we've grown and evolved 
-              to become the AI marketing agency of choice for ambitious businesses.
-            </p>
-          </motion.div>
-
-          <div className="relative">
-            <div className="absolute left-1/2 transform -translate-x-1/2 w-1 h-full bg-gradient-to-b from-accent to-primary rounded-full"></div>
-            
-            <div className="space-y-8">
-              {journey.map((item, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                  className={`flex items-center ${index % 2 === 0 ? 'flex-row' : 'flex-row-reverse'}`}
-                >
-                  <div className={`w-1/2 ${index % 2 === 0 ? 'pr-8 text-right' : 'pl-8 text-left'}`}>
-                    <Card className="agency-card">
-                      <CardHeader>
-                        <div className="flex items-center justify-between">
-                          <Badge className="bg-accent text-white">{item.year}</Badge>
-                          <Calendar className="text-accent" size={20} />
-                        </div>
-                        <CardTitle className="text-xl font-bold text-primary">
-                          {item.title}
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-gray-600 mb-3">{item.description}</p>
-                        <p className="text-sm text-accent font-semibold">{item.milestone}</p>
-                      </CardContent>
-                    </Card>
-                  </div>
-                  
-                  <div className="w-6 h-6 bg-accent rounded-full border-4 border-white shadow-lg relative z-10 flex-shrink-0"></div>
-                  
-                  <div className="w-1/2"></div>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Mission Section */}
-      <section className="bg-secondary section-padding">
-        <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-3xl md:text-5xl font-serif font-bold text-primary mb-6">
-              Our <span className="gradient-text">Mission & Vision</span>
-            </h2>
-            <p className="text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
-              We exist to democratize AI-powered marketing, making advanced marketing technologies 
-              accessible to businesses of all sizes. Our vision is a world where every business 
-              can compete and thrive in the digital landscape.
-            </p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6 }}
-            >
-              <Card className="agency-card h-full relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-accent/20 to-transparent"></div>
-                <CardHeader>
-                  <Zap size={48} className="text-accent mb-4" />
-                  <CardTitle className="text-2xl font-bold text-primary">Our Mission</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription className="text-gray-700 text-lg leading-relaxed">
-                    To empower businesses with AI-driven marketing solutions that deliver measurable, 
-                    profitable growth while maintaining the human touch that builds lasting relationships 
-                    and trust with customers.
-                  </CardDescription>
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-            >
-              <Card className="agency-card h-full relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-primary/20 to-transparent"></div>
-                <CardHeader>
-                  <Target size={48} className="text-accent mb-4" />
-                  <CardTitle className="text-2xl font-bold text-primary">Our Vision</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription className="text-gray-700 text-lg leading-relaxed">
-                    To be the global leader in AI-powered marketing, setting industry standards 
-                    for innovation, results, and client success while helping 10,000+ businesses 
-                    achieve their growth objectives by 2030.
-                  </CardDescription>
-                </CardContent>
-              </Card>
-            </motion.div>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+            {stats.map((stat, index) => (
+              <motion.div 
+                key={index}
+                initial={{ opacity: 0, scale: 0.5 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                whileHover={{ scale: 1.05 }}
+                className="text-center p-6 bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg pulse-glow"
+              >
+                <stat.icon size={40} className="text-purple-600 mx-auto mb-4" />
+                <div className="text-4xl lg:text-6xl font-bold text-purple-600 mb-2 bounce-in">{stat.value}</div>
+                <div className="text-gray-600 font-medium">{stat.label}</div>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* Values Section */}
-      <section className="bg-white section-padding">
+      <section className="bg-gradient-to-br from-purple-50 to-blue-50 section-padding">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="text-center mb-16"
+            className="text-center mb-16 float-animation"
           >
-            <h2 className="text-3xl md:text-5xl font-serif font-bold text-primary mb-6">
-              Our <span className="gradient-text">Core Values</span>
+            <h2 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6 bounce-in">
+              Our <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">Core Values</span>
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              These principles guide everything we do and shape how we work with our clients, 
-              partners, and each other.
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto slide-up">
+              The principles that guide everything we do and drive our commitment to excellence.
             </p>
           </motion.div>
 
@@ -411,22 +286,18 @@ const About = () => {
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
-                whileHover={{ y: -5 }}
+                whileHover={{ y: -5, scale: 1.02 }}
+                className="scale-on-hover"
               >
-                <Card className="agency-card h-full text-center group">
-                  <CardHeader>
-                    <div className="w-16 h-16 bg-gradient-to-br from-accent to-primary rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
-                      <value.icon size={32} className="text-white" />
-                    </div>
-                    <CardTitle className="text-lg font-bold text-primary">
-                      {value.title}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <CardDescription className="text-gray-600">
-                      {value.description}
-                    </CardDescription>
-                  </CardContent>
+                <Card className="h-full text-center p-6 shadow-xl border-0 bg-white glow-border">
+                  <motion.div
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                    className="w-16 h-16 bg-gradient-to-br from-purple-600 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 rotate-on-hover"
+                  >
+                    <value.icon size={32} className="text-white" />
+                  </motion.div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-3 bounce-in">{value.title}</h3>
+                  <p className="text-gray-600 slide-up">{value.description}</p>
                 </Card>
               </motion.div>
             ))}
@@ -435,20 +306,19 @@ const About = () => {
       </section>
 
       {/* Team Section */}
-      <section className="bg-secondary section-padding">
+      <section className="bg-white section-padding">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="text-center mb-16"
+            className="text-center mb-16 float-animation"
           >
-            <h2 className="text-3xl md:text-5xl font-serif font-bold text-primary mb-6">
-              Meet Our <span className="gradient-text">Expert Team</span>
+            <h2 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6 bounce-in">
+              Meet Our <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">Expert Team</span>
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Our team combines decades of marketing expertise with cutting-edge AI knowledge 
-              to deliver exceptional results for our clients.
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto slide-up">
+              Industry experts and innovators working together to drive your success.
             </p>
           </motion.div>
 
@@ -459,91 +329,72 @@ const About = () => {
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
-                whileHover={{ y: -5 }}
+                whileHover={{ y: -5, scale: 1.02 }}
+                className="scale-on-hover"
               >
-                <Card className="agency-card h-full group overflow-hidden">
-                  <CardHeader className="text-center pb-4">
-                    <div className="relative mx-auto mb-4">
-                      <img 
-                        src={member.image} 
-                        alt={member.name}
-                        className="w-24 h-24 rounded-full object-cover mx-auto group-hover:scale-105 transition-transform duration-300"
-                      />
-                      <div className="absolute inset-0 w-24 h-24 rounded-full bg-gradient-to-br from-accent/20 to-primary/20 mx-auto"></div>
-                    </div>
-                    <CardTitle className="text-lg font-bold text-primary">
-                      {member.name}
-                    </CardTitle>
-                    <CardDescription className="text-accent font-medium">
-                      {member.position}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-gray-600 mb-4 leading-relaxed text-sm">
-                      {member.bio}
-                    </p>
-                    <div>
-                      <h4 className="font-semibold text-primary mb-2 text-sm">Expertise:</h4>
-                      <div className="flex flex-wrap gap-1">
-                        {member.expertise.map((skill, skillIndex) => (
-                          <Badge key={skillIndex} variant="outline" className="text-xs">
-                            {skill}
-                          </Badge>
-                        ))}
+                <Card className="h-full shadow-xl border-0 bg-white overflow-hidden glow-border">
+                  <div className="relative">
+                    <motion.img 
+                      src={member.image} 
+                      alt={member.name}
+                      className="w-full h-64 object-cover"
+                      whileHover={{ scale: 1.05 }}
+                      transition={{ duration: 0.3 }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                    <div className="absolute bottom-4 left-4 right-4">
+                      <div className="flex space-x-2">
+                        <motion.a
+                          href={member.social.linkedin}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-500 transition-colors duration-200"
+                          whileHover={{ scale: 1.2, rotate: 360 }}
+                          whileTap={{ scale: 0.9 }}
+                        >
+                          <Linkedin size={14} className="text-white" />
+                        </motion.a>
+                        <motion.a
+                          href={member.social.twitter}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-8 h-8 bg-blue-400 rounded-full flex items-center justify-center hover:bg-blue-300 transition-colors duration-200"
+                          whileHover={{ scale: 1.2, rotate: 360 }}
+                          whileTap={{ scale: 0.9 }}
+                        >
+                          <Twitter size={14} className="text-white" />
+                        </motion.a>
+                        <motion.a
+                          href={`mailto:${member.social.email}`}
+                          className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center hover:bg-gray-500 transition-colors duration-200"
+                          whileHover={{ scale: 1.2, rotate: 360 }}
+                          whileTap={{ scale: 0.9 }}
+                        >
+                          <Mail size={14} className="text-white" />
+                        </motion.a>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Awards Section */}
-      <section className="bg-white section-padding">
-        <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-3xl md:text-5xl font-serif font-bold text-primary mb-6">
-              Awards & <span className="gradient-text">Recognition</span>
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Our commitment to excellence and innovation has been recognized by industry leaders 
-              and prestigious organizations worldwide.
-            </p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {awards.map((award, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                whileHover={{ y: -5 }}
-              >
-                <Card className="agency-card h-full text-center group relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-accent/10 to-transparent"></div>
-                  <CardHeader>
-                    <div className="w-16 h-16 bg-gradient-to-br from-accent to-primary rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
-                      <award.icon size={32} className="text-white" />
+                  </div>
+                  
+                  <CardContent className="p-6">
+                    <h3 className="text-xl font-bold text-gray-900 mb-1 bounce-in">{member.name}</h3>
+                    <p className="text-purple-600 font-medium mb-3 slide-up">{member.position}</p>
+                    <p className="text-gray-600 text-sm mb-4 fade-in">{member.bio}</p>
+                    
+                    <div className="flex flex-wrap gap-2">
+                      {member.expertise.map((skill, skillIndex) => (
+                        <motion.span
+                          key={skillIndex}
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          whileInView={{ opacity: 1, scale: 1 }}
+                          transition={{ delay: skillIndex * 0.1 }}
+                          whileHover={{ scale: 1.1 }}
+                          className="px-3 py-1 bg-purple-100 text-purple-600 rounded-full text-xs font-medium shimmer"
+                        >
+                          {skill}
+                        </motion.span>
+                      ))}
                     </div>
-                    <CardTitle className="text-lg font-bold text-primary">
-                      {award.title}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <CardDescription className="text-gray-600 mb-3">
-                      {award.organization}
-                    </CardDescription>
-                    <Badge className="bg-accent text-white">
-                      {award.year}
-                    </Badge>
                   </CardContent>
                 </Card>
               </motion.div>
@@ -553,37 +404,41 @@ const About = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="bg-gradient-primary text-white section-padding">
+      <section className="bg-gradient-to-br from-gray-900 via-purple-900 to-black text-white section-padding">
         <div className="max-w-4xl mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
+            className="float-animation"
           >
-            <h2 className="text-3xl md:text-5xl font-serif font-bold mb-6">
-              Ready to Work with the <span className="gradient-text">Best</span>?
+            <h2 className="text-4xl md:text-6xl font-bold mb-6 bounce-in">
+              Ready to Work with <span className="bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">the Best</span>?
             </h2>
-            <p className="text-xl text-gray-300 mb-8">
-              Join the ranks of successful businesses that have trusted us to transform 
-              their growth with AI-powered marketing strategies.
+            <p className="text-xl text-gray-300 mb-8 slide-up">
+              Our expert team is ready to transform your business with cutting-edge AI marketing strategies.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/strategy-call">
-                <Button className="agency-btn text-lg px-8 py-4">
-                  Schedule Consultation <ArrowRight className="ml-2" size={20} />
-                </Button>
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-lg px-8 py-4 shimmer">
+                    Book Free Consultation <ArrowRight className="ml-2" size={20} />
+                  </Button>
+                </motion.div>
               </Link>
-              <Link to="/testimonials">
-                <Button variant="outline" className="agency-btn-outline text-lg px-8 py-4">
-                  View Client Results
-                </Button>
+              <Link to="/contact">
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Button variant="outline" className="border-purple-400 text-purple-400 hover:bg-purple-400 hover:text-white text-lg px-8 py-4 glow-border">
+                    Contact Our Team
+                  </Button>
+                </motion.div>
               </Link>
             </div>
           </motion.div>
         </div>
       </section>
 
-      <Footer />
+      <EnhancedFooter />
     </>
   );
 };

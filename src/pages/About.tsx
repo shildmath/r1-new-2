@@ -35,11 +35,11 @@ const About = () => {
       image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&crop=face",
       bio: "10+ years of digital marketing expertise with a focus on AI-driven strategies. Former Google marketing lead with a passion for transforming businesses.",
       expertise: ["AI Marketing", "Strategy", "Leadership"],
-      // social: {
-      //   linkedin: "https://linkedin.com",
-      //   twitter: "https://twitter.com",
-      //   email: "alex@aiadmaxify.com"
-      // }
+      social: {
+        linkedin: "https://linkedin.com",
+        twitter: "https://twitter.com",
+        email: "alex@aiadmaxify.com"
+      }
     },
     {
       name: "Sarah Johnson",
@@ -47,11 +47,11 @@ const About = () => {
       image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=300&h=300&fit=crop&crop=face",
       bio: "AI researcher and marketing strategist with a PhD in Machine Learning. Specializes in developing cutting-edge AI solutions for marketing automation.",
       expertise: ["Machine Learning", "AI Automation", "Data Science"],
-      // social: {
-      //   linkedin: "https://linkedin.com",
-      //   twitter: "https://twitter.com",
-      //   email: "sarah@aiadmaxify.com"
-      // }
+      social: {
+        linkedin: "https://linkedin.com",
+        twitter: "https://twitter.com",
+        email: "sarah@aiadmaxify.com"
+      }
     },
     {
       name: "Michael Chen",
@@ -59,11 +59,11 @@ const About = () => {
       image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&h=300&fit=crop&crop=face",
       bio: "Award-winning creative director with 8+ years of experience in brand storytelling and visual design. Expert in creating compelling campaigns.",
       expertise: ["Brand Design", "Creative Strategy", "Content Creation"],
-      // social: {
-      //   linkedin: "https://linkedin.com",
-      //   twitter: "https://twitter.com",
-      //   email: "michael@aiadmaxify.com"
-      // }
+      social: {
+        linkedin: "https://linkedin.com",
+        twitter: "https://twitter.com",
+        email: "michael@aiadmaxify.com"
+      }
     },
     {
       name: "Emily Davis",
@@ -71,11 +71,11 @@ const About = () => {
       image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=300&h=300&fit=crop&crop=face",
       bio: "Performance marketing expert with proven track record of scaling campaigns to 7-figure revenues. Google Ads and Facebook Blueprint certified.",
       expertise: ["PPC Advertising", "Analytics", "ROI Optimization"],
-      // social: {
-      //   linkedin: "https://linkedin.com",
-      //   twitter: "https://twitter.com",
-      //   email: "emily@aiadmaxify.com"
-      // }
+      social: {
+        linkedin: "https://linkedin.com",
+        twitter: "https://twitter.com",
+        email: "emily@aiadmaxify.com"
+      }
     },
     {
       name: "David Park",
@@ -83,11 +83,11 @@ const About = () => {
       image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=300&h=300&fit=crop&crop=face",
       bio: "SEO specialist with expertise in technical SEO and content marketing. Has helped 200+ businesses achieve first-page Google rankings.",
       expertise: ["SEO", "Content Marketing", "Technical Optimization"],
-      // social: {
-      //   linkedin: "https://linkedin.com",
-      //   twitter: "https://twitter.com",
-      //   email: "david@aiadmaxify.com"
-      // }
+      social: {
+        linkedin: "https://linkedin.com",
+        twitter: "https://twitter.com",
+        email: "david@aiadmaxify.com"
+      }
     },
     {
       name: "Lisa Thompson",
@@ -95,11 +95,11 @@ const About = () => {
       image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=300&h=300&fit=crop&crop=face",
       bio: "Social media strategist with 6+ years of experience building communities and driving engagement across all major platforms.",
       expertise: ["Social Media", "Community Building", "Influencer Marketing"],
-      // social: {
-      //   linkedin: "https://linkedin.com",
-      //   twitter: "https://twitter.com",
-      //   email: "lisa@aiadmaxify.com"
-      // }
+      social: {
+        linkedin: "https://linkedin.com",
+        twitter: "https://twitter.com",
+        email: "lisa@aiadmaxify.com"
+      }
     },
     {
       name: "James Wilson",
@@ -107,11 +107,11 @@ const About = () => {
       image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=300&h=300&fit=crop&crop=face",
       bio: "Data scientist and analytics expert specializing in marketing attribution and predictive modeling. Former Amazon data analyst.",
       expertise: ["Data Analytics", "Predictive Modeling", "Attribution"],
-      // social: {
-      //   linkedin: "https://linkedin.com",
-      //   twitter: "https://twitter.com",
-      //   email: "james@aiadmaxify.com"
-      // }
+      social: {
+        linkedin: "https://linkedin.com",
+        twitter: "https://twitter.com",
+        email: "james@aiadmaxify.com"
+      }
     },
     {
       name: "Maria Garcia",
@@ -119,11 +119,11 @@ const About = () => {
       image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=300&h=300&fit=crop&crop=face",
       bio: "Client relationship expert with 7+ years of experience ensuring client satisfaction and driving account growth. Certified in customer success.",
       expertise: ["Client Relations", "Account Management", "Growth Strategy"],
-      // social: {
-      //   linkedin: "https://linkedin.com",
-      //   twitter: "https://twitter.com",
-      //   email: "maria@aiadmaxify.com"
-      // }
+      social: {
+        linkedin: "https://linkedin.com",
+        twitter: "https://twitter.com",
+        email: "maria@aiadmaxify.com"
+      }
     },
     {
       name: "Robert Kim",
@@ -131,11 +131,11 @@ const About = () => {
       image: "https://images.unsplash.com/photo-1566492031773-4f4e44671d66?w=300&h=300&fit=crop&crop=face",
       bio: "Video production and marketing expert with Emmy Award recognition. Specializes in creating viral video content and YouTube growth strategies.",
       expertise: ["Video Production", "YouTube Marketing", "Viral Content"],
-      // social: {
-      //   linkedin: "https://linkedin.com",
-      //   twitter: "https://twitter.com",
-      //   email: "robert@aiadmaxify.com"
-      // }
+      social: {
+        linkedin: "https://linkedin.com",
+        twitter: "https://twitter.com",
+        email: "robert@aiadmaxify.com"
+      }
     },
     {
       name: "Jennifer Lee",
@@ -143,11 +143,11 @@ const About = () => {
       image: "https://images.unsplash.com/photo-1551836022-deb4988cc6c0?w=300&h=300&fit=crop&crop=face",
       bio: "Email marketing expert with proven track record of achieving 40%+ open rates and 8%+ CTR. Certified in marketing automation platforms.",
       expertise: ["Email Marketing", "Automation", "List Building"],
-      // social: {
-      //   linkedin: "https://linkedin.com",
-      //   twitter: "https://twitter.com",
-      //   email: "jennifer@aiadmaxify.com"
-      // }
+      social: {
+        linkedin: "https://linkedin.com",
+        twitter: "https://twitter.com",
+        email: "jennifer@aiadmaxify.com"
+      }
     },
     {
       name: "Daniel Brown",
@@ -155,11 +155,11 @@ const About = () => {
       image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&h=300&fit=crop&crop=face",
       bio: "CRO specialist with expertise in A/B testing and user experience optimization. Has improved conversion rates for 300+ websites.",
       expertise: ["A/B Testing", "UX Optimization", "Funnel Analysis"],
-      // social: {
-      //   linkedin: "https://linkedin.com",
-      //   twitter: "https://twitter.com",
-      //   email: "daniel@aiadmaxify.com"
-      // }
+      social: {
+        linkedin: "https://linkedin.com",
+        twitter: "https://twitter.com",
+        email: "daniel@aiadmaxify.com"
+      }
     },
     {
       name: "Grace Wong",
@@ -167,11 +167,11 @@ const About = () => {
       image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=300&h=300&fit=crop&crop=face",
       bio: "Brand strategy consultant with 9+ years of experience helping companies build strong brand identities and market positioning.",
       expertise: ["Brand Strategy", "Market Research", "Positioning"],
-      // social: {
-      //   linkedin: "https://linkedin.com",
-      //   twitter: "https://twitter.com",
-      //   email: "grace@aiadmaxify.com"
-      // }
+      social: {
+        linkedin: "https://linkedin.com",
+        twitter: "https://twitter.com",
+        email: "grace@aiadmaxify.com"
+      }
     }
   ];
 

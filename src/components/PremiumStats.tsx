@@ -5,14 +5,14 @@ import { Graph } from '@/components/ui/graph';
 
 const PremiumStats = () => {
   const roiData = [
-    { name: 'Q1', value: 12 },
-    { name: 'Q2', value: 15 },
-    { name: 'Q3', value: 17 },
+    { name: 'Q1', value: 0 },
+    { name: 'Q2', value: 5 },
+    { name: 'Q3', value: 12 },
     { name: 'Q4', value: 17 }
   ];
 
   const clientGrowthData = [
-    { name: 'Jan', value: 100 },
+    { name: 'Jan', value: 50 },
     { name: 'Feb', value: 150 },
     { name: 'Mar', value: 220 },
     { name: 'Apr', value: 310 },
@@ -87,7 +87,7 @@ const PremiumStats = () => {
           ))}
         </div>
 
-        {/* Graphs */}
+        {/* Enhanced Graphs */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -96,9 +96,10 @@ const PremiumStats = () => {
           >
             <Graph 
               data={roiData} 
-              type="line" 
+              type="area" 
               color="#10b981" 
               title="Average ROI Growth" 
+              startFromZero={true}
             />
           </motion.div>
           
@@ -112,6 +113,7 @@ const PremiumStats = () => {
               type="bar" 
               color="#8b5cf6" 
               title="Client Growth Over Time" 
+              startFromZero={true}
             />
           </motion.div>
         </div>

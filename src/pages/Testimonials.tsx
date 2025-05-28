@@ -5,12 +5,14 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import Navbar from '@/components/Navbar';
 import EnhancedFooter from '@/components/EnhancedFooter';
-import { Star, ArrowRight, TrendingUp, Target, Users } from 'lucide-react';
+import { Star, ArrowRight, TrendingUp, Target, Users, ChevronDown } from 'lucide-react';
 
 const Testimonials = () => {
   const [selectedIndustry, setSelectedIndustry] = useState('all');
+  const [visibleCount, setVisibleCount] = useState(12);
 
   const testimonials = [
     {
@@ -1012,17 +1014,324 @@ const Testimonials = () => {
         { label: "Customer Base", value: "+500%", icon: Target },
         { label: "Brand Recognition", value: "+400%", icon: Users }
       ]
+    },
+    {
+      id: 51,
+      name: "Alexandra Thompson",
+      company: "Premium Properties",
+      position: "Real Estate Agent",
+      industry: "Real Estate",
+      image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face",
+      rating: 5,
+      testimonial: "AIAdMaxify revolutionized my real estate business. Their targeted marketing campaigns helped me close 12 luxury home sales in just 3 months, totaling over $8 million in revenue.",
+      results: {
+        before: "2 sales/month, $450K average",
+        after: "12 sales/quarter, $670K average",
+        timeframe: "3 months"
+      },
+      metrics: [
+        { label: "Sales Volume", value: "+500%", icon: TrendingUp },
+        { label: "Average Price", value: "+49%", icon: Target },
+        { label: "Lead Quality", value: "+320%", icon: Users }
+      ]
+    },
+    {
+      id: 52,
+      name: "Marcus Rodriguez",
+      company: "Urban Realty Group",
+      position: "Broker",
+      industry: "Real Estate",
+      image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
+      rating: 5,
+      testimonial: "The virtual tour campaigns and social media strategy from AIAdMaxify brought us 180 new listing inquiries in 2 months. Our market share grew dramatically.",
+      results: {
+        before: "25 inquiries/month",
+        after: "180 inquiries/month",
+        timeframe: "2 months"
+      },
+      metrics: [
+        { label: "Inquiries", value: "+620%", icon: TrendingUp },
+        { label: "Market Share", value: "+85%", icon: Target },
+        { label: "Conversion Rate", value: "+78%", icon: Users }
+      ]
+    },
+    {
+      id: 53,
+      name: "Samantha Chen",
+      company: "Luxury Estates Co",
+      position: "Senior Agent",
+      industry: "Real Estate",
+      image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&h=150&fit=crop&crop=face",
+      rating: 5,
+      testimonial: "Their drone photography campaigns and luxury marketing approach helped me establish myself as the go-to agent for high-end properties. Sales increased 340%.",
+      results: {
+        before: "$2.5M annual sales",
+        after: "$11M annual sales",
+        timeframe: "8 months"
+      },
+      metrics: [
+        { label: "Annual Sales", value: "+340%", icon: TrendingUp },
+        { label: "Luxury Listings", value: "+280%", icon: Target },
+        { label: "Commission", value: "+340%", icon: Users }
+      ]
+    },
+    {
+      id: 54,
+      name: "David Park",
+      company: "Metropolitan Homes",
+      position: "Team Lead",
+      industry: "Real Estate",
+      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+      rating: 5,
+      testimonial: "AIAdMaxify's local SEO and Google Ads campaigns made us the #1 real estate team in our city. We now handle 40% of all home sales in our area.",
+      results: {
+        before: "8% market share",
+        after: "40% market share",
+        timeframe: "12 months"
+      },
+      metrics: [
+        { label: "Market Share", value: "+400%", icon: TrendingUp },
+        { label: "Team Sales", value: "+650%", icon: Target },
+        { label: "Brand Recognition", value: "+890%", icon: Users }
+      ]
+    },
+    {
+      id: 55,
+      name: "Jennifer Walsh",
+      company: "Coastal Properties",
+      position: "Owner",
+      industry: "Real Estate",
+      image: "https://images.unsplash.com/photo-1551836022-deb4988cc6c0?w=150&h=150&fit=crop&crop=face",
+      rating: 5,
+      testimonial: "Their waterfront property marketing campaigns and influencer partnerships brought us international buyers. We sold 25 luxury oceanfront homes this year.",
+      results: {
+        before: "3 luxury sales/year",
+        after: "25 luxury sales/year",
+        timeframe: "10 months"
+      },
+      metrics: [
+        { label: "Luxury Sales", value: "+733%", icon: TrendingUp },
+        { label: "International Buyers", value: "+1200%", icon: Target },
+        { label: "Revenue", value: "+890%", icon: Users }
+      ]
+    },
+    {
+      id: 101,
+      name: "Isabella Martinez",
+      company: "Glamour Studio",
+      position: "Beauty Entrepreneur",
+      industry: "Beauty",
+      image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face",
+      rating: 5,
+      testimonial: "AIAdMaxify's influencer campaigns and social media strategy transformed my beauty brand from local to international. We now ship to 45 countries worldwide.",
+      results: {
+        before: "Local salon only",
+        after: "45 countries, $2M revenue",
+        timeframe: "8 months"
+      },
+      metrics: [
+        { label: "Global Reach", value: "+4400%", icon: TrendingUp },
+        { label: "Revenue", value: "+2000%", icon: Target },
+        { label: "Brand Value", value: "+1500%", icon: Users }
+      ]
+    },
+    {
+      id: 102,
+      name: "Sophia Williams",
+      company: "Chic Fashion House",
+      position: "Designer",
+      industry: "Fashion",
+      image: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=150&h=150&fit=crop&crop=face",
+      rating: 5,
+      testimonial: "Their fashion week campaigns and celebrity styling partnerships got my designs featured in Vogue and worn by A-list celebrities. Sales exploded 580%.",
+      results: {
+        before: "$50K quarterly sales",
+        after: "$340K quarterly sales",
+        timeframe: "6 months"
+      },
+      metrics: [
+        { label: "Sales Growth", value: "+580%", icon: TrendingUp },
+        { label: "Celebrity Clients", value: "+15", icon: Target },
+        { label: "Media Features", value: "+2200%", icon: Users }
+      ]
+    },
+    {
+      id: 103,
+      name: "Emma Thompson",
+      company: "Luxury Cosmetics",
+      position: "Brand Manager",
+      industry: "Beauty",
+      image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&h=150&fit=crop&crop=face",
+      rating: 5,
+      testimonial: "AIAdMaxify's beauty influencer network and YouTube campaigns helped us launch our new skincare line to 2.5 million potential customers in the first month.",
+      results: {
+        before: "New brand launch",
+        after: "2.5M reach, $890K sales",
+        timeframe: "1 month"
+      },
+      metrics: [
+        { label: "Launch Reach", value: "2.5M", icon: TrendingUp },
+        { label: "First Month Sales", value: "$890K", icon: Target },
+        { label: "Conversion Rate", value: "8.5%", icon: Users }
+      ]
+    },
+    {
+      id: 151,
+      name: "Dr. Michelle Roberts",
+      company: "Success Coaching Institute",
+      position: "Life Coach",
+      industry: "Coaching",
+      image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=150&h=150&fit=crop&crop=face",
+      rating: 5,
+      testimonial: "AIAdMaxify's webinar funnels and content marketing helped me build a coaching empire. I went from 1-on-1 sessions to running a $3M coaching business.",
+      results: {
+        before: "Solo practice, $80K/year",
+        after: "Coaching empire, $3M/year",
+        timeframe: "18 months"
+      },
+      metrics: [
+        { label: "Revenue Growth", value: "+3650%", icon: TrendingUp },
+        { label: "Client Base", value: "+2800%", icon: Target },
+        { label: "Course Sales", value: "+5000%", icon: Users }
+      ]
+    },
+    {
+      id: 152,
+      name: "Robert Johnson",
+      company: "Executive Leadership Co",
+      position: "Business Coach",
+      industry: "Coaching",
+      image: "https://images.unsplash.com/photo-1566492031773-4f4e44671d66?w=150&h=150&fit=crop&crop=face",
+      rating: 5,
+      testimonial: "Their LinkedIn strategy and thought leadership campaigns made me the go-to executive coach for Fortune 500 companies. My coaching fees increased 450%.",
+      results: {
+        before: "$200/hour sessions",
+        after: "$1200/hour + retainers",
+        timeframe: "12 months"
+      },
+      metrics: [
+        { label: "Hourly Rate", value: "+500%", icon: TrendingUp },
+        { label: "Corporate Clients", value: "+890%", icon: Target },
+        { label: "Speaking Fees", value: "+680%", icon: Users }
+      ]
+    },
+    {
+      id: 201,
+      name: "Carlos Mendez",
+      company: "SolarMax Solutions",
+      position: "Sales Director",
+      industry: "Solar",
+      image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&h=150&fit=crop&crop=face",
+      rating: 5,
+      testimonial: "AIAdMaxify's green energy campaigns and government incentive marketing helped us become the #1 solar installer in our state. Installations increased 780%.",
+      results: {
+        before: "25 installations/month",
+        after: "220 installations/month",
+        timeframe: "10 months"
+      },
+      metrics: [
+        { label: "Installations", value: "+780%", icon: TrendingUp },
+        { label: "Market Share", value: "+450%", icon: Target },
+        { label: "Revenue", value: "+890%", icon: Users }
+      ]
+    },
+    {
+      id: 202,
+      name: "Angela Foster",
+      company: "Green Power Systems",
+      position: "CEO",
+      industry: "Solar",
+      image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face",
+      rating: 5,
+      testimonial: "Their educational content campaigns and environmental messaging helped us sign 1,200 new solar customers. We're now the fastest-growing solar company in the region.",
+      results: {
+        before: "50 customers/month",
+        after: "1,200 customers/month",
+        timeframe: "8 months"
+      },
+      metrics: [
+        { label: "Customer Growth", value: "+2300%", icon: TrendingUp },
+        { label: "Regional Rank", value: "#1", icon: Target },
+        { label: "Revenue", value: "+1800%", icon: Users }
+      ]
+    },
+    {
+      id: 251,
+      name: "Ashley Wilson",
+      company: "FitLife Studios",
+      position: "Fitness Entrepreneur",
+      industry: "Fitness",
+      image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face",
+      rating: 5,
+      testimonial: "AIAdMaxify's transformation story campaigns and before/after showcases helped me build a fitness empire. My online training programs now serve 15,000 clients globally.",
+      results: {
+        before: "Local gym, 200 members",
+        after: "Global brand, 15K clients",
+        timeframe: "14 months"
+      },
+      metrics: [
+        { label: "Client Base", value: "+7400%", icon: TrendingUp },
+        { label: "Global Reach", value: "+∞", icon: Target },
+        { label: "Revenue", value: "+2200%", icon: Users }
+      ]
+    },
+    {
+      id: 301,
+      name: "Jessica Chang",
+      company: "TechGadgets Pro",
+      position: "E-commerce Manager",
+      industry: "E-commerce",
+      image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&h=150&fit=crop&crop=face",
+      rating: 5,
+      testimonial: "AIAdMaxify's product launch campaigns and Amazon optimization strategies helped us become a top 3 seller in our category. Monthly revenue hit $2.5M.",
+      results: {
+        before: "$150K monthly revenue",
+        after: "$2.5M monthly revenue",
+        timeframe: "9 months"
+      },
+      metrics: [
+        { label: "Revenue Growth", value: "+1567%", icon: TrendingUp },
+        { label: "Amazon Rank", value: "Top 3", icon: Target },
+        { label: "Conversion Rate", value: "+340%", icon: Users }
+      ]
+    },
+    {
+      id: 351,
+      name: "Dr. Michael Foster",
+      company: "Advanced Medical Center",
+      position: "Medical Director",
+      industry: "Healthcare",
+      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+      rating: 5,
+      testimonial: "AIAdMaxify's medical marketing campaigns and patient education content helped us expand from 1 clinic to 8 locations across the state. Patient volume increased 450%.",
+      results: {
+        before: "1 clinic, 500 patients/month",
+        after: "8 clinics, 2,750 patients/month",
+        timeframe: "20 months"
+      },
+      metrics: [
+        { label: "Locations", value: "+700%", icon: TrendingUp },
+        { label: "Patient Volume", value: "+450%", icon: Target },
+        { label: "Revenue", value: "+680%", icon: Users }
+      ]
     }
   ];
 
-  const industries = ['all', 'Technology', 'E-commerce', 'Local Services', 'Healthcare', 'Fashion', 'Finance', 'Real Estate', 'Fitness', 'Legal', 'Food & Beverage', 'Beauty', 'Automotive', 'Construction', 'Travel', 'Consulting', 'Insurance', 'Education', 'Home Services', 'Events', 'Pet Services', 'Luxury Goods', 'Sports', 'Wellness'];
+  const industries = ['all', 'Technology', 'E-commerce', 'Local Services', 'Healthcare', 'Fashion', 'Finance', 'Real Estate', 'Fitness', 'Legal', 'Food & Beverage', 'Beauty', 'Automotive', 'Construction', 'Travel', 'Consulting', 'Insurance', 'Education', 'Home Services', 'Events', 'Pet Services', 'Luxury Goods', 'Sports', 'Wellness', 'Coaching', 'Solar', 'Marketing'];
 
   const filteredTestimonials = selectedIndustry === 'all' 
     ? testimonials 
     : testimonials.filter(t => t.industry === selectedIndustry);
 
+  const visibleTestimonials = filteredTestimonials.slice(0, visibleCount);
+  const hasMore = visibleCount < filteredTestimonials.length;
+
+  const loadMore = () => {
+    setVisibleCount(prev => Math.min(prev + 12, filteredTestimonials.length));
+  };
+
   return (
-    <>
+    <div className="min-h-screen overflow-x-hidden">
       <Navbar />
       
       {/* Enhanced Hero Section */}
@@ -1038,7 +1347,7 @@ const Testimonials = () => {
               repeat: Infinity,
               ease: "linear"
             }}
-            className="absolute top-1/4 right-1/4 w-64 h-64 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 float-animation"
+            className="absolute top-1/4 right-1/4 w-64 h-64 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20"
           />
         </div>
 
@@ -1063,21 +1372,26 @@ const Testimonials = () => {
       </section>
 
       {/* Filter Section */}
-      <section className="bg-white py-8">
+      <section className="bg-white py-8 sticky top-0 z-40 shadow-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-center">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
             <Select value={selectedIndustry} onValueChange={setSelectedIndustry}>
-              <SelectTrigger className="w-64 border-2 border-purple-200 focus:border-purple-500">
+              <SelectTrigger className="w-full sm:w-64 border-2 border-purple-200 focus:border-purple-500">
                 <SelectValue placeholder="Filter by industry" />
               </SelectTrigger>
-              <SelectContent>
-                {industries.map(industry => (
-                  <SelectItem key={industry} value={industry}>
-                    {industry === 'all' ? 'All Industries' : industry}
-                  </SelectItem>
-                ))}
+              <SelectContent className="max-h-60">
+                <ScrollArea className="h-full">
+                  {industries.map(industry => (
+                    <SelectItem key={industry} value={industry}>
+                      {industry === 'all' ? 'All Industries' : industry}
+                    </SelectItem>
+                  ))}
+                </ScrollArea>
               </SelectContent>
             </Select>
+            <div className="text-sm text-gray-600">
+              Showing {visibleTestimonials.length} of {filteredTestimonials.length} testimonials
+            </div>
           </div>
         </div>
       </section>
@@ -1085,53 +1399,53 @@ const Testimonials = () => {
       {/* Enhanced Testimonials Grid */}
       <section className="bg-gradient-to-br from-purple-50 to-blue-50 section-padding">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {filteredTestimonials.map((testimonial, index) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 sm:gap-8">
+            {visibleTestimonials.map((testimonial, index) => (
               <motion.div
                 key={testimonial.id}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
+                transition={{ duration: 0.6, delay: (index % 12) * 0.1 }}
                 whileHover={{ y: -5, scale: 1.02 }}
               >
-                <Card className="h-full shadow-xl border-0 bg-white overflow-hidden">
-                  <CardHeader>
+                <Card className="h-full shadow-xl border-0 bg-white overflow-hidden hover:shadow-2xl transition-all duration-300">
+                  <CardHeader className="pb-4">
                     {/* Client Image and Rating */}
                     <div className="flex items-center space-x-4 mb-4">
                       <img 
                         src={testimonial.image} 
                         alt={testimonial.name}
-                        className="w-16 h-16 rounded-full object-cover border-3 border-purple-200"
+                        className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover border-3 border-purple-200"
                       />
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-2 mb-2">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center space-x-1 mb-2">
                           {[...Array(testimonial.rating)].map((_, i) => (
-                            <Star key={i} size={16} className="text-yellow-400 fill-current" />
+                            <Star key={i} size={14} className="text-yellow-400 fill-current" />
                           ))}
                         </div>
-                        <Badge variant="outline" className="text-purple-600 border-purple-600">
+                        <Badge variant="outline" className="text-purple-600 border-purple-600 text-xs">
                           {testimonial.industry}
                         </Badge>
                       </div>
                     </div>
                     
-                    <CardDescription className="text-gray-700 italic text-lg leading-relaxed">
+                    <CardDescription className="text-gray-700 italic text-sm sm:text-base leading-relaxed line-clamp-4">
                       "{testimonial.testimonial}"
                     </CardDescription>
                   </CardHeader>
                   
-                  <CardContent>
+                  <CardContent className="pt-0">
                     {/* Results Before/After */}
-                    <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg p-4 mb-6">
-                      <h4 className="font-semibold text-gray-900 mb-3">Results Achieved</h4>
-                      <div className="grid grid-cols-1 gap-2 text-sm">
+                    <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6">
+                      <h4 className="font-semibold text-gray-900 mb-3 text-sm">Results Achieved</h4>
+                      <div className="grid grid-cols-1 gap-2 text-xs sm:text-sm">
                         <div>
                           <span className="text-gray-600">Before: </span>
-                          <span className="text-gray-800">{testimonial.results.before}</span>
+                          <span className="text-gray-800 break-words">{testimonial.results.before}</span>
                         </div>
                         <div>
                           <span className="text-gray-600">After: </span>
-                          <span className="text-purple-600 font-semibold">{testimonial.results.after}</span>
+                          <span className="text-purple-600 font-semibold break-words">{testimonial.results.after}</span>
                         </div>
                         <div>
                           <span className="text-gray-600">Timeframe: </span>
@@ -1141,27 +1455,47 @@ const Testimonials = () => {
                     </div>
 
                     {/* Key Metrics */}
-                    <div className="grid grid-cols-3 gap-2 mb-6">
+                    <div className="grid grid-cols-3 gap-1 sm:gap-2 mb-4 sm:mb-6">
                       {testimonial.metrics.map((metric, metricIndex) => (
-                        <div key={metricIndex} className="text-center p-3 bg-white rounded-lg shadow-sm">
-                          <metric.icon size={20} className="text-purple-600 mx-auto mb-1" />
-                          <div className="text-lg font-bold text-purple-600">{metric.value}</div>
-                          <div className="text-xs text-gray-600">{metric.label}</div>
+                        <div key={metricIndex} className="text-center p-2 sm:p-3 bg-white rounded-lg shadow-sm">
+                          <metric.icon size={16} className="text-purple-600 mx-auto mb-1" />
+                          <div className="text-sm sm:text-lg font-bold text-purple-600 break-words">{metric.value}</div>
+                          <div className="text-xs text-gray-600 leading-tight">{metric.label}</div>
                         </div>
                       ))}
                     </div>
 
                     {/* Client Info */}
                     <div className="border-t pt-4">
-                      <div className="font-bold text-gray-900">{testimonial.name}</div>
-                      <div className="text-sm text-gray-600">{testimonial.position}</div>
-                      <div className="text-sm text-purple-600 font-medium">{testimonial.company}</div>
+                      <div className="font-bold text-gray-900 text-sm sm:text-base truncate">{testimonial.name}</div>
+                      <div className="text-xs sm:text-sm text-gray-600 truncate">{testimonial.position}</div>
+                      <div className="text-xs sm:text-sm text-purple-600 font-medium truncate">{testimonial.company}</div>
                     </div>
                   </CardContent>
                 </Card>
               </motion.div>
             ))}
           </div>
+
+          {/* Load More Button */}
+          {hasMore && (
+            <motion.div 
+              className="text-center mt-12"
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              transition={{ duration: 0.6 }}
+            >
+              <Button 
+                onClick={loadMore}
+                className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-8 py-3 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+              >
+                Load More Stories <ChevronDown className="ml-2" size={20} />
+              </Button>
+              <p className="text-gray-600 mt-4">
+                {filteredTestimonials.length - visibleCount} more success stories available
+              </p>
+            </motion.div>
+          )}
         </div>
       </section>
 
@@ -1182,17 +1516,21 @@ const Testimonials = () => {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8">
             {[
               { value: "97%", label: "Client Satisfaction", color: "text-green-600" },
               { value: "17X", label: "Average ROI", color: "text-purple-600" },
               { value: "2.8M+", label: "Leads Generated", color: "text-blue-600" },
               { value: "$50M+", label: "Revenue Generated", color: "text-orange-600" }
             ].map((stat, index) => (
-              <div key={index} className="text-center p-6 bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg">
-                <div className={`text-4xl lg:text-6xl font-bold ${stat.color} mb-2`}>{stat.value}</div>
-                <div className="text-gray-600 font-medium">{stat.label}</div>
-              </div>
+              <motion.div 
+                key={index} 
+                className="text-center p-4 sm:p-6 bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+                whileHover={{ scale: 1.05 }}
+              >
+                <div className={`text-3xl sm:text-4xl lg:text-6xl font-bold ${stat.color} mb-2`}>{stat.value}</div>
+                <div className="text-gray-600 font-medium text-sm sm:text-base">{stat.label}</div>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -1216,14 +1554,14 @@ const Testimonials = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/strategy-call">
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-lg px-8 py-4">
+                  <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-lg px-8 py-4 w-full sm:w-auto">
                     Book Free Strategy Call <ArrowRight className="ml-2" size={20} />
                   </Button>
                 </motion.div>
               </Link>
               <Link to="/services">
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Button variant="outline" className="border-purple-400 text-purple-400 hover:bg-purple-400 hover:text-white text-lg px-8 py-4">
+                  <Button variant="outline" className="border-purple-400 text-purple-400 hover:bg-purple-400 hover:text-white text-lg px-8 py-4 w-full sm:w-auto">
                     View Our Services
                   </Button>
                 </motion.div>
@@ -1234,7 +1572,7 @@ const Testimonials = () => {
       </section>
 
       <EnhancedFooter />
-    </>
+    </div>
   );
 };
 

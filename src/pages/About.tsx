@@ -323,81 +323,89 @@ const About = () => {
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {teamMembers.map((member, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                whileHover={{ y: -5, scale: 1.02 }}
-                className="scale-on-hover"
-              >
-                <Card className="h-full shadow-xl border-0 bg-white overflow-hidden glow-border">
-                  <div className="relative">
-                    <motion.img 
-                      src={member.image} 
-                      alt={member.name}
-                      className="w-full h-64 object-cover"
-                      whileHover={{ scale: 1.05 }}
-                      transition={{ duration: 0.3 }}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                    <div className="absolute bottom-4 left-4 right-4">
-                      <div className="flex space-x-2">
-                        <motion.a
-                          href={member.social.linkedin}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-500 transition-colors duration-200"
-                          whileHover={{ scale: 1.2, rotate: 360 }}
-                          whileTap={{ scale: 0.9 }}
-                        >
-                          <Linkedin size={14} className="text-white" />
-                        </motion.a>
-                        <motion.a
-                          href={member.social.twitter}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="w-8 h-8 bg-blue-400 rounded-full flex items-center justify-center hover:bg-blue-300 transition-colors duration-200"
-                          whileHover={{ scale: 1.2, rotate: 360 }}
-                          whileTap={{ scale: 0.9 }}
-                        >
-                          <Twitter size={14} className="text-white" />
-                        </motion.a>
-                        <motion.a
-                          href={`mailto:${member.social.email}`}
-                          className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center hover:bg-gray-500 transition-colors duration-200"
-                          whileHover={{ scale: 1.2, rotate: 360 }}
-                          whileTap={{ scale: 0.9 }}
-                        >
-                          <Mail size={14} className="text-white" />
-                        </motion.a>
+            {teamMembers && teamMembers.map((member, index) => (
+              member && member.social ? (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                  whileHover={{ y: -5, scale: 1.02 }}
+                  className="scale-on-hover"
+                >
+                  <Card className="h-full shadow-xl border-0 bg-white overflow-hidden glow-border">
+                    <div className="relative">
+                      <motion.img 
+                        src={member.image} 
+                        alt={member.name}
+                        className="w-full h-64 object-cover"
+                        whileHover={{ scale: 1.05 }}
+                        transition={{ duration: 0.3 }}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                      <div className="absolute bottom-4 left-4 right-4">
+                        <div className="flex space-x-2">
+                          {member.social.linkedin && (
+                            <motion.a
+                              href={member.social.linkedin}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-500 transition-colors duration-200"
+                              whileHover={{ scale: 1.2, rotate: 360 }}
+                              whileTap={{ scale: 0.9 }}
+                            >
+                              <Linkedin size={14} className="text-white" />
+                            </motion.a>
+                          )}
+                          {member.social.twitter && (
+                            <motion.a
+                              href={member.social.twitter}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="w-8 h-8 bg-blue-400 rounded-full flex items-center justify-center hover:bg-blue-300 transition-colors duration-200"
+                              whileHover={{ scale: 1.2, rotate: 360 }}
+                              whileTap={{ scale: 0.9 }}
+                            >
+                              <Twitter size={14} className="text-white" />
+                            </motion.a>
+                          )}
+                          {member.social.email && (
+                            <motion.a
+                              href={`mailto:${member.social.email}`}
+                              className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center hover:bg-gray-500 transition-colors duration-200"
+                              whileHover={{ scale: 1.2, rotate: 360 }}
+                              whileTap={{ scale: 0.9 }}
+                            >
+                              <Mail size={14} className="text-white" />
+                            </motion.a>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  
-                  <CardContent className="p-6">
-                    <h3 className="text-xl font-bold text-gray-900 mb-1 bounce-in">{member.name}</h3>
-                    <p className="text-purple-600 font-medium mb-3 slide-up">{member.position}</p>
-                    <p className="text-gray-600 text-sm mb-4 fade-in">{member.bio}</p>
                     
-                    <div className="flex flex-wrap gap-2">
-                      {member.expertise.map((skill, skillIndex) => (
-                        <motion.span
-                          key={skillIndex}
-                          initial={{ opacity: 0, scale: 0.8 }}
-                          whileInView={{ opacity: 1, scale: 1 }}
-                          transition={{ delay: skillIndex * 0.1 }}
-                          whileHover={{ scale: 1.1 }}
-                          className="px-3 py-1 bg-purple-100 text-purple-600 rounded-full text-xs font-medium shimmer"
-                        >
-                          {skill}
-                        </motion.span>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
+                    <CardContent className="p-6">
+                      <h3 className="text-xl font-bold text-gray-900 mb-1 bounce-in">{member.name}</h3>
+                      <p className="text-purple-600 font-medium mb-3 slide-up">{member.position}</p>
+                      <p className="text-gray-600 text-sm mb-4 fade-in">{member.bio}</p>
+                      
+                      <div className="flex flex-wrap gap-2">
+                        {member.expertise && member.expertise.map((skill, skillIndex) => (
+                          <motion.span
+                            key={skillIndex}
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: skillIndex * 0.1 }}
+                            whileHover={{ scale: 1.1 }}
+                            className="px-3 py-1 bg-purple-100 text-purple-600 rounded-full text-xs font-medium shimmer"
+                          >
+                            {skill}
+                          </motion.span>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ) : null
             ))}
           </div>
         </div>

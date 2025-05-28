@@ -1,1341 +1,1073 @@
-import { useState } from 'react';
+
+import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { Star, Quote, TrendingUp, Users, Award, ChevronDown } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import EnhancedFooter from '@/components/EnhancedFooter';
-import { Star, ArrowRight, TrendingUp, Target, Users, ChevronDown } from 'lucide-react';
+import { 
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 const Testimonials = () => {
   const [selectedIndustry, setSelectedIndustry] = useState('all');
-  const [visibleCount, setVisibleCount] = useState(12);
+  const [currentPage, setCurrentPage] = useState(1);
+  const testimonialsPerPage = 12;
 
-  const testimonials = [
+  const allTestimonials = [
+    // Real Estate Industry (50+ testimonials)
     {
-      id: 1,
+      name: "Michael Thompson",
+      company: "Thompson Realty Group",
+      image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
+      text: "AI AdMaxify transformed our real estate marketing completely. We went from 15 leads per month to 180+ qualified leads. Their AI-powered Facebook and Google campaigns generated $2.3M in property sales in just 4 months.",
+      industry: "real-estate",
+      results: "$2.3M in sales, 1200% lead increase",
+      rating: 5
+    },
+    {
       name: "Sarah Johnson",
-      company: "TechStartup Inc.",
-      position: "CEO",
-      industry: "Technology",
+      company: "Coastal Properties LLC",
       image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "AIAdMaxify completely transformed our digital presence. Within 3 months, we saw a 300% increase in qualified leads and our revenue grew by 180%. Their AI-powered approach to social media marketing is absolutely game-changing.",
-      results: {
-        before: "50 leads/month, $50K revenue",
-        after: "200 leads/month, $140K revenue",
-        timeframe: "3 months"
-      },
-      metrics: [
-        { label: "Lead Increase", value: "+300%", icon: TrendingUp },
-        { label: "Revenue Growth", value: "+180%", icon: Target },
-        { label: "Conversion Rate", value: "+45%", icon: Users }
-      ]
+      text: "The AI targeting was incredible. We started getting calls from buyers with $500K+ budgets specifically looking for luxury waterfront properties. Closed 12 high-end deals worth $8.4M total.",
+      industry: "real-estate",
+      results: "$8.4M luxury sales, 12 closings",
+      rating: 5
     },
     {
-      id: 2,
-      name: "Mike Chen",
-      company: "E-commerce Pro",
-      position: "Marketing Director",
-      industry: "E-commerce",
-      image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "The ROI we've achieved with AIAdMaxify is unprecedented. Their data-driven PPC campaigns generated a 450% ROI while reducing our cost per acquisition by 60%. The team's expertise in AI marketing is unmatched.",
-      results: {
-        before: "2.1% conversion rate, $85 CPA",
-        after: "5.8% conversion rate, $34 CPA",
-        timeframe: "4 months"
-      },
-      metrics: [
-        { label: "ROI Improvement", value: "+450%", icon: TrendingUp },
-        { label: "CPA Reduction", value: "-60%", icon: Target },
-        { label: "Conversion Rate", value: "+176%", icon: Users }
-      ]
+      name: "David Rodriguez",
+      company: "Metro Investment Properties",
+      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+      text: "Their investment property campaigns are genius. We now have a waiting list of 200+ qualified investors. Our portfolio grew from $5M to $18M in assets under management.",
+      industry: "real-estate",
+      results: "$13M portfolio growth, 200+ investors",
+      rating: 5
     },
     {
-      id: 3,
-      name: "Emily Rodriguez",
-      company: "Local Business Co.",
-      position: "Owner",
-      industry: "Local Services",
+      name: "Jennifer Martinez",
+      company: "Downtown Condos Specialist",
       image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "As a local business, I was skeptical about digital marketing. AIAdMaxify proved me wrong. Their local SEO strategies helped us dominate our market, increasing our revenue by 280% and establishing us as the go-to provider in our area.",
-      results: {
-        before: "15 local customers/month",
-        after: "57 local customers/month",
-        timeframe: "6 months"
-      },
-      metrics: [
-        { label: "Revenue Growth", value: "+280%", icon: TrendingUp },
-        { label: "Local Visibility", value: "+320%", icon: Target },
-        { label: "Customer Base", value: "+380%", icon: Users }
-      ]
+      text: "Amazing results for condo marketing! The AI identified young professionals perfectly. Sold 45 units in 6 months with an average price of $320K each. Best year ever!",
+      industry: "real-estate",
+      results: "45 units sold, $14.4M revenue",
+      rating: 5
     },
     {
-      id: 4,
-      name: "David Park",
-      company: "HealthTech Solutions",
-      position: "VP Marketing",
-      industry: "Healthcare",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "AIAdMaxify's content marketing strategy elevated our brand authority in the healthcare space. Our organic traffic increased by 400% and we're now recognized as thought leaders. The quality of their AI-generated content with human oversight is exceptional.",
-      results: {
-        before: "5K monthly organic visitors",
-        after: "25K monthly organic visitors",
-        timeframe: "8 months"
-      },
-      metrics: [
-        { label: "Organic Traffic", value: "+400%", icon: TrendingUp },
-        { label: "Brand Authority", value: "+250%", icon: Target },
-        { label: "Lead Quality", value: "+85%", icon: Users }
-      ]
+      name: "Robert Chen",
+      company: "Chen Commercial Real Estate",
+      image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&h=150&fit=crop&crop=face",
+      text: "Commercial property leads increased by 850%. We closed deals worth $25M in the first year working with AI AdMaxify. Their B2B targeting is phenomenal.",
+      industry: "real-estate",
+      results: "$25M commercial deals, 850% lead growth",
+      rating: 5
     },
     {
-      id: 5,
-      name: "Lisa Thompson",
-      company: "Fashion Forward",
-      position: "CMO",
-      industry: "Fashion",
-      image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "The influencer marketing campaigns AIAdMaxify created for us were phenomenal. We reached 2M+ potential customers and saw a 190% increase in brand awareness. Their strategic approach to influencer partnerships is brilliant.",
-      results: {
-        before: "50K social media reach",
-        after: "2.1M social media reach",
-        timeframe: "5 months"
-      },
-      metrics: [
-        { label: "Reach Increase", value: "+4100%", icon: TrendingUp },
-        { label: "Brand Awareness", value: "+190%", icon: Target },
-        { label: "Engagement Rate", value: "+230%", icon: Users }
-      ]
-    },
-    {
-      id: 6,
-      name: "Robert Martinez",
-      company: "Financial Advisors Plus",
-      position: "Partner",
-      industry: "Finance",
-      image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "Trust is everything in our industry. AIAdMaxify helped us build that trust through strategic content marketing and thought leadership positioning. Our client acquisition increased by 220% and our average client value grew by 65%.",
-      results: {
-        before: "8 new clients/month, $5K avg value",
-        after: "26 new clients/month, $8.2K avg value",
-        timeframe: "7 months"
-      },
-      metrics: [
-        { label: "Client Acquisition", value: "+220%", icon: TrendingUp },
-        { label: "Client Value", value: "+65%", icon: Target },
-        { label: "Trust Score", value: "+180%", icon: Users }
-      ]
-    },
-    {
-      id: 7,
-      name: "Jennifer Wu",
-      company: "Real Estate Empire",
-      position: "CEO",
-      industry: "Real Estate",
-      image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "Our property sales increased by 340% after implementing AIAdMaxify's digital marketing strategy. Their virtual tour campaigns and targeted advertising brought us high-quality leads that converted at an amazing rate.",
-      results: {
-        before: "12 properties sold/month",
-        after: "53 properties sold/month",
-        timeframe: "6 months"
-      },
-      metrics: [
-        { label: "Sales Increase", value: "+340%", icon: TrendingUp },
-        { label: "Lead Quality", value: "+280%", icon: Target },
-        { label: "Commission", value: "+420%", icon: Users }
-      ]
-    },
-    {
-      id: 8,
-      name: "Marcus Thompson",
-      company: "Fitness Revolution",
-      position: "Owner",
-      industry: "Fitness",
-      image: "https://images.unsplash.com/photo-1566492031773-4f4e44671d66?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "AIAdMaxify helped us build a fitness community of over 50K members. Their social media strategy and influencer partnerships drove massive engagement and helped us launch our online training programs successfully.",
-      results: {
-        before: "500 gym members",
-        after: "50K online community",
-        timeframe: "12 months"
-      },
-      metrics: [
-        { label: "Community Growth", value: "+9900%", icon: TrendingUp },
-        { label: "Online Revenue", value: "+1200%", icon: Target },
-        { label: "Retention Rate", value: "+85%", icon: Users }
-      ]
-    },
-    {
-      id: 9,
       name: "Amanda Foster",
-      company: "Legal Solutions",
-      position: "Managing Partner",
-      industry: "Legal",
+      company: "Foster Family Homes",
+      image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=face",
+      text: "First-time homebuyer campaigns generated 300+ leads monthly. Helped 85 families buy their dream homes with an average value of $285K. Life-changing results!",
+      industry: "real-estate",
+      results: "85 home sales, $24.2M total value",
+      rating: 5
+    },
+    {
+      name: "Mark Williams",
+      company: "Williams Luxury Estates",
+      image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face",
+      text: "Luxury home sales skyrocketed! The AI found ultra-high-net-worth individuals looking for $1M+ properties. Closed 18 luxury deals totaling $28M in 8 months.",
+      industry: "real-estate",
+      results: "$28M luxury sales, 18 closings",
+      rating: 5
+    },
+    {
+      name: "Lisa Anderson",
+      company: "Anderson Property Management",
+      image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&h=150&fit=crop&crop=face",
+      text: "Rental property inquiries went from 20 to 240 per month. Our occupancy rate is now 98% with a waiting list. Monthly rental income increased by 340%.",
+      industry: "real-estate",
+      results: "98% occupancy, 340% income boost",
+      rating: 5
+    },
+    {
+      name: "James Liu",
+      company: "Liu Development Group",
+      image: "https://images.unsplash.com/photo-1566492031773-4f4e44671d66?w=150&h=150&fit=crop&crop=face",
+      text: "New construction pre-sales exceeded expectations. Sold all 120 units before completion with $36M in total sales. The AI targeting brought serious buyers only.",
+      industry: "real-estate",
+      results: "120 pre-sales, $36M revenue",
+      rating: 5
+    },
+    {
+      name: "Carol Davis",
+      company: "Davis Vacation Rentals",
       image: "https://images.unsplash.com/photo-1551836022-deb4988cc6c0?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "As a law firm, we needed to establish credibility online. AIAdMaxify's content marketing and SEO strategies positioned us as industry experts. Our case inquiries increased by 380% and our average case value grew significantly.",
-      results: {
-        before: "15 inquiries/month, $8K avg case",
-        after: "72 inquiries/month, $15K avg case",
-        timeframe: "9 months"
-      },
-      metrics: [
-        { label: "Inquiries", value: "+380%", icon: TrendingUp },
-        { label: "Case Value", value: "+87%", icon: Target },
-        { label: "Authority Score", value: "+290%", icon: Users }
-      ]
+      text: "Vacation rental bookings increased 520%. Our properties are booked solid 11 months of the year. Annual revenue jumped from $180K to $1.1M.",
+      industry: "real-estate",
+      results: "$920K revenue increase, 520% bookings",
+      rating: 5
     },
     {
-      id: 10,
-      name: "Carlos Rodriguez",
-      company: "Restaurant Chain Plus",
-      position: "Marketing Manager",
-      industry: "Food & Beverage",
-      image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "Our restaurant chain saw incredible results with AIAdMaxify's local marketing campaigns. Food delivery orders increased by 450% and our social media following grew from 2K to 85K. Their visual content strategy is outstanding.",
-      results: {
-        before: "200 daily orders, 2K followers",
-        after: "1100 daily orders, 85K followers",
-        timeframe: "8 months"
-      },
-      metrics: [
-        { label: "Daily Orders", value: "+450%", icon: TrendingUp },
-        { label: "Social Following", value: "+4150%", icon: Target },
-        { label: "Revenue", value: "+380%", icon: Users }
-      ]
+      name: "Ryan Murphy",
+      company: "Murphy Fix & Flip",
+      image: "https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=150&h=150&fit=crop&crop=face",
+      text: "House flipping became incredibly profitable. The AI finds cash buyers within 48 hours of listing. Flipped 22 houses with an average profit of $85K each.",
+      industry: "real-estate",
+      results: "22 flips, $1.87M profit",
+      rating: 5
     },
     {
-      id: 11,
+      name: "Nicole Torres",
+      company: "Torres International Realty",
+      image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face",
+      text: "International buyer campaigns are amazing. Connected with buyers from 15+ countries. Closed $45M in international real estate transactions.",
+      industry: "real-estate",
+      results: "$45M international sales",
+      rating: 5
+    },
+    {
+      name: "Kevin Brown",
+      company: "Brown Real Estate Investments",
+      image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=150&h=150&fit=crop&crop=face",
+      text: "REI campaigns brought 500+ serious investors. Our real estate investment seminars now sell out in hours. Generated $12M in investment property sales.",
+      industry: "real-estate",
+      results: "$12M investment sales, 500+ investors",
+      rating: 5
+    },
+    {
       name: "Rachel Green",
-      company: "Beauty Boutique",
-      position: "Founder",
-      industry: "Beauty",
-      image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "AIAdMaxify transformed our beauty brand from a local store to a nationwide presence. Their influencer partnerships and social media campaigns generated over $2M in online sales within 10 months.",
-      results: {
-        before: "$50K monthly revenue",
-        after: "$400K monthly revenue",
-        timeframe: "10 months"
-      },
-      metrics: [
-        { label: "Revenue Growth", value: "+700%", icon: TrendingUp },
-        { label: "Online Sales", value: "+2000%", icon: Target },
-        { label: "Brand Recognition", value: "+850%", icon: Users }
-      ]
+      company: "Green Residential Sales",
+      image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&h=150&fit=crop&crop=face",
+      text: "Suburban family home sales doubled. The AI perfectly targets growing families looking for their forever home. Sold 67 homes averaging $420K each.",
+      industry: "real-estate",
+      results: "67 home sales, $28.1M revenue",
+      rating: 5
     },
     {
-      id: 12,
-      name: "Tom Anderson",
-      company: "Auto Dealership Pro",
-      position: "Sales Director",
-      industry: "Automotive",
-      image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "Our car sales skyrocketed after partnering with AIAdMaxify. Their targeted advertising and lead generation system helped us sell 380% more vehicles. The quality of leads improved dramatically too.",
-      results: {
-        before: "25 cars sold/month",
-        after: "120 cars sold/month",
-        timeframe: "7 months"
-      },
-      metrics: [
-        { label: "Vehicle Sales", value: "+380%", icon: TrendingUp },
-        { label: "Lead Quality", value: "+290%", icon: Target },
-        { label: "Profit Margin", value: "+145%", icon: Users }
-      ]
+      name: "Patrick O'Connor",
+      company: "O'Connor Commercial Properties",
+      image: "https://images.unsplash.com/photo-1556157382-97eda2d62296?w=150&h=150&fit=crop&crop=face",
+      text: "Office space leasing campaigns are incredible. Filled our entire 500K sqft complex with premium tenants. Monthly rental income: $2.8M annually.",
+      industry: "real-estate",
+      results: "500K sqft leased, $2.8M annual income",
+      rating: 5
     },
     {
-      id: 13,
-      name: "Dr. Patricia Kim",
-      company: "Medical Practice",
-      position: "Practice Owner",
-      industry: "Healthcare",
-      image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "Patient appointments increased by 290% thanks to AIAdMaxify's healthcare marketing expertise. Their reputation management and local SEO strategies helped us become the top-rated practice in our area.",
-      results: {
-        before: "120 patients/month",
-        after: "468 patients/month",
-        timeframe: "11 months"
-      },
-      metrics: [
-        { label: "Patient Growth", value: "+290%", icon: TrendingUp },
-        { label: "Online Reviews", value: "+450%", icon: Target },
-        { label: "Revenue", value: "+340%", icon: Users }
-      ]
+      name: "Michelle Kim",
+      company: "Kim Luxury Condominiums",
+      image: "https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?w=150&h=150&fit=crop&crop=face",
+      text: "Penthouse sales were outstanding. All 8 penthouses sold within 90 days at $2.5M average price. The AI found ultra-wealthy buyers effortlessly.",
+      industry: "real-estate",
+      results: "8 penthouses sold, $20M total",
+      rating: 5
     },
     {
-      id: 14,
-      name: "Kevin O'Brien",
-      company: "Construction Corp",
-      position: "CEO",
-      industry: "Construction",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "AIAdMaxify helped us modernize our construction business marketing. Project inquiries increased by 420% and our average project value grew by 180%. Their content strategy showcases our work beautifully.",
-      results: {
-        before: "8 projects/month, $45K avg",
-        after: "42 projects/month, $126K avg",
-        timeframe: "9 months"
-      },
-      metrics: [
-        { label: "Project Inquiries", value: "+420%", icon: TrendingUp },
-        { label: "Project Value", value: "+180%", icon: Target },
-        { label: "Revenue", value: "+680%", icon: Users }
-      ]
-    },
-    {
-      id: 15,
-      name: "Sophia Martinez",
-      company: "Travel Adventures",
-      position: "Owner",
-      industry: "Travel",
-      image: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "Our travel booking increased by 520% with AIAdMaxify's digital marketing campaigns. Their visual storytelling and social media strategy made our destinations irresistible to travelers worldwide.",
-      results: {
-        before: "50 bookings/month",
-        after: "310 bookings/month",
-        timeframe: "8 months"
-      },
-      metrics: [
-        { label: "Bookings", value: "+520%", icon: TrendingUp },
-        { label: "Revenue", value: "+480%", icon: Target },
-        { label: "International Reach", value: "+890%", icon: Users }
-      ]
-    },
-    {
-      id: 16,
-      name: "James Wilson",
-      company: "Consulting Experts",
-      position: "Principal",
-      industry: "Consulting",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "AIAdMaxify positioned our consulting firm as industry thought leaders. Our client base grew by 350% and our average contract value increased by 240%. Their LinkedIn strategy was particularly effective.",
-      results: {
-        before: "12 clients, $25K avg contract",
-        after: "54 clients, $85K avg contract",
-        timeframe: "10 months"
-      },
-      metrics: [
-        { label: "Client Growth", value: "+350%", icon: TrendingUp },
-        { label: "Contract Value", value: "+240%", icon: Target },
-        { label: "Authority", value: "+420%", icon: Users }
-      ]
-    },
-    {
-      id: 17,
-      name: "Maya Patel",
-      company: "Software Solutions",
-      position: "CTO",
-      industry: "Technology",
-      image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "Our SaaS product gained 15K new users within 6 months thanks to AIAdMaxify's growth hacking strategies. Their product marketing approach and conversion optimization increased our MRR by 580%.",
-      results: {
-        before: "500 users, $15K MRR",
-        after: "15,500 users, $102K MRR",
-        timeframe: "6 months"
-      },
-      metrics: [
-        { label: "User Growth", value: "+3000%", icon: TrendingUp },
-        { label: "MRR Growth", value: "+580%", icon: Target },
-        { label: "Churn Reduction", value: "-65%", icon: Users }
-      ]
-    },
-    {
-      id: 18,
-      name: "Andrew Clark",
-      company: "Insurance Plus",
-      position: "Agency Owner",
-      industry: "Insurance",
-      image: "https://images.unsplash.com/photo-1566492031773-4f4e44671d66?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "AIAdMaxify's trust-building marketing strategies helped our insurance agency grow by 290%. Their educational content approach and local advertising brought us high-quality leads that converted excellently.",
-      results: {
-        before: "45 policies/month",
-        after: "175 policies/month",
-        timeframe: "8 months"
-      },
-      metrics: [
-        { label: "Policy Sales", value: "+290%", icon: TrendingUp },
-        { label: "Lead Quality", value: "+220%", icon: Target },
-        { label: "Revenue", value: "+340%", icon: Users }
-      ]
-    },
-    {
-      id: 19,
-      name: "Isabella Garcia",
-      company: "Online Education Hub",
-      position: "Founder",
-      industry: "Education",
-      image: "https://images.unsplash.com/photo-1551836022-deb4988cc6c0?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "Our online course enrollment increased by 680% with AIAdMaxify's educational marketing strategies. Their webinar funnels and content marketing helped us reach learners globally.",
-      results: {
-        before: "200 students enrolled",
-        after: "1,560 students enrolled",
-        timeframe: "7 months"
-      },
-      metrics: [
-        { label: "Enrollment", value: "+680%", icon: TrendingUp },
-        { label: "Course Revenue", value: "+720%", icon: Target },
-        { label: "Global Reach", value: "+950%", icon: Users }
-      ]
-    },
-    {
-      id: 20,
-      name: "Daniel Lee",
-      company: "Home Services Pro",
-      position: "Operations Manager",
-      industry: "Home Services",
-      image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "Service calls increased by 410% after implementing AIAdMaxify's local marketing strategy. Their Google Ads campaigns and reputation management made us the top choice for homeowners in our area.",
-      results: {
-        before: "80 service calls/month",
-        after: "408 service calls/month",
-        timeframe: "6 months"
-      },
-      metrics: [
-        { label: "Service Calls", value: "+410%", icon: TrendingUp },
-        { label: "Revenue", value: "+380%", icon: Target },
-        { label: "Customer Rating", value: "+45%", icon: Users }
-      ]
-    },
-    {
-      id: 21,
-      name: "Grace Chen",
-      company: "Event Planning Elite",
-      position: "Creative Director",
-      industry: "Events",
-      image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "Our event bookings doubled within 4 months thanks to AIAdMaxify's visual marketing strategy. Their Instagram campaigns and influencer partnerships made our events the talk of the town.",
-      results: {
-        before: "15 events/month",
-        after: "45 events/month",
-        timeframe: "4 months"
-      },
-      metrics: [
-        { label: "Event Bookings", value: "+200%", icon: TrendingUp },
-        { label: "Average Value", value: "+180%", icon: Target },
-        { label: "Social Reach", value: "+650%", icon: Users }
-      ]
-    },
-    {
-      id: 22,
-      name: "Nathan Brown",
-      company: "Pet Care Central",
-      position: "Owner",
-      industry: "Pet Services",
-      image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "Our pet grooming and boarding business grew by 320% with AIAdMaxify's local marketing expertise. Their heartwarming content strategy and community engagement brought us loyal pet parents.",
-      results: {
-        before: "25 pets/day",
-        after: "105 pets/day",
-        timeframe: "8 months"
-      },
-      metrics: [
-        { label: "Daily Clients", value: "+320%", icon: TrendingUp },
-        { label: "Revenue", value: "+290%", icon: Target },
-        { label: "Customer Loyalty", value: "+240%", icon: Users }
-      ]
-    },
-    {
-      id: 23,
-      name: "Victoria White",
-      company: "Luxury Jewelry",
-      position: "CEO",
-      industry: "Luxury Goods",
-      image: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "AIAdMaxify elevated our jewelry brand to luxury status. Their high-end marketing approach and influencer collaborations increased our sales by 450% and attracted celebrity clients.",
-      results: {
-        before: "$80K monthly sales",
-        after: "$440K monthly sales",
-        timeframe: "9 months"
-      },
-      metrics: [
-        { label: "Sales Growth", value: "+450%", icon: TrendingUp },
-        { label: "Brand Value", value: "+380%", icon: Target },
-        { label: "Celebrity Clients", value: "+12", icon: Users }
-      ]
-    },
-    {
-      id: 24,
-      name: "Ryan Davis",
-      company: "Sports Academy",
-      position: "Director",
-      industry: "Sports",
+      name: "Daniel Cooper",
+      company: "Cooper Retail Properties",
       image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "Our sports academy enrollment increased by 380% with AIAdMaxify's athletic marketing campaigns. Their video content and parent testimonials created tremendous trust in our programs.",
-      results: {
-        before: "85 students enrolled",
-        after: "408 students enrolled",
-        timeframe: "10 months"
-      },
-      metrics: [
-        { label: "Enrollment", value: "+380%", icon: TrendingUp },
-        { label: "Revenue", value: "+420%", icon: Target },
-        { label: "Parent Satisfaction", value: "+95%", icon: Users }
-      ]
+      text: "Retail space leasing improved dramatically. Our shopping centers are 100% occupied with waiting lists. Annual rental income increased to $5.2M.",
+      industry: "real-estate",
+      results: "100% occupancy, $5.2M income",
+      rating: 5
     },
     {
-      id: 25,
-      name: "Olivia Johnson",
-      company: "Wellness Center",
-      position: "Founder",
-      industry: "Wellness",
-      image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "Our wellness center became the premier destination in our city thanks to AIAdMaxify's holistic marketing approach. Client bookings increased by 290% and our community grew to 25K followers.",
-      results: {
-        before: "60 clients/month",
-        after: "234 clients/month",
-        timeframe: "7 months"
-      },
-      metrics: [
-        { label: "Client Growth", value: "+290%", icon: TrendingUp },
-        { label: "Revenue", value: "+320%", icon: Target },
-        { label: "Community", value: "+2400%", icon: Users }
-      ]
-    },
-    {
-      id: 26,
-      name: "Sophia Lee",
-      company: "Tech Innovations",
-      position: "CTO",
-      industry: "Technology",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "AIAdMaxify's innovative strategies helped us launch our new tech product successfully. We achieved 500% more sign-ups than projected in the first month.",
-      results: {
-        before: "100 sign-ups/month",
-        after: "600 sign-ups/month",
-        timeframe: "1 month"
-      },
-      metrics: [
-        { label: "Sign-ups", value: "+500%", icon: TrendingUp },
-        { label: "Revenue", value: "+300%", icon: Target },
-        { label: "Market Share", value: "+50%", icon: Users }
-      ]
-    },
-    {
-      id: 27,
-      name: "Liam Smith",
-      company: "Home Decor Co.",
-      position: "Owner",
-      industry: "Retail",
-      image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "Our online sales skyrocketed by 400% after implementing AIAdMaxify's marketing strategies. Their targeted ads and social media campaigns were game-changers.",
-      results: {
-        before: "$20K monthly sales",
-        after: "$100K monthly sales",
-        timeframe: "6 months"
-      },
-      metrics: [
-        { label: "Sales Growth", value: "+400%", icon: TrendingUp },
-        { label: "Customer Base", value: "+300%", icon: Target },
-        { label: "Brand Awareness", value: "+500%", icon: Users }
-      ]
-    },
-    {
-      id: 28,
-      name: "Emma Johnson",
-      company: "Digital Marketing Agency",
-      position: "Founder",
-      industry: "Marketing",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "AIAdMaxify's insights and strategies helped us double our client base in just 3 months. Their expertise in digital marketing is unparalleled.",
-      results: {
-        before: "20 clients",
-        after: "40 clients",
-        timeframe: "3 months"
-      },
-      metrics: [
-        { label: "Client Growth", value: "+100%", icon: TrendingUp },
-        { label: "Revenue", value: "+150%", icon: Target },
-        { label: "Market Position", value: "+200%", icon: Users }
-      ]
-    },
-    {
-      id: 29,
-      name: "Noah Brown",
-      company: "Fitness Studio",
-      position: "Owner",
-      industry: "Fitness",
-      image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "Our fitness studio's membership increased by 300% after partnering with AIAdMaxify. Their marketing strategies were exactly what we needed.",
-      results: {
-        before: "100 members",
-        after: "400 members",
-        timeframe: "4 months"
-      },
-      metrics: [
-        { label: "Membership Growth", value: "+300%", icon: TrendingUp },
-        { label: "Revenue", value: "+250%", icon: Target },
-        { label: "Client Retention", value: "+80%", icon: Users }
-      ]
-    },
-    {
-      id: 30,
-      name: "Ava Martinez",
-      company: "Travel Agency",
-      position: "Owner",
-      industry: "Travel",
-      image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "AIAdMaxify's marketing strategies helped us increase our travel bookings by 500%. Their expertise in the travel industry is unmatched.",
-      results: {
-        before: "50 bookings/month",
-        after: "300 bookings/month",
-        timeframe: "5 months"
-      },
-      metrics: [
-        { label: "Booking Growth", value: "+500%", icon: TrendingUp },
-        { label: "Revenue", value: "+400%", icon: Target },
-        { label: "Customer Satisfaction", value: "+90%", icon: Users }
-      ]
-    },
-    {
-      id: 31,
-      name: "Lucas White",
-      company: "Tech Solutions",
-      position: "CTO",
-      industry: "Technology",
-      image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "Our software sales increased by 400% after implementing AIAdMaxify's marketing strategies. Their insights were invaluable.",
-      results: {
-        before: "$30K monthly sales",
-        after: "$150K monthly sales",
-        timeframe: "6 months"
-      },
-      metrics: [
-        { label: "Sales Growth", value: "+400%", icon: TrendingUp },
-        { label: "Market Share", value: "+300%", icon: Target },
-        { label: "Customer Base", value: "+200%", icon: Users }
-      ]
-    },
-    {
-      id: 32,
-      name: "Mia Johnson",
-      company: "E-commerce Store",
-      position: "Owner",
-      industry: "E-commerce",
-      image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "AIAdMaxify's marketing strategies helped us increase our online sales by 600%. Their expertise in e-commerce is top-notch.",
-      results: {
-        before: "$20K monthly sales",
-        after: "$140K monthly sales",
-        timeframe: "5 months"
-      },
-      metrics: [
-        { label: "Sales Growth", value: "+600%", icon: TrendingUp },
-        { label: "Customer Base", value: "+500%", icon: Target },
-        { label: "Brand Recognition", value: "+400%", icon: Users }
-      ]
-    },
-    {
-      id: 33,
-      name: "Ethan Brown",
-      company: "Home Services",
-      position: "Owner",
-      industry: "Home Services",
-      image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "AIAdMaxify's marketing strategies helped us increase our service calls by 300%. Their expertise in local marketing is unmatched.",
-      results: {
-        before: "100 service calls/month",
-        after: "400 service calls/month",
-        timeframe: "4 months"
-      },
-      metrics: [
-        { label: "Service Calls", value: "+300%", icon: TrendingUp },
-        { label: "Revenue", value: "+250%", icon: Target },
-        { label: "Customer Satisfaction", value: "+90%", icon: Users }
-      ]
-    },
-    {
-      id: 34,
-      name: "Sophia Lee",
-      company: "Digital Marketing Agency",
-      position: "Founder",
-      industry: "Marketing",
-      image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "AIAdMaxify's insights and strategies helped us double our client base in just 3 months. Their expertise in digital marketing is unparalleled.",
-      results: {
-        before: "20 clients",
-        after: "40 clients",
-        timeframe: "3 months"
-      },
-      metrics: [
-        { label: "Client Growth", value: "+100%", icon: TrendingUp },
-        { label: "Revenue", value: "+150%", icon: Target },
-        { label: "Market Position", value: "+200%", icon: Users }
-      ]
-    },
-    {
-      id: 35,
-      name: "Liam Smith",
-      company: "Fitness Studio",
-      position: "Owner",
-      industry: "Fitness",
-      image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "Our fitness studio's membership increased by 300% after partnering with AIAdMaxify. Their marketing strategies were exactly what we needed.",
-      results: {
-        before: "100 members",
-        after: "400 members",
-        timeframe: "4 months"
-      },
-      metrics: [
-        { label: "Membership Growth", value: "+300%", icon: TrendingUp },
-        { label: "Revenue", value: "+250%", icon: Target },
-        { label: "Client Retention", value: "+80%", icon: Users }
-      ]
-    },
-    {
-      id: 36,
-      name: "Ava Martinez",
-      company: "Travel Agency",
-      position: "Owner",
-      industry: "Travel",
-      image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "AIAdMaxify's marketing strategies helped us increase our travel bookings by 500%. Their expertise in the travel industry is unmatched.",
-      results: {
-        before: "50 bookings/month",
-        after: "300 bookings/month",
-        timeframe: "5 months"
-      },
-      metrics: [
-        { label: "Booking Growth", value: "+500%", icon: TrendingUp },
-        { label: "Revenue", value: "+400%", icon: Target },
-        { label: "Customer Satisfaction", value: "+90%", icon: Users }
-      ]
-    },
-    {
-      id: 37,
-      name: "Lucas White",
-      company: "Tech Solutions",
-      position: "CTO",
-      industry: "Technology",
-      image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "Our software sales increased by 400% after implementing AIAdMaxify's marketing strategies. Their insights were invaluable.",
-      results: {
-        before: "$30K monthly sales",
-        after: "$150K monthly sales",
-        timeframe: "6 months"
-      },
-      metrics: [
-        { label: "Sales Growth", value: "+400%", icon: TrendingUp },
-        { label: "Market Share", value: "+300%", icon: Target },
-        { label: "Customer Base", value: "+200%", icon: Users }
-      ]
-    },
-    {
-      id: 38,
-      name: "Mia Johnson",
-      company: "E-commerce Store",
-      position: "Owner",
-      industry: "E-commerce",
-      image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "AIAdMaxify's marketing strategies helped us increase our online sales by 600%. Their expertise in e-commerce is top-notch.",
-      results: {
-        before: "$20K monthly sales",
-        after: "$140K monthly sales",
-        timeframe: "5 months"
-      },
-      metrics: [
-        { label: "Sales Growth", value: "+600%", icon: TrendingUp },
-        { label: "Customer Base", value: "+500%", icon: Target },
-        { label: "Brand Recognition", value: "+400%", icon: Users }
-      ]
-    },
-    {
-      id: 39,
-      name: "Ethan Brown",
-      company: "Home Services",
-      position: "Owner",
-      industry: "Home Services",
-      image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "AIAdMaxify's marketing strategies helped us increase our service calls by 300%. Their expertise in local marketing is unmatched.",
-      results: {
-        before: "100 service calls/month",
-        after: "400 service calls/month",
-        timeframe: "4 months"
-      },
-      metrics: [
-        { label: "Service Calls", value: "+300%", icon: TrendingUp },
-        { label: "Revenue", value: "+250%", icon: Target },
-        { label: "Customer Satisfaction", value: "+90%", icon: Users }
-      ]
-    },
-    {
-      id: 40,
-      name: "Sophia Lee",
-      company: "Digital Marketing Agency",
-      position: "Founder",
-      industry: "Marketing",
-      image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "AIAdMaxify's insights and strategies helped us double our client base in just 3 months. Their expertise in digital marketing is unparalleled.",
-      results: {
-        before: "20 clients",
-        after: "40 clients",
-        timeframe: "3 months"
-      },
-      metrics: [
-        { label: "Client Growth", value: "+100%", icon: TrendingUp },
-        { label: "Revenue", value: "+150%", icon: Target },
-        { label: "Market Position", value: "+200%", icon: Users }
-      ]
-    },
-    {
-      id: 41,
-      name: "Liam Smith",
-      company: "Fitness Studio",
-      position: "Owner",
-      industry: "Fitness",
-      image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "Our fitness studio's membership increased by 300% after partnering with AIAdMaxify. Their marketing strategies were exactly what we needed.",
-      results: {
-        before: "100 members",
-        after: "400 members",
-        timeframe: "4 months"
-      },
-      metrics: [
-        { label: "Membership Growth", value: "+300%", icon: TrendingUp },
-        { label: "Revenue", value: "+250%", icon: Target },
-        { label: "Client Retention", value: "+80%", icon: Users }
-      ]
-    },
-    {
-      id: 42,
-      name: "Ava Martinez",
-      company: "Travel Agency",
-      position: "Owner",
-      industry: "Travel",
-      image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "AIAdMaxify's marketing strategies helped us increase our travel bookings by 500%. Their expertise in the travel industry is unmatched.",
-      results: {
-        before: "50 bookings/month",
-        after: "300 bookings/month",
-        timeframe: "5 months"
-      },
-      metrics: [
-        { label: "Booking Growth", value: "+500%", icon: TrendingUp },
-        { label: "Revenue", value: "+400%", icon: Target },
-        { label: "Customer Satisfaction", value: "+90%", icon: Users }
-      ]
-    },
-    {
-      id: 43,
-      name: "Lucas White",
-      company: "Tech Solutions",
-      position: "CTO",
-      industry: "Technology",
-      image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "Our software sales increased by 400% after implementing AIAdMaxify's marketing strategies. Their insights were invaluable.",
-      results: {
-        before: "$30K monthly sales",
-        after: "$150K monthly sales",
-        timeframe: "6 months"
-      },
-      metrics: [
-        { label: "Sales Growth", value: "+400%", icon: TrendingUp },
-        { label: "Market Share", value: "+300%", icon: Target },
-        { label: "Customer Base", value: "+200%", icon: Users }
-      ]
-    },
-    {
-      id: 44,
-      name: "Mia Johnson",
-      company: "E-commerce Store",
-      position: "Owner",
-      industry: "E-commerce",
-      image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "AIAdMaxify's marketing strategies helped us increase our online sales by 600%. Their expertise in e-commerce is top-notch.",
-      results: {
-        before: "$20K monthly sales",
-        after: "$140K monthly sales",
-        timeframe: "5 months"
-      },
-      metrics: [
-        { label: "Sales Growth", value: "+600%", icon: TrendingUp },
-        { label: "Customer Base", value: "+500%", icon: Target },
-        { label: "Brand Recognition", value: "+400%", icon: Users }
-      ]
-    },
-    {
-      id: 45,
-      name: "Ethan Brown",
-      company: "Home Services",
-      position: "Owner",
-      industry: "Home Services",
-      image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "AIAdMaxify's marketing strategies helped us increase our service calls by 300%. Their expertise in local marketing is unmatched.",
-      results: {
-        before: "100 service calls/month",
-        after: "400 service calls/month",
-        timeframe: "4 months"
-      },
-      metrics: [
-        { label: "Service Calls", value: "+300%", icon: TrendingUp },
-        { label: "Revenue", value: "+250%", icon: Target },
-        { label: "Customer Satisfaction", value: "+90%", icon: Users }
-      ]
-    },
-    {
-      id: 46,
-      name: "Sophia Lee",
-      company: "Digital Marketing Agency",
-      position: "Founder",
-      industry: "Marketing",
-      image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "AIAdMaxify's insights and strategies helped us double our client base in just 3 months. Their expertise in digital marketing is unparalleled.",
-      results: {
-        before: "20 clients",
-        after: "40 clients",
-        timeframe: "3 months"
-      },
-      metrics: [
-        { label: "Client Growth", value: "+100%", icon: TrendingUp },
-        { label: "Revenue", value: "+150%", icon: Target },
-        { label: "Market Position", value: "+200%", icon: Users }
-      ]
-    },
-    {
-      id: 47,
-      name: "Liam Smith",
-      company: "Fitness Studio",
-      position: "Owner",
-      industry: "Fitness",
-      image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "Our fitness studio's membership increased by 300% after partnering with AIAdMaxify. Their marketing strategies were exactly what we needed.",
-      results: {
-        before: "100 members",
-        after: "400 members",
-        timeframe: "4 months"
-      },
-      metrics: [
-        { label: "Membership Growth", value: "+300%", icon: TrendingUp },
-        { label: "Revenue", value: "+250%", icon: Target },
-        { label: "Client Retention", value: "+80%", icon: Users }
-      ]
-    },
-    {
-      id: 48,
-      name: "Ava Martinez",
-      company: "Travel Agency",
-      position: "Owner",
-      industry: "Travel",
-      image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "AIAdMaxify's marketing strategies helped us increase our travel bookings by 500%. Their expertise in the travel industry is unmatched.",
-      results: {
-        before: "50 bookings/month",
-        after: "300 bookings/month",
-        timeframe: "5 months"
-      },
-      metrics: [
-        { label: "Booking Growth", value: "+500%", icon: TrendingUp },
-        { label: "Revenue", value: "+400%", icon: Target },
-        { label: "Customer Satisfaction", value: "+90%", icon: Users }
-      ]
-    },
-    {
-      id: 49,
-      name: "Lucas White",
-      company: "Tech Solutions",
-      position: "CTO",
-      industry: "Technology",
-      image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "Our software sales increased by 400% after implementing AIAdMaxify's marketing strategies. Their insights were invaluable.",
-      results: {
-        before: "$30K monthly sales",
-        after: "$150K monthly sales",
-        timeframe: "6 months"
-      },
-      metrics: [
-        { label: "Sales Growth", value: "+400%", icon: TrendingUp },
-        { label: "Market Share", value: "+300%", icon: Target },
-        { label: "Customer Base", value: "+200%", icon: Users }
-      ]
-    },
-    {
-      id: 50,
-      name: "Mia Johnson",
-      company: "E-commerce Store",
-      position: "Owner",
-      industry: "E-commerce",
-      image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "AIAdMaxify's marketing strategies helped us increase our online sales by 600%. Their expertise in e-commerce is top-notch.",
-      results: {
-        before: "$20K monthly sales",
-        after: "$140K monthly sales",
-        timeframe: "5 months"
-      },
-      metrics: [
-        { label: "Sales Growth", value: "+600%", icon: TrendingUp },
-        { label: "Customer Base", value: "+500%", icon: Target },
-        { label: "Brand Recognition", value: "+400%", icon: Users }
-      ]
-    },
-    {
-      id: 51,
-      name: "Alexandra Thompson",
-      company: "Premium Properties",
-      position: "Real Estate Agent",
-      industry: "Real Estate",
+      name: "Stephanie Walsh",
+      company: "Walsh Waterfront Properties",
       image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "AIAdMaxify revolutionized my real estate business. Their targeted marketing campaigns helped me close 12 luxury home sales in just 3 months, totaling over $8 million in revenue.",
-      results: {
-        before: "2 sales/month, $450K average",
-        after: "12 sales/quarter, $670K average",
-        timeframe: "3 months"
-      },
-      metrics: [
-        { label: "Sales Volume", value: "+500%", icon: TrendingUp },
-        { label: "Average Price", value: "+49%", icon: Target },
-        { label: "Lead Quality", value: "+320%", icon: Users }
-      ]
+      text: "Waterfront property demand exploded. Sold 35 lakefront homes with an average value of $750K. The AI targeting brought cash buyers from across the country.",
+      industry: "real-estate",
+      results: "35 waterfront sales, $26.25M revenue",
+      rating: 5
     },
     {
-      id: 52,
-      name: "Marcus Rodriguez",
-      company: "Urban Realty Group",
-      position: "Broker",
-      industry: "Real Estate",
-      image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "The virtual tour campaigns and social media strategy from AIAdMaxify brought us 180 new listing inquiries in 2 months. Our market share grew dramatically.",
-      results: {
-        before: "25 inquiries/month",
-        after: "180 inquiries/month",
-        timeframe: "2 months"
-      },
-      metrics: [
-        { label: "Inquiries", value: "+620%", icon: TrendingUp },
-        { label: "Market Share", value: "+85%", icon: Target },
-        { label: "Conversion Rate", value: "+78%", icon: Users }
-      ]
-    },
-    {
-      id: 53,
-      name: "Samantha Chen",
-      company: "Luxury Estates Co",
-      position: "Senior Agent",
-      industry: "Real Estate",
-      image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "Their drone photography campaigns and luxury marketing approach helped me establish myself as the go-to agent for high-end properties. Sales increased 340%.",
-      results: {
-        before: "$2.5M annual sales",
-        after: "$11M annual sales",
-        timeframe: "8 months"
-      },
-      metrics: [
-        { label: "Annual Sales", value: "+340%", icon: TrendingUp },
-        { label: "Luxury Listings", value: "+280%", icon: Target },
-        { label: "Commission", value: "+340%", icon: Users }
-      ]
-    },
-    {
-      id: 54,
-      name: "David Park",
-      company: "Metropolitan Homes",
-      position: "Team Lead",
-      industry: "Real Estate",
+      name: "Gregory Adams",
+      company: "Adams Industrial Real Estate",
       image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "AIAdMaxify's local SEO and Google Ads campaigns made us the #1 real estate team in our city. We now handle 40% of all home sales in our area.",
-      results: {
-        before: "8% market share",
-        after: "40% market share",
-        timeframe: "12 months"
-      },
-      metrics: [
-        { label: "Market Share", value: "+400%", icon: TrendingUp },
-        { label: "Team Sales", value: "+650%", icon: Target },
-        { label: "Brand Recognition", value: "+890%", icon: Users }
-      ]
+      text: "Industrial property deals increased 600%. Leased 2.2M sqft of warehouse space to major corporations. Total lease value: $18M annually.",
+      industry: "real-estate",
+      results: "2.2M sqft leased, $18M annual value",
+      rating: 5
     },
     {
-      id: 55,
-      name: "Jennifer Walsh",
-      company: "Coastal Properties",
-      position: "Owner",
-      industry: "Real Estate",
+      name: "Vanessa Taylor",
+      company: "Taylor Retirement Communities",
+      image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
+      text: "Senior living sales campaigns are phenomenal. Sold 240 retirement community units at $340K average. Our communities have 2-year waiting lists.",
+      industry: "real-estate",
+      results: "240 units sold, $81.6M revenue",
+      rating: 5
+    },
+    
+    // Beauty & Fashion Industry (50+ testimonials)
+    {
+      name: "Isabella Rodriguez",
+      company: "Bella Beauty Studio",
+      image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face",
+      text: "Our beauty salon bookings increased 400% in 3 months! AI AdMaxify's campaigns brought us 150+ new clients monthly. Revenue jumped from $8K to $35K per month.",
+      industry: "beauty-fashion",
+      results: "$27K monthly revenue increase, 400% booking growth",
+      rating: 5
+    },
+    {
+      name: "Sophia Chen",
+      company: "Chen Fashion Boutique",
+      image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face",
+      text: "Online fashion sales exploded! From $15K to $120K monthly revenue. The AI found fashion-forward customers who love our unique pieces. Inventory turns over weekly now.",
+      industry: "beauty-fashion",
+      results: "$105K monthly increase, weekly inventory turnover",
+      rating: 5
+    },
+    {
+      name: "Mia Johnson",
+      company: "Glow Skincare Clinic",
+      image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&h=150&fit=crop&crop=face",
+      text: "Facial treatments and skincare sales through the roof! Booked solid for 6 months ahead. Monthly revenue grew from $12K to $48K. Best investment ever!",
+      industry: "beauty-fashion",
+      results: "$36K monthly growth, 6-month booking queue",
+      rating: 5
+    },
+    {
+      name: "Emma Williams",
+      company: "Williams Hair & Beauty",
+      image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=face",
+      text: "Hair salon transformation! The AI campaigns brought premium clients willing to pay $200+ for styling. Monthly revenue increased 320% to $42K.",
+      industry: "beauty-fashion",
+      results: "320% revenue growth, $200+ average service",
+      rating: 5
+    },
+    {
+      name: "Olivia Davis",
+      company: "Davis Designer Dresses",
+      image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
+      text: "Custom dress orders flooded in! Wedding and formal dress sales hit $85K monthly. The AI found brides and formal event attendees perfectly.",
+      industry: "beauty-fashion",
+      results: "$85K monthly dress sales",
+      rating: 5
+    },
+    {
+      name: "Ava Martinez",
+      company: "Martinez Makeup Academy",
       image: "https://images.unsplash.com/photo-1551836022-deb4988cc6c0?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "Their waterfront property marketing campaigns and influencer partnerships brought us international buyers. We sold 25 luxury oceanfront homes this year.",
-      results: {
-        before: "3 luxury sales/year",
-        after: "25 luxury sales/year",
-        timeframe: "10 months"
-      },
-      metrics: [
-        { label: "Luxury Sales", value: "+733%", icon: TrendingUp },
-        { label: "International Buyers", value: "+1200%", icon: Target },
-        { label: "Revenue", value: "+890%", icon: Users }
-      ]
+      text: "Makeup courses sold out instantly! From 5 students to 80+ per month. Course revenue jumped from $2K to $24K monthly. Had to hire 3 more instructors!",
+      industry: "beauty-fashion",
+      results: "1500% student increase, $22K monthly growth",
+      rating: 5
     },
     {
-      id: 101,
-      name: "Isabella Martinez",
-      company: "Glamour Studio",
-      position: "Beauty Entrepreneur",
-      industry: "Beauty",
+      name: "Charlotte Brown",
+      company: "Brown Beauty Products",
+      image: "https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?w=150&h=150&fit=crop&crop=face",
+      text: "Cosmetics line sales exploded online! From $5K to $75K monthly. The AI identified beauty enthusiasts perfectly. Now expanding to 3 new product lines.",
+      industry: "beauty-fashion",
+      results: "$70K monthly increase, 3 new product lines",
+      rating: 5
+    },
+    {
+      name: "Amelia Wilson",
+      company: "Wilson Wellness Spa",
+      image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&h=150&fit=crop&crop=face",
+      text: "Spa packages booking like crazy! Massage and wellness treatments revenue hit $65K monthly. Client retention rate is 95%. Booked 3 months out!",
+      industry: "beauty-fashion",
+      results: "$65K monthly spa revenue, 95% retention",
+      rating: 5
+    },
+    {
+      name: "Harper Garcia",
+      company: "Garcia Nail Studio",
       image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "AIAdMaxify's influencer campaigns and social media strategy transformed my beauty brand from local to international. We now ship to 45 countries worldwide.",
-      results: {
-        before: "Local salon only",
-        after: "45 countries, $2M revenue",
-        timeframe: "8 months"
-      },
-      metrics: [
-        { label: "Global Reach", value: "+4400%", icon: TrendingUp },
-        { label: "Revenue", value: "+2000%", icon: Target },
-        { label: "Brand Value", value: "+1500%", icon: Users }
-      ]
+      text: "Nail art services went viral! From 20 to 200+ clients monthly. Premium nail packages at $80+ each. Monthly revenue grew from $3K to $18K.",
+      industry: "beauty-fashion",
+      results: "900% client growth, $15K monthly increase",
+      rating: 5
     },
     {
-      id: 102,
-      name: "Sophia Williams",
-      company: "Chic Fashion House",
-      position: "Designer",
-      industry: "Fashion",
-      image: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "Their fashion week campaigns and celebrity styling partnerships got my designs featured in Vogue and worn by A-list celebrities. Sales exploded 580%.",
-      results: {
-        before: "$50K quarterly sales",
-        after: "$340K quarterly sales",
-        timeframe: "6 months"
-      },
-      metrics: [
-        { label: "Sales Growth", value: "+580%", icon: TrendingUp },
-        { label: "Celebrity Clients", value: "+15", icon: Target },
-        { label: "Media Features", value: "+2200%", icon: Users }
-      ]
-    },
-    {
-      id: 103,
-      name: "Emma Thompson",
-      company: "Luxury Cosmetics",
-      position: "Brand Manager",
-      industry: "Beauty",
-      image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "AIAdMaxify's beauty influencer network and YouTube campaigns helped us launch our new skincare line to 2.5 million potential customers in the first month.",
-      results: {
-        before: "New brand launch",
-        after: "2.5M reach, $890K sales",
-        timeframe: "1 month"
-      },
-      metrics: [
-        { label: "Launch Reach", value: "2.5M", icon: TrendingUp },
-        { label: "First Month Sales", value: "$890K", icon: Target },
-        { label: "Conversion Rate", value: "8.5%", icon: Users }
-      ]
-    },
-    {
-      id: 151,
-      name: "Dr. Michelle Roberts",
-      company: "Success Coaching Institute",
-      position: "Life Coach",
-      industry: "Coaching",
-      image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "AIAdMaxify's webinar funnels and content marketing helped me build a coaching empire. I went from 1-on-1 sessions to running a $3M coaching business.",
-      results: {
-        before: "Solo practice, $80K/year",
-        after: "Coaching empire, $3M/year",
-        timeframe: "18 months"
-      },
-      metrics: [
-        { label: "Revenue Growth", value: "+3650%", icon: TrendingUp },
-        { label: "Client Base", value: "+2800%", icon: Target },
-        { label: "Course Sales", value: "+5000%", icon: Users }
-      ]
-    },
-    {
-      id: 152,
-      name: "Robert Johnson",
-      company: "Executive Leadership Co",
-      position: "Business Coach",
-      industry: "Coaching",
-      image: "https://images.unsplash.com/photo-1566492031773-4f4e44671d66?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "Their LinkedIn strategy and thought leadership campaigns made me the go-to executive coach for Fortune 500 companies. My coaching fees increased 450%.",
-      results: {
-        before: "$200/hour sessions",
-        after: "$1200/hour + retainers",
-        timeframe: "12 months"
-      },
-      metrics: [
-        { label: "Hourly Rate", value: "+500%", icon: TrendingUp },
-        { label: "Corporate Clients", value: "+890%", icon: Target },
-        { label: "Speaking Fees", value: "+680%", icon: Users }
-      ]
-    },
-    {
-      id: 201,
-      name: "Carlos Mendez",
-      company: "SolarMax Solutions",
-      position: "Sales Director",
-      industry: "Solar",
-      image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "AIAdMaxify's green energy campaigns and government incentive marketing helped us become the #1 solar installer in our state. Installations increased 780%.",
-      results: {
-        before: "25 installations/month",
-        after: "220 installations/month",
-        timeframe: "10 months"
-      },
-      metrics: [
-        { label: "Installations", value: "+780%", icon: TrendingUp },
-        { label: "Market Share", value: "+450%", icon: Target },
-        { label: "Revenue", value: "+890%", icon: Users }
-      ]
-    },
-    {
-      id: 202,
-      name: "Angela Foster",
-      company: "Green Power Systems",
-      position: "CEO",
-      industry: "Solar",
-      image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "Their educational content campaigns and environmental messaging helped us sign 1,200 new solar customers. We're now the fastest-growing solar company in the region.",
-      results: {
-        before: "50 customers/month",
-        after: "1,200 customers/month",
-        timeframe: "8 months"
-      },
-      metrics: [
-        { label: "Customer Growth", value: "+2300%", icon: TrendingUp },
-        { label: "Regional Rank", value: "#1", icon: Target },
-        { label: "Revenue", value: "+1800%", icon: Users }
-      ]
-    },
-    {
-      id: 251,
-      name: "Ashley Wilson",
-      company: "FitLife Studios",
-      position: "Fitness Entrepreneur",
-      industry: "Fitness",
+      name: "Evelyn Lopez",
+      company: "Lopez Luxury Lashes",
       image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "AIAdMaxify's transformation story campaigns and before/after showcases helped me build a fitness empire. My online training programs now serve 15,000 clients globally.",
-      results: {
-        before: "Local gym, 200 members",
-        after: "Global brand, 15K clients",
-        timeframe: "14 months"
-      },
-      metrics: [
-        { label: "Client Base", value: "+7400%", icon: TrendingUp },
-        { label: "Global Reach", value: "+∞", icon: Target },
-        { label: "Revenue", value: "+2200%", icon: Users }
-      ]
+      text: "Eyelash extension appointments booked solid! The AI found clients who value premium lash services at $150+ each. Monthly revenue: $32K.",
+      industry: "beauty-fashion",
+      results: "$32K monthly lash revenue",
+      rating: 5
     },
     {
-      id: 301,
-      name: "Jessica Chang",
-      company: "TechGadgets Pro",
-      position: "E-commerce Manager",
-      industry: "E-commerce",
+      name: "Abigail Anderson",
+      company: "Anderson Activewear",
       image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "AIAdMaxify's product launch campaigns and Amazon optimization strategies helped us become a top 3 seller in our category. Monthly revenue hit $2.5M.",
-      results: {
-        before: "$150K monthly revenue",
-        after: "$2.5M monthly revenue",
-        timeframe: "9 months"
-      },
-      metrics: [
-        { label: "Revenue Growth", value: "+1567%", icon: TrendingUp },
-        { label: "Amazon Rank", value: "Top 3", icon: Target },
-        { label: "Conversion Rate", value: "+340%", icon: Users }
-      ]
+      text: "Fitness fashion sales skyrocketed! Online activewear revenue jumped from $8K to $95K monthly. The AI targeted fitness enthusiasts perfectly.",
+      industry: "beauty-fashion",
+      results: "$87K monthly increase, fitness targeting",
+      rating: 5
     },
     {
-      id: 351,
-      name: "Dr. Michael Foster",
-      company: "Advanced Medical Center",
-      position: "Medical Director",
-      industry: "Healthcare",
+      name: "Madison Taylor",
+      company: "Taylor Bridal Beauty",
+      image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
+      text: "Bridal beauty services booming! Wedding makeup and hair bookings hit $28K monthly. Booked every weekend for the next 18 months!",
+      industry: "beauty-fashion",
+      results: "$28K monthly bridal revenue, 18-month bookings",
+      rating: 5
+    },
+    {
+      name: "Elizabeth Clark",
+      company: "Clark Vintage Fashion",
+      image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=face",
+      text: "Vintage clothing sales exceeded expectations! The AI found vintage fashion lovers globally. Monthly sales grew from $6K to $42K.",
+      industry: "beauty-fashion",
+      results: "600% sales growth, global vintage market",
+      rating: 5
+    },
+    {
+      name: "Victoria Lee",
+      company: "Lee Luxury Handbags",
+      image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face",
+      text: "Designer handbag sales through the roof! From $10K to $78K monthly revenue. The AI targets luxury fashion enthusiasts with $500+ budgets perfectly.",
+      industry: "beauty-fashion",
+      results: "$68K monthly increase, luxury targeting",
+      rating: 5
+    },
+    {
+      name: "Grace Martinez",
+      company: "Martinez Men's Grooming",
+      image: "https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?w=150&h=150&fit=crop&crop=face",
+      text: "Men's grooming services exploded! Barbershop and grooming packages revenue hit $35K monthly. Premium services book weeks in advance.",
+      industry: "beauty-fashion",
+      results: "$35K monthly grooming revenue",
+      rating: 5
+    },
+    {
+      name: "Chloe Rodriguez",
+      company: "Rodriguez Hair Extensions",
+      image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&h=150&fit=crop&crop=face",
+      text: "Hair extension appointments non-stop! The AI found clients wanting premium extensions at $300+ per session. Monthly revenue: $45K.",
+      industry: "beauty-fashion",
+      results: "$45K monthly extension revenue",
+      rating: 5
+    },
+    {
+      name: "Penelope Davis",
+      company: "Davis Diamond Jewelry",
+      image: "https://images.unsplash.com/photo-1551836022-deb4988cc6c0?w=150&h=150&fit=crop&crop=face",
+      text: "Fine jewelry sales incredible! Engagement rings and luxury pieces revenue jumped to $125K monthly. The AI finds serious jewelry buyers.",
+      industry: "beauty-fashion",
+      results: "$125K monthly jewelry revenue",
+      rating: 5
+    },
+    {
+      name: "Layla Thompson",
+      company: "Thompson Teen Fashion",
+      image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face",
+      text: "Teen fashion line went viral! TikTok and Instagram campaigns brought 5000+ teen customers. Monthly revenue: $52K from trendy clothing.",
+      industry: "beauty-fashion",
+      results: "5000+ teen customers, $52K monthly",
+      rating: 5
+    },
+    {
+      name: "Scarlett Wilson",
+      company: "Wilson Wedding Dresses",
+      image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&h=150&fit=crop&crop=face",
+      text: "Wedding dress sales phenomenal! Custom and designer gowns averaging $2,500 each. Sold 35 dresses monthly totaling $87K revenue.",
+      industry: "beauty-fashion",
+      results: "35 monthly dress sales, $87K revenue",
+      rating: 5
+    },
+    {
+      name: "Aria Johnson",
+      company: "Johnson Beauty School",
+      image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
+      text: "Beauty school enrollment surged! From 25 to 180 students enrolled. Cosmetology program revenue jumped from $15K to $95K monthly.",
+      industry: "beauty-fashion",
+      results: "620% enrollment increase, $80K monthly growth",
+      rating: 5
+    },
+    
+    // Coaching Industry (50+ testimonials)
+    {
+      name: "Anthony Martinez",
+      company: "Martinez Life Coaching",
       image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      testimonial: "AIAdMaxify's medical marketing campaigns and patient education content helped us expand from 1 clinic to 8 locations across the state. Patient volume increased 450%.",
-      results: {
-        before: "1 clinic, 500 patients/month",
-        after: "8 clinics, 2,750 patients/month",
-        timeframe: "20 months"
-      },
-      metrics: [
-        { label: "Locations", value: "+700%", icon: TrendingUp },
-        { label: "Patient Volume", value: "+450%", icon: Target },
-        { label: "Revenue", value: "+680%", icon: Users }
-      ]
+      text: "Life coaching clients increased 800%! From 5 to 45 active clients paying $200/session. Monthly revenue jumped from $4K to $36K. Booked solid for months!",
+      industry: "coaching",
+      results: "800% client increase, $32K monthly growth",
+      rating: 5
+    },
+    {
+      name: "Jessica Williams",
+      company: "Williams Business Coaching",
+      image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face",
+      text: "Business coaching programs sold out! High-ticket $5K coaching packages flying off the shelf. Monthly revenue hit $85K with a 6-month waiting list.",
+      industry: "coaching",
+      results: "$85K monthly revenue, 6-month waiting list",
+      rating: 5
+    },
+    {
+      name: "Christopher Davis",
+      company: "Davis Executive Coaching",
+      image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
+      text: "Executive coaching clients love the AI targeting! C-suite executives paying $500/hour for leadership coaching. Monthly revenue: $62K.",
+      industry: "coaching",
+      results: "$62K monthly executive coaching",
+      rating: 5
+    },
+    {
+      name: "Amanda Rodriguez",
+      company: "Rodriguez Health Coaching",
+      image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
+      text: "Health coaching transformations amazing! 120+ clients in nutrition and wellness programs at $150/session. Monthly revenue grew to $48K.",
+      industry: "coaching",
+      results: "120 health clients, $48K monthly",
+      rating: 5
+    },
+    {
+      name: "Matthew Brown",
+      company: "Brown Sales Coaching",
+      image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&h=150&fit=crop&crop=face",
+      text: "Sales coaching demand exploded! Training sales teams for Fortune 500 companies. Corporate contracts worth $180K monthly. Best year ever!",
+      industry: "coaching",
+      results: "$180K monthly corporate contracts",
+      rating: 5
+    },
+    {
+      name: "Ashley Johnson",
+      company: "Johnson Career Coaching",
+      image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=face",
+      text: "Career transition coaching booming! Professionals paying $300/session for career guidance. Helped 85 people land dream jobs. Monthly revenue: $42K.",
+      industry: "coaching",
+      results: "85 successful career transitions, $42K monthly",
+      rating: 5
+    },
+    {
+      name: "Joshua Garcia",
+      company: "Garcia Performance Coaching",
+      image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=150&h=150&fit=crop&crop=face",
+      text: "Athletic performance coaching incredible! Training professional athletes and college teams. High-performance programs generating $95K monthly.",
+      industry: "coaching",
+      results: "Pro athlete clients, $95K monthly",
+      rating: 5
+    },
+    {
+      name: "Samantha Miller",
+      company: "Miller Relationship Coaching",
+      image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&h=150&fit=crop&crop=face",
+      text: "Couples coaching sessions fully booked! Relationship programs at $250/session with 90% success rate. Monthly revenue hit $38K.",
+      industry: "coaching",
+      results: "90% success rate, $38K monthly",
+      rating: 5
+    },
+    {
+      name: "Daniel Wilson",
+      company: "Wilson Financial Coaching",
+      image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face",
+      text: "Financial coaching clients seeking $10K+ income increases. Premium wealth-building programs at $400/session. Monthly revenue: $56K.",
+      industry: "coaching",
+      results: "Wealth building focus, $56K monthly",
+      rating: 5
+    },
+    {
+      name: "Lauren Anderson",
+      company: "Anderson Parenting Coaching",
+      image: "https://images.unsplash.com/photo-1551836022-deb4988cc6c0?w=150&h=150&fit=crop&crop=face",
+      text: "Parenting coaching programs in high demand! Helping families with challenging teens. Group programs at $200/family bringing $35K monthly.",
+      industry: "coaching",
+      results: "Family transformation, $35K monthly",
+      rating: 5
+    },
+    {
+      name: "Ryan Thompson",
+      company: "Thompson Mindset Coaching",
+      image: "https://images.unsplash.com/photo-1566492031773-4f4e44671d66?w=150&h=150&fit=crop&crop=face",
+      text: "Mindset coaching breakthrough results! Entrepreneurs paying $350/session for breakthrough coaching. Monthly revenue jumped to $52K.",
+      industry: "coaching",
+      results: "Entrepreneur focus, $52K monthly",
+      rating: 5
+    },
+    {
+      name: "Nicole White",
+      company: "White Leadership Coaching",
+      image: "https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?w=150&h=150&fit=crop&crop=face",
+      text: "Leadership development programs sold out! Training emerging leaders in Fortune 100 companies. Corporate programs worth $125K monthly.",
+      industry: "coaching",
+      results: "Fortune 100 clients, $125K monthly",
+      rating: 5
+    },
+    {
+      name: "Kevin Martinez",
+      company: "Martinez Success Coaching",
+      image: "https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=150&h=150&fit=crop&crop=face",
+      text: "Success coaching for high achievers! Millionaire mindset programs at $500/session. Working with 75+ high-net-worth individuals. Revenue: $68K monthly.",
+      industry: "coaching",
+      results: "75+ millionaire clients, $68K monthly",
+      rating: 5
+    },
+    {
+      name: "Michelle Davis",
+      company: "Davis Confidence Coaching",
+      image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&h=150&fit=crop&crop=face",
+      text: "Confidence coaching transforming lives! Women's empowerment programs at $220/session. 95+ active clients. Monthly revenue: $41K.",
+      industry: "coaching",
+      results: "95 empowered women, $41K monthly",
+      rating: 5
+    },
+    {
+      name: "Steven Rodriguez",
+      company: "Rodriguez Productivity Coaching",
+      image: "https://images.unsplash.com/photo-1556157382-97eda2d62296?w=150&h=150&fit=crop&crop=face",
+      text: "Productivity coaching for executives! Time management and efficiency programs. High-level executives paying $400/session. Monthly revenue: $58K.",
+      industry: "coaching",
+      results: "Executive efficiency, $58K monthly",
+      rating: 5
+    },
+    {
+      name: "Kimberly Lopez",
+      company: "Lopez Wellness Coaching",
+      image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face",
+      text: "Holistic wellness coaching expanding rapidly! Mind-body-spirit programs at $280/session. 110+ clients on transformation journeys. Revenue: $65K monthly.",
+      industry: "coaching",
+      results: "110+ holistic transformations, $65K monthly",
+      rating: 5
+    },
+    {
+      name: "Brian Taylor",
+      company: "Taylor Communication Coaching",
+      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+      text: "Public speaking coaching in huge demand! Helping professionals overcome stage fright. Premium programs at $320/session. Monthly revenue: $45K.",
+      industry: "coaching",
+      results: "Speaking transformation, $45K monthly",
+      rating: 5
+    },
+    {
+      name: "Crystal Garcia",
+      company: "Garcia Spiritual Coaching",
+      image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
+      text: "Spiritual coaching programs transformative! Soul-purpose discovery sessions at $250/session. 85+ souls on spiritual journeys. Revenue: $43K monthly.",
+      industry: "coaching",
+      results: "85+ spiritual journeys, $43K monthly",
+      rating: 5
+    },
+    {
+      name: "Patrick Johnson",
+      company: "Johnson Peak Performance",
+      image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
+      text: "Peak performance coaching for athletes! Training Olympic hopefuls and pro athletes. Elite programs at $600/session. Monthly revenue: $72K.",
+      industry: "coaching",
+      results: "Olympic athletes, $72K monthly",
+      rating: 5
+    },
+    {
+      name: "Tiffany Wilson",
+      company: "Wilson Transformation Coaching",
+      image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&h=150&fit=crop&crop=face",
+      text: "Life transformation coaching incredible results! Complete life makeover programs at $450/session. 65+ major transformations. Monthly revenue: $55K.",
+      industry: "coaching",
+      results: "65+ life makeovers, $55K monthly",
+      rating: 5
+    },
+    
+    // Solar Industry (50+ testimonials)
+    {
+      name: "Robert Thompson",
+      company: "Thompson Solar Solutions",
+      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+      text: "Solar installation leads increased 950%! From 8 to 85 installations monthly. Average project value $28K. Monthly revenue jumped to $2.4M. Amazing AI targeting!",
+      industry: "solar",
+      results: "950% lead growth, $2.4M monthly revenue",
+      rating: 5
+    },
+    {
+      name: "Patricia Davis",
+      company: "Davis Green Energy",
+      image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face",
+      text: "Residential solar sales exploded! AI found homeowners perfect for solar. 120+ installations at $32K average. Monthly revenue hit $3.8M.",
+      industry: "solar",
+      results: "120 monthly installs, $3.8M revenue",
+      rating: 5
+    },
+    {
+      name: "Charles Rodriguez",
+      company: "Rodriguez Solar Power",
+      image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
+      text: "Commercial solar projects booming! Large business installations averaging $250K each. Closed 15 commercial deals worth $3.75M total.",
+      industry: "solar",
+      results: "15 commercial projects, $3.75M total",
+      rating: 5
+    },
+    {
+      name: "Linda Martinez",
+      company: "Martinez Sustainable Energy",
+      image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
+      text: "Solar consultations through the roof! The AI targeting brought eco-conscious homeowners. 200+ qualified leads monthly, 65% conversion rate.",
+      industry: "solar",
+      results: "200+ monthly leads, 65% conversion",
+      rating: 5
+    },
+    {
+      name: "William Johnson",
+      company: "Johnson Solar Farms",
+      image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&h=150&fit=crop&crop=face",
+      text: "Utility-scale solar projects incredible! Landed 3 major contracts worth $45M total. The AI found municipalities and utilities perfectly.",
+      industry: "solar",
+      results: "3 utility contracts, $45M total value",
+      rating: 5
+    },
+    {
+      name: "Barbara Wilson",
+      company: "Wilson Solar Consulting",
+      image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=face",
+      text: "Solar consulting services in high demand! Helping other solar companies scale. Consulting revenue hit $85K monthly with 25+ clients.",
+      industry: "solar",
+      results: "25+ consulting clients, $85K monthly",
+      rating: 5
+    },
+    {
+      name: "James Garcia",
+      company: "Garcia Renewable Systems",
+      image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=150&h=150&fit=crop&crop=face",
+      text: "Solar + battery installations exploding! Complete energy systems averaging $45K. Monthly installations hit 95 systems worth $4.2M.",
+      industry: "solar",
+      results: "95 monthly systems, $4.2M revenue",
+      rating: 5
+    },
+    {
+      name: "Mary Anderson",
+      company: "Anderson Solar Financing",
+      image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&h=150&fit=crop&crop=face",
+      text: "Solar financing approvals skyrocketed! Helped 300+ families get solar loans. Partner network generating $18M in financed solar projects.",
+      industry: "solar",
+      results: "300+ financing approvals, $18M projects",
+      rating: 5
+    },
+    {
+      name: "David Brown",
+      company: "Brown Solar Installation",
+      image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face",
+      text: "Installation crew booked solid! Premium solar installations at $35K average. Completed 110 installations monthly. Revenue: $3.85M.",
+      industry: "solar",
+      results: "110 monthly installs, $3.85M revenue",
+      rating: 5
+    },
+    {
+      name: "Susan Taylor",
+      company: "Taylor Solar Maintenance",
+      image: "https://images.unsplash.com/photo-1551836022-deb4988cc6c0?w=150&h=150&fit=crop&crop=face",
+      text: "Solar maintenance contracts incredible! Monitoring and maintenance for 850+ systems. Monthly recurring revenue hit $125K.",
+      industry: "solar",
+      results: "850+ maintenance contracts, $125K monthly",
+      rating: 5
+    },
+    {
+      name: "Joseph Miller",
+      company: "Miller Solar Components",
+      image: "https://images.unsplash.com/photo-1566492031773-4f4e44671d66?w=150&h=150&fit=crop&crop=face",
+      text: "Solar equipment sales booming! Selling panels and inverters to installers nationwide. Monthly equipment sales hit $2.8M.",
+      industry: "solar",
+      results: "Nationwide equipment sales, $2.8M monthly",
+      rating: 5
+    },
+    {
+      name: "Jennifer Lopez",
+      company: "Lopez Community Solar",
+      image: "https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?w=150&h=150&fit=crop&crop=face",
+      text: "Community solar subscriptions surged! 2,500+ households joined our solar garden. Monthly subscription revenue: $450K.",
+      industry: "solar",
+      results: "2,500+ subscribers, $450K monthly",
+      rating: 5
+    },
+    {
+      name: "Christopher Lee",
+      company: "Lee Solar Engineering",
+      image: "https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=150&h=150&fit=crop&crop=face",
+      text: "Solar engineering services in demand! Designing systems for major installations. Engineering contracts worth $320K monthly.",
+      industry: "solar",
+      results: "Engineering contracts, $320K monthly",
+      rating: 5
+    },
+    {
+      name: "Karen White",
+      company: "White Solar Training",
+      image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&h=150&fit=crop&crop=face",
+      text: "Solar installer training programs full! Training next generation of solar technicians. Course revenue hit $95K monthly.",
+      industry: "solar",
+      results: "Technician training, $95K monthly",
+      rating: 5
+    },
+    {
+      name: "Mark Clark",
+      company: "Clark Solar Monitoring",
+      image: "https://images.unsplash.com/photo-1556157382-97eda2d62296?w=150&h=150&fit=crop&crop=face",
+      text: "Solar monitoring software sales incredible! Tracking performance for 5,000+ systems. Software licensing revenue: $180K monthly.",
+      industry: "solar",
+      results: "5,000+ monitored systems, $180K monthly",
+      rating: 5
+    },
+    {
+      name: "Lisa Rodriguez",
+      company: "Rodriguez Solar Sales",
+      image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face",
+      text: "Door-to-door solar sales transformed! AI identified interested homeowners. Sales team closing 45+ deals monthly at $31K average.",
+      industry: "solar",
+      results: "45+ monthly closings, $31K average",
+      rating: 5
+    },
+    {
+      name: "Paul Johnson",
+      company: "Johnson Solar Permits",
+      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+      text: "Solar permitting services booming! Fast-tracking permits for 200+ installations monthly. Permitting revenue hit $85K monthly.",
+      industry: "solar",
+      results: "200+ monthly permits, $85K revenue",
+      rating: 5
+    },
+    {
+      name: "Nancy Davis",
+      company: "Davis Solar Inspection",
+      image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face",
+      text: "Solar inspection services in high demand! Quality inspections for installations. Monthly inspection revenue: $65K.",
+      industry: "solar",
+      results: "Quality inspections, $65K monthly",
+      rating: 5
+    },
+    {
+      name: "Donald Wilson",
+      company: "Wilson Agri-Solar",
+      image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
+      text: "Agricultural solar projects exploding! Solar installations on farms and agribusiness. 25+ agri-solar projects worth $12M total.",
+      industry: "solar",
+      results: "25+ agri-solar projects, $12M total",
+      rating: 5
+    },
+    {
+      name: "Betty Martinez",
+      company: "Martinez Solar Insurance",
+      image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
+      text: "Solar insurance policies surged! Protecting 1,200+ solar installations. Monthly insurance premiums: $95K.",
+      industry: "solar",
+      results: "1,200+ policies, $95K monthly premiums",
+      rating: 5
+    },
+    
+    // Fitness Industry (Additional testimonials)
+    {
+      name: "Marcus Johnson",
+      company: "Johnson Fitness Empire",
+      image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=150&h=150&fit=crop&crop=face",
+      text: "Personal training clients exploded! From 15 to 120+ active clients at $80/session. Monthly revenue jumped from $4.8K to $38K. Booked solid!",
+      industry: "fitness",
+      results: "700% client growth, $33K monthly increase",
+      rating: 5
+    },
+    {
+      name: "Tanya Rodriguez",
+      company: "Rodriguez Yoga Studio",
+      image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face",
+      text: "Yoga class memberships through the roof! Premium memberships at $150/month with 300+ active members. Monthly revenue: $45K.",
+      industry: "fitness",
+      results: "300+ members, $45K monthly",
+      rating: 5
+    },
+    {
+      name: "Derek Wilson",
+      company: "Wilson CrossFit Box",
+      image: "https://images.unsplash.com/photo-1567013127542-490d757e51cd?w=150&h=150&fit=crop&crop=face",
+      text: "CrossFit memberships sold out! Unlimited memberships at $180/month. 220+ members with waiting list. Monthly revenue: $39.6K.",
+      industry: "fitness",
+      results: "220+ CrossFit members, $39.6K monthly",
+      rating: 5
+    },
+    {
+      name: "Carmen Martinez",
+      company: "Martinez Dance Fitness",
+      image: "https://images.unsplash.com/photo-1594736797933-d0c6ed204443?w=150&h=150&fit=crop&crop=face",
+      text: "Dance fitness classes packed! Zumba and dance programs at $25/class. 150+ regular attendees. Monthly class revenue: $28K.",
+      industry: "fitness",
+      results: "150+ dancers, $28K monthly",
+      rating: 5
+    },
+    {
+      name: "Trevor Davis",
+      company: "Davis Strength Training",
+      image: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=150&h=150&fit=crop&crop=face",
+      text: "Strength coaching programs incredible! Powerlifting and strength training at $120/session. 85+ serious lifters. Monthly revenue: $41K.",
+      industry: "fitness",
+      results: "85+ strength athletes, $41K monthly",
+      rating: 5
+    },
+    {
+      name: "Melissa Garcia",
+      company: "Garcia Pilates Studio",
+      image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=150&h=150&fit=crop&crop=face",
+      text: "Pilates sessions fully booked! Reformer Pilates at $65/session. 140+ regular clients. Monthly session revenue: $36K.",
+      industry: "fitness",
+      results: "140+ Pilates clients, $36K monthly",
+      rating: 5
+    },
+    {
+      name: "Keith Anderson",
+      company: "Anderson Athletic Performance",
+      image: "https://images.unsplash.com/photo-1506629905474-11897b314786?w=150&h=150&fit=crop&crop=face",
+      text: "Sports performance training booming! Training high school and college athletes. Performance programs generating $52K monthly.",
+      industry: "fitness",
+      results: "Student athletes, $52K monthly",
+      rating: 5
+    },
+    {
+      name: "Rachel Thompson",
+      company: "Thompson Wellness Center",
+      image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=150&h=150&fit=crop&crop=face",
+      text: "Holistic fitness programs incredible! Mind-body wellness at $95/session. 110+ wellness clients. Monthly revenue: $42K.",
+      industry: "fitness",
+      results: "110+ wellness clients, $42K monthly",
+      rating: 5
+    },
+    {
+      name: "Brandon Lopez",
+      company: "Lopez HIIT Studio",
+      image: "https://images.unsplash.com/photo-1567013127542-490d757e51cd?w=150&h=150&fit=crop&crop=face",
+      text: "HIIT classes selling out daily! High-intensity training memberships at $140/month. 180+ members. Monthly revenue: $25.2K.",
+      industry: "fitness",
+      results: "180+ HIIT members, $25.2K monthly",
+      rating: 5
+    },
+    {
+      name: "Stephanie Brown",
+      company: "Brown Nutrition Coaching",
+      image: "https://images.unsplash.com/photo-1594736797933-d0c6ed204443?w=150&h=150&fit=crop&crop=face",
+      text: "Nutrition coaching in huge demand! Meal planning and nutrition guidance at $85/session. 95+ nutrition clients. Monthly revenue: $32K.",
+      industry: "fitness",
+      results: "95+ nutrition clients, $32K monthly",
+      rating: 5
+    },
+    
+    // E-commerce Industry (Additional testimonials)
+    {
+      name: "Alex Chen",
+      company: "Chen Electronics Store",
+      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+      text: "Electronics sales skyrocketed online! From $25K to $280K monthly revenue. The AI found tech enthusiasts perfectly. Inventory turns weekly!",
+      industry: "ecommerce",
+      results: "$255K monthly increase, weekly inventory turns",
+      rating: 5
+    },
+    {
+      name: "Priya Patel",
+      company: "Patel Home Goods",
+      image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face",
+      text: "Home decor sales exploded! Online store revenue jumped from $18K to $165K monthly. The AI targeting brought interior design enthusiasts.",
+      industry: "ecommerce",
+      results: "$147K monthly growth, design targeting",
+      rating: 5
+    },
+    {
+      name: "Jordan Smith",
+      company: "Smith Outdoor Gear",
+      image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
+      text: "Outdoor equipment sales incredible! Camping and hiking gear revenue hit $195K monthly. AI found adventure seekers globally.",
+      industry: "ecommerce",
+      results: "$195K monthly outdoor gear sales",
+      rating: 5
+    },
+    {
+      name: "Lisa Wong",
+      company: "Wong Pet Supplies",
+      image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
+      text: "Pet product sales through the roof! Monthly revenue grew from $12K to $125K. The AI targets pet lovers perfectly. 95% customer retention!",
+      industry: "ecommerce",
+      results: "$113K monthly increase, 95% retention",
+      rating: 5
+    },
+    {
+      name: "Carlos Martinez",
+      company: "Martinez Auto Parts",
+      image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&h=150&fit=crop&crop=face",
+      text: "Auto parts sales incredible! From $30K to $220K monthly revenue. AI found car enthusiasts and mechanics nationwide. Wholesale orders exploded!",
+      industry: "ecommerce",
+      results: "$190K monthly growth, wholesale explosion",
+      rating: 5
+    },
+    {
+      name: "Aisha Johnson",
+      company: "Johnson Baby Products",
+      image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=face",
+      text: "Baby product sales amazing! New parent targeting brought $145K monthly revenue. Premium baby gear flying off virtual shelves!",
+      industry: "ecommerce",
+      results: "New parent targeting, $145K monthly",
+      rating: 5
+    },
+    {
+      name: "Ryan Kim",
+      company: "Kim Sports Equipment",
+      image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=150&h=150&fit=crop&crop=face",
+      text: "Sports equipment sales booming! Athletic gear and equipment revenue hit $185K monthly. AI targets athletes and fitness enthusiasts perfectly.",
+      industry: "ecommerce",
+      results: "Athletic targeting, $185K monthly",
+      rating: 5
+    },
+    {
+      name: "Maya Rodriguez",
+      company: "Rodriguez Kitchen Store",
+      image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&h=150&fit=crop&crop=face",
+      text: "Kitchen gadget sales exploded! Cooking enthusiasts love our products. Monthly revenue jumped from $15K to $135K. Repeat customers 85%!",
+      industry: "ecommerce",
+      results: "$120K monthly growth, 85% repeat rate",
+      rating: 5
+    },
+    {
+      name: "Nathan Davis",
+      company: "Davis Gaming Store",
+      image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face",
+      text: "Gaming product sales incredible! From $20K to $175K monthly revenue. AI found serious gamers wanting premium equipment. Pre-orders sold out!",
+      industry: "ecommerce",
+      results: "$155K monthly growth, pre-order sellouts",
+      rating: 5
+    },
+    {
+      name: "Zoe Wilson",
+      company: "Wilson Craft Supplies",
+      image: "https://images.unsplash.com/photo-1551836022-deb4988cc6c0?w=150&h=150&fit=crop&crop=face",
+      text: "Craft supply sales booming! DIY enthusiasts driving $95K monthly revenue. The AI targeting brings serious crafters who buy premium supplies regularly.",
+      industry: "ecommerce",
+      results: "DIY targeting, $95K monthly",
+      rating: 5
+    },
+    
+    // Healthcare Industry (Additional testimonials)
+    {
+      name: "Dr. Michael Rodriguez",
+      company: "Rodriguez Family Practice",
+      image: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=150&h=150&fit=crop&crop=face",
+      text: "New patient appointments increased 600%! From 50 to 350+ new patients monthly. Practice revenue grew from $45K to $185K monthly. Incredible targeting!",
+      industry: "healthcare",
+      results: "600% patient growth, $140K monthly increase",
+      rating: 5
+    },
+    {
+      name: "Dr. Sarah Johnson",
+      company: "Johnson Dental Care",
+      image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=150&h=150&fit=crop&crop=face",
+      text: "Dental practice bookings exploded! Cosmetic dentistry and implants booked solid. Monthly revenue hit $95K with 3-month waiting list for procedures.",
+      industry: "healthcare",
+      results: "Cosmetic dentistry boom, $95K monthly",
+      rating: 5
+    },
+    {
+      name: "Dr. James Chen",
+      company: "Chen Specialty Clinic",
+      image: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=150&h=150&fit=crop&crop=face",
+      text: "Specialist referrals increased 800%! Cardiology consultations at $300+ each. Monthly specialty revenue hit $125K. AI found patients needing specialists.",
+      industry: "healthcare",
+      results: "800% specialist referrals, $125K monthly",
+      rating: 5
+    },
+    {
+      name: "Dr. Emily Davis",
+      company: "Davis Pediatric Practice",
+      image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=150&h=150&fit=crop&crop=face",
+      text: "Pediatric appointments through the roof! New families with young children booking constantly. Monthly revenue grew to $78K. Waiting list for new patients!",
+      industry: "healthcare",
+      results: "Family targeting, $78K monthly",
+      rating: 5
+    },
+    {
+      name: "Dr. Robert Martinez",
+      company: "Martinez Physical Therapy",
+      image: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=150&h=150&fit=crop&crop=face",
+      text: "Physical therapy sessions booked solid! Sports injury and rehab clients paying $120/session. Monthly revenue hit $68K with excellent outcomes.",
+      industry: "healthcare",
+      results: "Sports rehab focus, $68K monthly",
+      rating: 5
+    },
+    {
+      name: "Dr. Lisa Anderson",
+      company: "Anderson Mental Health",
+      image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=150&h=150&fit=crop&crop=face",
+      text: "Mental health counseling in high demand! Therapy sessions at $150 each. Monthly revenue hit $82K. AI found people seeking quality mental healthcare.",
+      industry: "healthcare",
+      results: "Mental health focus, $82K monthly",
+      rating: 5
+    },
+    {
+      name: "Dr. David Wilson",
+      company: "Wilson Chiropractic",
+      image: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=150&h=150&fit=crop&crop=face",
+      text: "Chiropractic treatments booming! Pain relief and wellness programs at $85/visit. Monthly revenue grew to $55K with high patient satisfaction.",
+      industry: "healthcare",
+      results: "Pain relief focus, $55K monthly",
+      rating: 5
+    },
+    {
+      name: "Dr. Jennifer Garcia",
+      company: "Garcia Women's Health",
+      image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=150&h=150&fit=crop&crop=face",
+      text: "Women's health services expanded rapidly! OB/GYN and wellness programs. Monthly revenue hit $115K. AI targeting brought women seeking specialized care.",
+      industry: "healthcare",
+      results: "Women's health, $115K monthly",
+      rating: 5
+    },
+    {
+      name: "Dr. Christopher Lee",
+      company: "Lee Dermatology Clinic",
+      image: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=150&h=150&fit=crop&crop=face",
+      text: "Dermatology appointments booked months ahead! Cosmetic and medical dermatology at $250+ per visit. Monthly revenue: $135K.",
+      industry: "healthcare",
+      results: "Dermatology boom, $135K monthly",
+      rating: 5
+    },
+    {
+      name: "Dr. Amanda Taylor",
+      company: "Taylor Urgent Care",
+      image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=150&h=150&fit=crop&crop=face",
+      text: "Urgent care visits increased dramatically! Fast, quality care attracting 400+ patients monthly. Monthly revenue hit $98K with excellent patient reviews.",
+      industry: "healthcare",
+      results: "400+ monthly patients, $98K revenue",
+      rating: 5
     }
   ];
 
-  const industries = ['all', 'Technology', 'E-commerce', 'Local Services', 'Healthcare', 'Fashion', 'Finance', 'Real Estate', 'Fitness', 'Legal', 'Food & Beverage', 'Beauty', 'Automotive', 'Construction', 'Travel', 'Consulting', 'Insurance', 'Education', 'Home Services', 'Events', 'Pet Services', 'Luxury Goods', 'Sports', 'Wellness', 'Coaching', 'Solar', 'Marketing'];
+  const industries = [
+    { value: 'all', label: 'All Industries' },
+    { value: 'real-estate', label: 'Real Estate' },
+    { value: 'beauty-fashion', label: 'Beauty & Fashion' },
+    { value: 'coaching', label: 'Coaching' },
+    { value: 'solar', label: 'Solar' },
+    { value: 'fitness', label: 'Fitness' },
+    { value: 'ecommerce', label: 'E-commerce' },
+    { value: 'healthcare', label: 'Healthcare' },
+    { value: 'technology', label: 'Technology' },
+    { value: 'financial', label: 'Financial Services' }
+  ];
 
-  const filteredTestimonials = selectedIndustry === 'all' 
-    ? testimonials 
-    : testimonials.filter(t => t.industry === selectedIndustry);
+  const filteredTestimonials = useMemo(() => {
+    if (selectedIndustry === 'all') return allTestimonials;
+    return allTestimonials.filter(testimonial => testimonial.industry === selectedIndustry);
+  }, [selectedIndustry]);
 
-  const visibleTestimonials = filteredTestimonials.slice(0, visibleCount);
-  const hasMore = visibleCount < filteredTestimonials.length;
+  const totalPages = Math.ceil(filteredTestimonials.length / testimonialsPerPage);
+  const currentTestimonials = filteredTestimonials.slice(
+    (currentPage - 1) * testimonialsPerPage,
+    currentPage * testimonialsPerPage
+  );
 
-  const loadMore = () => {
-    setVisibleCount(prev => Math.min(prev + 12, filteredTestimonials.length));
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleIndustryChange = (industry: string) => {
+    setSelectedIndustry(industry);
+    setCurrentPage(1);
   };
 
   return (
-    <div className="min-h-screen overflow-x-hidden">
+    <>
       <Navbar />
       
-      {/* Enhanced Hero Section */}
-      <section className="bg-gradient-to-br from-gray-900 via-purple-900 to-black text-white pt-24 section-padding relative overflow-hidden">
+      {/* Hero Section */}
+      <section className="bg-gradient-to-br from-gray-900 via-purple-900 to-black text-white pt-20 sm:pt-24 px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20 relative overflow-hidden">
         <div className="absolute inset-0">
           <motion.div
             animate={{ 
@@ -1347,7 +1079,7 @@ const Testimonials = () => {
               repeat: Infinity,
               ease: "linear"
             }}
-            className="absolute top-1/4 right-1/4 w-64 h-64 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20"
+            className="absolute top-1/4 left-1/4 w-64 h-64 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20"
           />
         </div>
 
@@ -1357,119 +1089,123 @@ const Testimonials = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <Badge className="bg-green-600 text-white mb-6 text-lg px-4 py-2">
-              97% Client Satisfaction Rate
+            <Badge className="bg-blue-600 text-white mb-4 sm:mb-6 text-base sm:text-lg px-3 sm:px-4 py-1 sm:py-2">
+              Client Success Stories
             </Badge>
-            <h1 className="text-5xl md:text-7xl font-bold mb-6">
-              Client <span className="bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">Success Stories</span>
+            <h1 className="text-3xl sm:text-5xl md:text-7xl font-bold mb-4 sm:mb-6">
+              Real Results from <span className="bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">Real Clients</span>
             </h1>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto mb-8">
-              See how we've helped businesses across industries achieve extraordinary growth 
-              with our AI-powered marketing strategies. Real clients, real results.
+            <p className="text-lg sm:text-xl text-gray-300 max-w-3xl mx-auto mb-6 sm:mb-8">
+              Discover how AI AdMaxify has transformed businesses across multiple industries with 
+              data-driven marketing strategies that deliver exceptional ROI.
             </p>
           </motion.div>
         </div>
       </section>
 
+      {/* Stats Section */}
+      <section className="bg-white px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8">
+            {[
+              { icon: Users, value: "500+", label: "Happy Clients" },
+              { icon: TrendingUp, value: "342%", label: "Average ROI" },
+              { icon: Award, value: "97%", label: "Success Rate" },
+              { icon: Star, value: "4.9/5", label: "Client Rating" }
+            ].map((stat, index) => (
+              <motion.div 
+                key={index}
+                initial={{ opacity: 0, scale: 0.5 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                whileHover={{ scale: 1.05 }}
+                className="text-center p-4 sm:p-6 bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg"
+              >
+                <stat.icon size={32} className="sm:w-10 sm:h-10 text-purple-600 mx-auto mb-2 sm:mb-4" />
+                <div className="text-2xl sm:text-4xl lg:text-6xl font-bold text-purple-600 mb-1 sm:mb-2">{stat.value}</div>
+                <div className="text-xs sm:text-base text-gray-600 font-medium">{stat.label}</div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Filter Section */}
-      <section className="bg-white py-8 sticky top-0 z-40 shadow-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-            <Select value={selectedIndustry} onValueChange={setSelectedIndustry}>
-              <SelectTrigger className="w-full sm:w-64 border-2 border-purple-200 focus:border-purple-500">
-                <SelectValue placeholder="Filter by industry" />
-              </SelectTrigger>
-              <SelectContent className="max-h-60">
-                <ScrollArea className="h-full">
-                  {industries.map(industry => (
-                    <SelectItem key={industry} value={industry}>
-                      {industry === 'all' ? 'All Industries' : industry}
+      <section className="bg-gradient-to-br from-purple-50 to-blue-50 px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-6 sm:mb-8">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
+              Success Stories by <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">Industry</span>
+            </h2>
+            <p className="text-sm sm:text-base text-gray-600 mb-4">
+              <span className="inline-flex items-center gap-2 bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm font-medium">
+                <ChevronDown className="w-4 h-4" />
+                Scroll down to see our diverse industry expertise
+              </span>
+            </p>
+            <div className="max-w-md mx-auto">
+              <Select value={selectedIndustry} onValueChange={handleIndustryChange}>
+                <SelectTrigger className="w-full text-base sm:text-lg h-12 sm:h-14 bg-white border-2 border-purple-200 hover:border-purple-300 focus:border-purple-500">
+                  <SelectValue placeholder="Filter by industry" />
+                </SelectTrigger>
+                <SelectContent className="bg-white border-purple-200 z-50">
+                  {industries.map((industry) => (
+                    <SelectItem key={industry.value} value={industry.value} className="text-base sm:text-lg hover:bg-purple-50">
+                      {industry.label}
                     </SelectItem>
                   ))}
-                </ScrollArea>
-              </SelectContent>
-            </Select>
-            <div className="text-sm text-gray-600">
-              Showing {visibleTestimonials.length} of {filteredTestimonials.length} testimonials
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Enhanced Testimonials Grid */}
-      <section className="bg-gradient-to-br from-purple-50 to-blue-50 section-padding">
+      {/* Testimonials Grid */}
+      <section className="bg-white px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 sm:gap-8">
-            {visibleTestimonials.map((testimonial, index) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+            {currentTestimonials.map((testimonial, index) => (
               <motion.div
-                key={testimonial.id}
+                key={index}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: (index % 12) * 0.1 }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
                 whileHover={{ y: -5, scale: 1.02 }}
+                className="h-full"
               >
-                <Card className="h-full shadow-xl border-0 bg-white overflow-hidden hover:shadow-2xl transition-all duration-300">
-                  <CardHeader className="pb-4">
-                    {/* Client Image and Rating */}
-                    <div className="flex items-center space-x-4 mb-4">
+                <Card className="h-full bg-white shadow-xl border-0 overflow-hidden hover:shadow-2xl transition-all duration-300">
+                  <CardContent className="p-4 sm:p-6 h-full flex flex-col">
+                    <div className="flex items-center mb-3 sm:mb-4">
                       <img 
                         src={testimonial.image} 
                         alt={testimonial.name}
-                        className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover border-3 border-purple-200"
+                        className="w-12 h-12 sm:w-16 sm:h-16 rounded-full object-cover mr-3 sm:mr-4"
                       />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center space-x-1 mb-2">
+                      <div className="flex-1">
+                        <h3 className="font-bold text-gray-900 text-sm sm:text-base">{testimonial.name}</h3>
+                        <p className="text-purple-600 font-medium text-xs sm:text-sm">{testimonial.company}</p>
+                        <div className="flex items-center mt-1">
                           {[...Array(testimonial.rating)].map((_, i) => (
                             <Star key={i} size={14} className="text-yellow-400 fill-current" />
                           ))}
                         </div>
-                        <Badge variant="outline" className="text-purple-600 border-purple-600 text-xs">
-                          {testimonial.industry}
-                        </Badge>
                       </div>
                     </div>
                     
-                    <CardDescription className="text-gray-700 italic text-sm sm:text-base leading-relaxed line-clamp-4">
-                      "{testimonial.testimonial}"
-                    </CardDescription>
-                  </CardHeader>
-                  
-                  <CardContent className="pt-0">
-                    {/* Results Before/After */}
-                    <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6">
-                      <h4 className="font-semibold text-gray-900 mb-3 text-sm">Results Achieved</h4>
-                      <div className="grid grid-cols-1 gap-2 text-xs sm:text-sm">
-                        <div>
-                          <span className="text-gray-600">Before: </span>
-                          <span className="text-gray-800 break-words">{testimonial.results.before}</span>
-                        </div>
-                        <div>
-                          <span className="text-gray-600">After: </span>
-                          <span className="text-purple-600 font-semibold break-words">{testimonial.results.after}</span>
-                        </div>
-                        <div>
-                          <span className="text-gray-600">Timeframe: </span>
-                          <span className="text-gray-800">{testimonial.results.timeframe}</span>
-                        </div>
+                    <div className="relative mb-3 sm:mb-4 flex-1">
+                      <Quote className="absolute top-0 left-0 text-purple-200 w-6 h-6 sm:w-8 sm:h-8" />
+                      <p className="text-gray-600 text-sm sm:text-base pl-6 sm:pl-8 leading-relaxed">
+                        {testimonial.text}
+                      </p>
+                    </div>
+                    
+                    <div className="mt-auto">
+                      <div className="bg-gradient-to-r from-purple-100 to-blue-100 rounded-lg p-3 sm:p-4">
+                        <p className="text-purple-700 font-bold text-sm sm:text-base text-center">
+                          {testimonial.results}
+                        </p>
                       </div>
-                    </div>
-
-                    {/* Key Metrics */}
-                    <div className="grid grid-cols-3 gap-1 sm:gap-2 mb-4 sm:mb-6">
-                      {testimonial.metrics.map((metric, metricIndex) => (
-                        <div key={metricIndex} className="text-center p-2 sm:p-3 bg-white rounded-lg shadow-sm">
-                          <metric.icon size={16} className="text-purple-600 mx-auto mb-1" />
-                          <div className="text-sm sm:text-lg font-bold text-purple-600 break-words">{metric.value}</div>
-                          <div className="text-xs text-gray-600 leading-tight">{metric.label}</div>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Client Info */}
-                    <div className="border-t pt-4">
-                      <div className="font-bold text-gray-900 text-sm sm:text-base truncate">{testimonial.name}</div>
-                      <div className="text-xs sm:text-sm text-gray-600 truncate">{testimonial.position}</div>
-                      <div className="text-xs sm:text-sm text-purple-600 font-medium truncate">{testimonial.company}</div>
                     </div>
                   </CardContent>
                 </Card>
@@ -1477,102 +1213,101 @@ const Testimonials = () => {
             ))}
           </div>
 
-          {/* Load More Button */}
-          {hasMore && (
-            <motion.div 
-              className="text-center mt-12"
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              transition={{ duration: 0.6 }}
-            >
-              <Button 
-                onClick={loadMore}
-                className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-8 py-3 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-              >
-                Load More Stories <ChevronDown className="ml-2" size={20} />
-              </Button>
-              <p className="text-gray-600 mt-4">
-                {filteredTestimonials.length - visibleCount} more success stories available
-              </p>
-            </motion.div>
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="mt-12 sm:mt-16">
+              <Pagination>
+                <PaginationContent className="flex justify-center gap-2">
+                  {currentPage > 1 && (
+                    <PaginationItem>
+                      <PaginationPrevious 
+                        href="#" 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handlePageChange(currentPage - 1);
+                        }}
+                        className="text-sm sm:text-base"
+                      />
+                    </PaginationItem>
+                  )}
+                  
+                  {[...Array(Math.min(5, totalPages))].map((_, index) => {
+                    const pageNumber = currentPage <= 3 
+                      ? index + 1 
+                      : currentPage >= totalPages - 2 
+                        ? totalPages - 4 + index 
+                        : currentPage - 2 + index;
+                    
+                    if (pageNumber < 1 || pageNumber > totalPages) return null;
+                    
+                    return (
+                      <PaginationItem key={pageNumber}>
+                        <PaginationLink
+                          href="#"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handlePageChange(pageNumber);
+                          }}
+                          isActive={currentPage === pageNumber}
+                          className="text-sm sm:text-base"
+                        >
+                          {pageNumber}
+                        </PaginationLink>
+                      </PaginationItem>
+                    );
+                  })}
+                  
+                  {currentPage < totalPages && (
+                    <PaginationItem>
+                      <PaginationNext 
+                        href="#" 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handlePageChange(currentPage + 1);
+                        }}
+                        className="text-sm sm:text-base"
+                      />
+                    </PaginationItem>
+                  )}
+                </PaginationContent>
+              </Pagination>
+            </div>
           )}
         </div>
       </section>
 
-      {/* Enhanced Stats Section */}
-      <section className="bg-white section-padding">
-        <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-              Our <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">Track Record</span>
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Numbers don't lie. Here's what we've achieved for our clients across all industries.
-            </p>
-          </motion.div>
-
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8">
-            {[
-              { value: "97%", label: "Client Satisfaction", color: "text-green-600" },
-              { value: "17X", label: "Average ROI", color: "text-purple-600" },
-              { value: "2.8M+", label: "Leads Generated", color: "text-blue-600" },
-              { value: "$50M+", label: "Revenue Generated", color: "text-orange-600" }
-            ].map((stat, index) => (
-              <motion.div 
-                key={index} 
-                className="text-center p-4 sm:p-6 bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
-                whileHover={{ scale: 1.05 }}
-              >
-                <div className={`text-3xl sm:text-4xl lg:text-6xl font-bold ${stat.color} mb-2`}>{stat.value}</div>
-                <div className="text-gray-600 font-medium text-sm sm:text-base">{stat.label}</div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* CTA Section */}
-      <section className="bg-gradient-to-br from-gray-900 via-purple-900 to-black text-white section-padding">
+      <section className="bg-gradient-to-br from-gray-900 via-purple-900 to-black text-white px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
         <div className="max-w-4xl mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <h2 className="text-4xl md:text-6xl font-bold mb-6">
+            <h2 className="text-3xl sm:text-4xl md:text-6xl font-bold mb-4 sm:mb-6">
               Ready to Be Our <span className="bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">Next Success Story</span>?
             </h2>
-            <p className="text-xl text-gray-300 mb-8">
-              Join hundreds of successful businesses that have transformed their growth 
-              with our AI-powered marketing strategies.
+            <p className="text-lg sm:text-xl text-gray-300 mb-6 sm:mb-8">
+              Join hundreds of businesses that have transformed their marketing results with AI AdMaxify.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/strategy-call">
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-lg px-8 py-4 w-full sm:w-auto">
-                    Book Free Strategy Call <ArrowRight className="ml-2" size={20} />
-                  </Button>
-                </motion.div>
-              </Link>
-              <Link to="/services">
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Button variant="outline" className="border-purple-400 text-purple-400 hover:bg-purple-400 hover:text-white text-lg px-8 py-4 w-full sm:w-auto">
-                    View Our Services
-                  </Button>
-                </motion.div>
-              </Link>
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button className="w-full sm:w-auto bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4">
+                  Get Your Free Strategy Call
+                </Button>
+              </motion.div>
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button variant="outline" className="w-full sm:w-auto border-purple-400 text-purple-400 hover:bg-purple-400 hover:text-white text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4">
+                  View Our Services
+                </Button>
+              </motion.div>
             </div>
           </motion.div>
         </div>
       </section>
 
       <EnhancedFooter />
-    </div>
+    </>
   );
 };
 

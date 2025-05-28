@@ -146,7 +146,7 @@ const Contact = () => {
                     worth $500!
                   </p>
                   <Link to="/strategy-call">
-                    <Button variant="outline" className="border-white text-white hover:bg-white hover:text-accent">
+                    <Button variant="outline" className="border-white hover:bg-white text-lime-600">
                       Claim Free Analysis
                     </Button>
                   </Link>

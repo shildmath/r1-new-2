@@ -1,19 +1,18 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { storage } from '@/utils/localStorage';
-import { TimeSlot, Booking, User } from '@/types/admin';
-import { Calendar } from 'lucide-react';
+import { Booking, TimeSlot, User } from '@/types/admin';
+import { Calendar, Clock, User as UserIcon, Phone, Mail } from 'lucide-react';
 
 const StrategyCallForm = () => {
   const { toast } = useToast();
-  const [availableSlots, setAvailableSlots] = useState<(TimeSlot & { closerName: string })[]>([]);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -23,122 +22,86 @@ const StrategyCallForm = () => {
     preferredTime: '',
     additionalInfo: ''
   });
+  const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
+  const [closers, setClosers] = useState<User[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    loadAvailableSlots();
-  }, []);
-
-  const loadAvailableSlots = () => {
+  useState(() => {
+    // Load available time slots and closers
     const timeSlots = storage.getTimeSlots().filter(slot => !slot.isBooked);
-    const users = storage.getUsers();
-    
-    const slotsWithClosers = timeSlots.map(slot => {
-      const closer = users.find(user => user.id === slot.closerId);
-      return {
-        ...slot,
-        closerName: closer?.name || 'Unknown Closer'
-      };
-    });
+    const users = storage.getUsers().filter(user => user.role === 'closer');
+    setAvailableSlots(timeSlots);
+    setClosers(users);
+  });
 
-    const uniqueSlots = slotsWithClosers.reduce((acc: (TimeSlot & { closerName: string })[], slot) => {
-      const exists = acc.find(s => s.date === slot.date && s.time === slot.time);
-      if (!exists) {
-        acc.push(slot);
-      }
-      return acc;
-    }, []);
-
-    setAvailableSlots(uniqueSlots.sort((a, b) => {
-      const dateCompare = new Date(a.date).getTime() - new Date(b.date).getTime();
-      if (dateCompare === 0) {
-        return a.time.localeCompare(b.time);
-      }
-      return dateCompare;
-    }));
+  const getAvailableDates = () => {
+    const dates = [...new Set(availableSlots.map(slot => slot.date))];
+    return dates.sort();
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
-
-  const handleTimeSlotChange = (value: string) => {
-    const [date, time] = value.split('|');
-    setFormData({
-      ...formData,
-      preferredDate: date,
-      preferredTime: time
-    });
-  };
-
-  const findAvailableCloser = (date: string, time: string): string | null => {
-    const timeSlots = storage.getTimeSlots();
-    const availableSlot = timeSlots.find(slot => 
-      slot.date === date && 
-      slot.time === time && 
-      !slot.isBooked
-    );
-    return availableSlot?.closerId || null;
+  const getAvailableTimesForDate = (selectedDate: string) => {
+    return availableSlots
+      .filter(slot => slot.date === selectedDate)
+      .map(slot => slot.time)
+      .sort();
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!formData.preferredDate || !formData.preferredTime) {
-      toast({
-        title: "Error",
-        description: "Please select a preferred date and time.",
-        variant: "destructive"
-      });
-      return;
-    }
+    setIsSubmitting(true);
 
     try {
-      const assignedCloserId = findAvailableCloser(formData.preferredDate, formData.preferredTime);
-      
-      if (!assignedCloserId) {
+      // Find available time slot for the selected date and time
+      const selectedSlot = availableSlots.find(
+        slot => slot.date === formData.preferredDate && slot.time === formData.preferredTime
+      );
+
+      if (!selectedSlot) {
         toast({
-          title: "Error",
-          description: "Selected time slot is no longer available. Please choose another time.",
-          variant: "destructive"
+          title: "Time Slot Unavailable",
+          description: "The selected time slot is no longer available. Please choose another time.",
+          variant: "destructive",
         });
+        setIsSubmitting(false);
         return;
       }
 
+      // Create new booking
       const newBooking: Booking = {
         id: Date.now().toString(),
-        ...formData,
-        closerId: assignedCloserId,
-        timeSlotId: '',
-        status: 'confirmed',
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        phone: formData.phone,
+        preferredDate: formData.preferredDate,
+        preferredTime: formData.preferredTime,
+        additionalInfo: formData.additionalInfo,
+        closerId: selectedSlot.closerId,
+        timeSlotId: selectedSlot.id,
+        callStatus: 'confirmed',
+        dealStatus: 'follow-up',
+        paymentLinkSent: false,
+        contractLinkSent: false,
+        offerMade: false,
         createdAt: new Date().toISOString()
       };
 
-      // Update the time slot to mark it as booked
-      const timeSlots = storage.getTimeSlots();
-      const updatedTimeSlots = timeSlots.map(slot => {
-        if (slot.closerId === assignedCloserId && 
-            slot.date === formData.preferredDate && 
-            slot.time === formData.preferredTime && 
-            !slot.isBooked) {
-          newBooking.timeSlotId = slot.id;
-          return { ...slot, isBooked: true, clientId: newBooking.id };
-        }
-        return slot;
-      });
+      // Save booking
+      const existingBookings = storage.getBookings();
+      storage.setBookings([...existingBookings, newBooking]);
 
-      // Save the booking and updated time slots
-      const bookings = storage.getBookings();
-      storage.setBookings([...bookings, newBooking]);
+      // Mark time slot as booked
+      const allTimeSlots = storage.getTimeSlots();
+      const updatedTimeSlots = allTimeSlots.map(slot => 
+        slot.id === selectedSlot.id 
+          ? { ...slot, isBooked: true, clientId: newBooking.id }
+          : slot
+      );
       storage.setTimeSlots(updatedTimeSlots);
 
-      toast({
-        title: "Strategy Call Booked!",
-        description: "Thank you! Your strategy call has been confirmed. You'll receive a confirmation email shortly.",
-      });
-      
+      // Update available slots state
+      setAvailableSlots(prev => prev.filter(slot => slot.id !== selectedSlot.id));
+
       // Reset form
       setFormData({
         firstName: '',
@@ -150,133 +113,252 @@ const StrategyCallForm = () => {
         additionalInfo: ''
       });
 
-      // Refresh available slots
-      loadAvailableSlots();
+      toast({
+        title: "Booking Confirmed!",
+        description: "Your strategy call has been booked successfully. You will receive a confirmation email shortly.",
+      });
 
     } catch (error) {
+      console.error('Booking submission error:', error);
       toast({
-        title: "Error",
-        description: "Failed to book strategy call. Please try again.",
-        variant: "destructive"
+        title: "Booking Failed",
+        description: "There was an error booking your call. Please try again.",
+        variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
+  const handleChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    
+    // Reset time when date changes
+    if (field === 'preferredDate') {
+      setFormData(prev => ({ ...prev, preferredTime: '' }));
+    }
+  };
+
+  const availableDates = getAvailableDates();
+  const availableTimes = formData.preferredDate ? getAvailableTimesForDate(formData.preferredDate) : [];
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.8 }}
-    >
-      <Card className="agency-card">
-        <CardContent className="p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Personal Information */}
-            <div>
-              <h3 className="text-lg font-semibold text-primary mb-4">Personal Information</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Input
-                  name="firstName"
-                  placeholder="First Name *"
-                  value={formData.firstName}
-                  onChange={handleInputChange}
-                  required
-                />
-                <Input
-                  name="lastName"
-                  placeholder="Last Name *"
-                  value={formData.lastName}
-                  onChange={handleInputChange}
-                  required
-                />
-                <Input
-                  name="email"
-                  type="email"
-                  placeholder="Email Address *"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  required
-                />
-                <Input
-                  name="phone"
-                  type="tel"
-                  placeholder="Phone Number with Country Code *"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-            </div>
+    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-white to-accent/5 py-20">
+      <div className="container mx-auto px-4">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="max-w-4xl mx-auto"
+        >
+          <div className="text-center mb-12">
+            <h1 className="text-4xl md:text-5xl font-bold text-primary mb-6">
+              Book Your Strategy Call
+            </h1>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Ready to transform your business? Schedule a personalized strategy call with our experts.
+            </p>
+          </div>
 
-            {/* Time Slot Selection */}
-            <div>
-              <h3 className="text-lg font-semibold text-primary mb-4">Time Slot Selection</h3>
-              <div>
-                <label className="text-sm font-medium text-primary mb-2 block">
-                  Select Available Time Slot *
-                </label>
-                <Select 
-                  value={formData.preferredDate && formData.preferredTime ? `${formData.preferredDate}|${formData.preferredTime}` : ''} 
-                  onValueChange={handleTimeSlotChange}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Choose an available time slot" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {availableSlots.length > 0 ? (
-                      availableSlots.map((slot) => (
-                        <SelectItem key={`${slot.date}|${slot.time}`} value={`${slot.date}|${slot.time}`}>
-                          {new Date(slot.date).toLocaleDateString()} at {slot.time}
-                        </SelectItem>
-                      ))
+          <Card className="shadow-2xl">
+            <CardHeader className="bg-gradient-to-r from-primary to-accent text-white">
+              <CardTitle className="text-2xl text-center">Schedule Your Free Strategy Call</CardTitle>
+            </CardHeader>
+            <CardContent className="p-8">
+              <form onSubmit={handleSubmit} className="space-y-8">
+                {/* Personal Information Section */}
+                <div>
+                  <h3 className="text-xl font-semibold text-primary mb-4 flex items-center">
+                    <UserIcon size={24} className="mr-2" />
+                    Personal Information
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="text-sm font-medium text-primary mb-2 block">
+                        First Name *
+                      </label>
+                      <Input
+                        placeholder="Enter your first name"
+                        value={formData.firstName}
+                        onChange={(e) => handleChange('firstName', e.target.value)}
+                        required
+                        className="h-12"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-primary mb-2 block">
+                        Last Name *
+                      </label>
+                      <Input
+                        placeholder="Enter your last name"
+                        value={formData.lastName}
+                        onChange={(e) => handleChange('lastName', e.target.value)}
+                        required
+                        className="h-12"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                    <div>
+                      <label className="text-sm font-medium text-primary mb-2 block flex items-center">
+                        <Mail size={16} className="mr-2" />
+                        Email Address *
+                      </label>
+                      <Input
+                        type="email"
+                        placeholder="your.email@example.com"
+                        value={formData.email}
+                        onChange={(e) => handleChange('email', e.target.value)}
+                        required
+                        className="h-12"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-primary mb-2 block flex items-center">
+                        <Phone size={16} className="mr-2" />
+                        Phone Number with Country Code *
+                      </label>
+                      <Input
+                        placeholder="+1 (555) 123-4567"
+                        value={formData.phone}
+                        onChange={(e) => handleChange('phone', e.target.value)}
+                        required
+                        className="h-12"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Time Slot Section */}
+                <div>
+                  <h3 className="text-xl font-semibold text-primary mb-4 flex items-center">
+                    <Calendar size={24} className="mr-2" />
+                    Time Slot Selection
+                  </h3>
+                  
+                  {availableDates.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <label className="text-sm font-medium text-primary mb-2 block">
+                          Preferred Date *
+                        </label>
+                        <Select value={formData.preferredDate} onValueChange={(value) => handleChange('preferredDate', value)}>
+                          <SelectTrigger className="h-12">
+                            <SelectValue placeholder="Select a date" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {availableDates.map((date) => (
+                              <SelectItem key={date} value={date}>
+                                {new Date(date).toLocaleDateString('en-US', { 
+                                  weekday: 'long', 
+                                  year: 'numeric', 
+                                  month: 'long', 
+                                  day: 'numeric' 
+                                })}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div>
+                        <label className="text-sm font-medium text-primary mb-2 block flex items-center">
+                          <Clock size={16} className="mr-2" />
+                          Preferred Time *
+                        </label>
+                        <Select 
+                          value={formData.preferredTime} 
+                          onValueChange={(value) => handleChange('preferredTime', value)}
+                          disabled={!formData.preferredDate}
+                        >
+                          <SelectTrigger className="h-12">
+                            <SelectValue placeholder={formData.preferredDate ? "Select a time" : "Select date first"} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {availableTimes.map((time) => (
+                              <SelectItem key={time} value={time}>
+                                {new Date(`2000-01-01T${time}`).toLocaleTimeString('en-US', { 
+                                  hour: 'numeric', 
+                                  minute: '2-digit',
+                                  hour12: true 
+                                })}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
+                      <Calendar size={48} className="mx-auto text-yellow-500 mb-4" />
+                      <h4 className="text-lg font-medium text-yellow-800 mb-2">No Available Slots</h4>
+                      <p className="text-yellow-700">
+                        All time slots are currently booked. Please check back later or contact us directly.
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Additional Information Section */}
+                <div>
+                  <h3 className="text-xl font-semibold text-primary mb-4">
+                    Additional Information
+                  </h3>
+                  <div>
+                    <label className="text-sm font-medium text-primary mb-2 block">
+                      Tell us about your business and goals (Optional)
+                    </label>
+                    <Textarea
+                      placeholder="Share any specific topics you'd like to discuss, your current challenges, or questions you have..."
+                      value={formData.additionalInfo}
+                      onChange={(e) => handleChange('additionalInfo', e.target.value)}
+                      rows={4}
+                      className="resize-none"
+                    />
+                  </div>
+                </div>
+
+                {/* Submit Button */}
+                <div className="pt-4">
+                  <Button
+                    type="submit"
+                    disabled={isSubmitting || availableDates.length === 0}
+                    className="w-full h-14 text-lg font-semibold agency-btn"
+                  >
+                    {isSubmitting ? (
+                      <div className="flex items-center space-x-2">
+                        <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+                        <span>Booking Your Call...</span>
+                      </div>
                     ) : (
-                      <SelectItem value="no-slots" disabled>
-                        No available time slots
-                      </SelectItem>
+                      'Book My Strategy Call'
                     )}
-                  </SelectContent>
-                </Select>
-                {availableSlots.length === 0 && (
-                  <p className="text-sm text-red-600 mt-2">
-                    No time slots are currently available. Please check back later or contact us directly.
-                  </p>
-                )}
-              </div>
-            </div>
+                  </Button>
+                </div>
+              </form>
 
-            {/* Additional Information */}
-            <div>
-              <h3 className="text-lg font-semibold text-primary mb-4">Additional Information</h3>
-              <div>
-                <label className="text-sm font-medium text-primary mb-2 block">
-                  Additional Notes (Optional)
-                </label>
-                <Textarea
-                  name="additionalInfo"
-                  placeholder="Anything else you'd like us to know before our call?"
-                  value={formData.additionalInfo}
-                  onChange={handleInputChange}
-                  className="min-h-[80px]"
-                />
+              {/* Contact Information */}
+              <div className="mt-8 pt-8 border-t border-gray-200 text-center">
+                <p className="text-gray-600 mb-2">
+                  Need immediate assistance? Contact us directly:
+                </p>
+                <div className="flex justify-center space-x-6 text-sm">
+                  <a href="mailto:info@aiadmaxify.com" className="text-primary hover:underline flex items-center">
+                    <Mail size={16} className="mr-1" />
+                    info@aiadmaxify.com
+                  </a>
+                  <a href="tel:+15551234567" className="text-primary hover:underline flex items-center">
+                    <Phone size={16} className="mr-1" />
+                    +1 (555) 123-4567
+                  </a>
+                </div>
               </div>
-            </div>
-
-            <div className="text-center pt-6">
-              <Button 
-                type="submit" 
-                className="agency-btn text-lg px-12 py-4"
-                disabled={availableSlots.length === 0}
-              >
-                Book My Free Strategy Call <Calendar className="ml-2" size={20} />
-              </Button>
-              <p className="text-sm text-gray-600 mt-4">
-                No spam, no obligations. You'll receive a confirmation email shortly.
-              </p>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
-    </motion.div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </div>
+    </div>
   );
 };
 

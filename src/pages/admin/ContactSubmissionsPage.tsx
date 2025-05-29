@@ -4,14 +4,28 @@ import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { storage } from '@/utils/localStorage';
 import { ContactSubmission } from '@/types/admin';
-import { MessageSquare, Mail, Phone, Trash2 } from 'lucide-react';
+import { MessageSquare, Mail, Phone, Trash2, Filter } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const ContactSubmissionsPage = () => {
   const [submissions, setSubmissions] = useState<ContactSubmission[]>(storage.getContactSubmissions());
+  const [statusFilter, setStatusFilter] = useState<string>('');
   const { toast } = useToast();
+
+  const handleStatusChange = (submissionId: string, newStatus: 'new' | 'handled') => {
+    const updatedSubmissions = submissions.map(sub => 
+      sub.id === submissionId ? { ...sub, status: newStatus } : sub
+    );
+    setSubmissions(updatedSubmissions);
+    storage.setContactSubmissions(updatedSubmissions);
+    toast({
+      title: "Status Updated",
+      description: "Contact submission status has been updated successfully.",
+    });
+  };
 
   const handleDelete = (submissionId: string) => {
     const updatedSubmissions = submissions.filter(sub => sub.id !== submissionId);
@@ -23,6 +37,11 @@ const ContactSubmissionsPage = () => {
     });
   };
 
+  const filteredSubmissions = submissions.filter(submission => {
+    if (statusFilter && submission.status !== statusFilter) return false;
+    return true;
+  });
+
   return (
     <div className="space-y-6">
       <motion.div
@@ -30,11 +49,28 @@ const ContactSubmissionsPage = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        <h1 className="text-3xl font-bold text-primary mb-6">Contact Submissions</h1>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold text-primary">Contact Submissions</h1>
+          
+          {/* Status Filter */}
+          <div className="flex items-center space-x-4">
+            <Filter size={20} className="text-primary" />
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-40">
+                <SelectValue placeholder="All Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">All Status</SelectItem>
+                <SelectItem value="new">New Messages</SelectItem>
+                <SelectItem value="handled">Handled Messages</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
 
-        {submissions.length > 0 ? (
+        {filteredSubmissions.length > 0 ? (
           <div className="space-y-4">
-            {submissions.map((submission) => (
+            {filteredSubmissions.map((submission) => (
               <motion.div
                 key={submission.id}
                 initial={{ opacity: 0, x: -20 }}
@@ -65,9 +101,29 @@ const ContactSubmissionsPage = () => {
                         <Badge variant={submission.source === 'home' ? 'default' : 'secondary'}>
                           {submission.source} page
                         </Badge>
+                        <Badge 
+                          className={submission.status === 'new' ? 'bg-orange-500' : 'bg-green-500'}
+                        >
+                          {submission.status === 'new' ? 'New Message' : 'Handled Message'}
+                        </Badge>
                         <p className="text-xs text-gray-500">
                           {new Date(submission.createdAt).toLocaleString()}
                         </p>
+                        
+                        {/* Status Change Dropdown */}
+                        <Select 
+                          value={submission.status} 
+                          onValueChange={(value: 'new' | 'handled') => handleStatusChange(submission.id, value)}
+                        >
+                          <SelectTrigger className="w-32">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="new">New</SelectItem>
+                            <SelectItem value="handled">Handled</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        
                         <Button
                           variant="outline"
                           size="sm"

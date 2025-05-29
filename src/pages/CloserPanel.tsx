@@ -10,7 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { storage } from '@/utils/localStorage';
 import { TimeSlot, Booking } from '@/types/admin';
-import { Calendar, Clock, Plus, Trash2, User, LogOut } from 'lucide-react';
+import { Calendar, Clock, Plus, Trash2, User, LogOut, Eye, Filter } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const CloserPanel = () => {
@@ -20,6 +20,12 @@ const CloserPanel = () => {
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [filters, setFilters] = useState({
+    callStatus: '',
+    dealStatus: '',
+    dateFrom: '',
+    dateTo: ''
+  });
   const [formData, setFormData] = useState({
     date: '',
     time: ''
@@ -83,15 +89,15 @@ const CloserPanel = () => {
     });
   };
 
-  const handleStatusChange = (bookingId: string, newStatus: Booking['status']) => {
+  const handleStatusChange = (bookingId: string, field: string, value: string) => {
     const allBookings = storage.getBookings();
     const updatedBookings = allBookings.map(booking => 
-      booking.id === bookingId ? { ...booking, status: newStatus } : booking
+      booking.id === bookingId ? { ...booking, [field]: value } : booking
     );
     
     storage.setBookings(updatedBookings);
     setBookings(prev => prev.map(booking => 
-      booking.id === bookingId ? { ...booking, status: newStatus } : booking
+      booking.id === bookingId ? { ...booking, [field]: value } : booking
     ));
     
     toast({
@@ -100,7 +106,43 @@ const CloserPanel = () => {
     });
   };
 
-  const getStatusColor = (status: Booking['status']) => {
+  const handleDeleteBooking = (bookingId: string) => {
+    const allBookings = storage.getBookings();
+    const updatedBookings = allBookings.filter(booking => booking.id !== bookingId);
+    storage.setBookings(updatedBookings);
+    
+    setBookings(prev => prev.filter(booking => booking.id !== bookingId));
+    
+    // Also free up the time slot
+    const allTimeSlots = storage.getTimeSlots();
+    const booking = bookings.find(b => b.id === bookingId);
+    if (booking) {
+      const updatedTimeSlots = allTimeSlots.map(slot => {
+        if (slot.closerId === booking.closerId && 
+            slot.date === booking.preferredDate && 
+            slot.time === booking.preferredTime) {
+          return { ...slot, isBooked: false, clientId: undefined };
+        }
+        return slot;
+      });
+      storage.setTimeSlots(updatedTimeSlots);
+      setTimeSlots(prev => prev.map(slot => {
+        if (slot.closerId === booking.closerId && 
+            slot.date === booking.preferredDate && 
+            slot.time === booking.preferredTime) {
+          return { ...slot, isBooked: false, clientId: undefined };
+        }
+        return slot;
+      }));
+    }
+    
+    toast({
+      title: "Booking Deleted",
+      description: "Booking has been deleted and time slot freed up.",
+    });
+  };
+
+  const getCallStatusColor = (status: Booking['callStatus']) => {
     switch (status) {
       case 'confirmed': return 'bg-blue-500';
       case 'completed': return 'bg-green-500';
@@ -110,6 +152,24 @@ const CloserPanel = () => {
       default: return 'bg-blue-500';
     }
   };
+
+  const getDealStatusColor = (status: Booking['dealStatus']) => {
+    switch (status) {
+      case 'closed': return 'bg-green-600';
+      case 'follow-up': return 'bg-blue-600';
+      case 'client-loss': return 'bg-red-600';
+      case 'unqualified': return 'bg-gray-600';
+      default: return 'bg-blue-600';
+    }
+  };
+
+  const filteredBookings = bookings.filter(booking => {
+    if (filters.callStatus && booking.callStatus !== filters.callStatus) return false;
+    if (filters.dealStatus && booking.dealStatus !== filters.dealStatus) return false;
+    if (filters.dateFrom && booking.preferredDate < filters.dateFrom) return false;
+    if (filters.dateTo && booking.preferredDate > filters.dateTo) return false;
+    return true;
+  });
 
   const availableSlots = timeSlots.filter(slot => !slot.isBooked);
   const bookedSlots = timeSlots.filter(slot => slot.isBooked);
@@ -137,7 +197,7 @@ const CloserPanel = () => {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center space-x-4">
@@ -175,6 +235,22 @@ const CloserPanel = () => {
                 <div>
                   <p className="text-sm text-gray-600">Total Bookings</p>
                   <p className="text-2xl font-bold text-primary">{bookings.length}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 rounded-lg bg-purple-500 flex items-center justify-center">
+                  <Calendar className="text-white" size={24} />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Completed Calls</p>
+                  <p className="text-2xl font-bold text-primary">
+                    {bookings.filter(b => b.callStatus === 'completed').length}
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -269,12 +345,45 @@ const CloserPanel = () => {
         {/* My Bookings */}
         <Card>
           <CardHeader>
-            <CardTitle>My Bookings</CardTitle>
+            <div className="flex justify-between items-center">
+              <CardTitle>My Bookings</CardTitle>
+              
+              {/* Filters */}
+              <div className="flex items-center space-x-4">
+                <Filter size={20} className="text-primary" />
+                <Select value={filters.callStatus} onValueChange={(value) => setFilters({...filters, callStatus: value})}>
+                  <SelectTrigger className="w-32">
+                    <SelectValue placeholder="Call Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">All</SelectItem>
+                    <SelectItem value="confirmed">Confirmed</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                    <SelectItem value="no-show">No Show</SelectItem>
+                    <SelectItem value="reschedule">Reschedule</SelectItem>
+                    <SelectItem value="not-attended">Not Attended</SelectItem>
+                  </SelectContent>
+                </Select>
+                
+                <Select value={filters.dealStatus} onValueChange={(value) => setFilters({...filters, dealStatus: value})}>
+                  <SelectTrigger className="w-32">
+                    <SelectValue placeholder="Deal Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">All</SelectItem>
+                    <SelectItem value="closed">Closed</SelectItem>
+                    <SelectItem value="follow-up">Follow Up</SelectItem>
+                    <SelectItem value="client-loss">Client Loss</SelectItem>
+                    <SelectItem value="unqualified">Unqualified</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
-            {bookings.length > 0 ? (
+            {filteredBookings.length > 0 ? (
               <div className="space-y-4">
-                {bookings.map((booking) => (
+                {filteredBookings.map((booking) => (
                   <motion.div
                     key={booking.id}
                     initial={{ opacity: 0, x: -20 }}
@@ -296,33 +405,70 @@ const CloserPanel = () => {
                             Note: {booking.additionalInfo}
                           </p>
                         )}
+                        {booking.country && (
+                          <p className="text-xs text-gray-500">
+                            Location: {booking.country}
+                          </p>
+                        )}
                       </div>
                       <div className="flex flex-col items-end space-y-2">
-                        <Badge className={getStatusColor(booking.status)}>
-                          {booking.status.replace('-', ' ').toUpperCase()}
-                        </Badge>
-                        <Select 
-                          value={booking.status} 
-                          onValueChange={(value: Booking['status']) => handleStatusChange(booking.id, value)}
+                        <div className="flex space-x-2">
+                          <Badge className={getCallStatusColor(booking.callStatus)}>
+                            {booking.callStatus.replace('-', ' ').toUpperCase()}
+                          </Badge>
+                          <Badge className={getDealStatusColor(booking.dealStatus)}>
+                            {booking.dealStatus.replace('-', ' ').toUpperCase()}
+                          </Badge>
+                        </div>
+                        
+                        <div className="flex space-x-2">
+                          <Select 
+                            value={booking.callStatus} 
+                            onValueChange={(value: Booking['callStatus']) => handleStatusChange(booking.id, 'callStatus', value)}
+                          >
+                            <SelectTrigger className="w-32">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="confirmed">Confirmed</SelectItem>
+                              <SelectItem value="completed">Completed</SelectItem>
+                              <SelectItem value="no-show">No Show</SelectItem>
+                              <SelectItem value="reschedule">Reschedule</SelectItem>
+                              <SelectItem value="not-attended">Not Attended</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          
+                          <Select 
+                            value={booking.dealStatus} 
+                            onValueChange={(value: Booking['dealStatus']) => handleStatusChange(booking.id, 'dealStatus', value)}
+                          >
+                            <SelectTrigger className="w-32">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="closed">Closed</SelectItem>
+                              <SelectItem value="follow-up">Follow Up</SelectItem>
+                              <SelectItem value="client-loss">Client Loss</SelectItem>
+                              <SelectItem value="unqualified">Unqualified</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDeleteBooking(booking.id)}
+                          className="text-red-600 hover:text-red-700"
                         >
-                          <SelectTrigger className="w-40">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="confirmed">Confirmed</SelectItem>
-                            <SelectItem value="completed">Completed</SelectItem>
-                            <SelectItem value="no-show">No Show</SelectItem>
-                            <SelectItem value="reschedule">Reschedule</SelectItem>
-                            <SelectItem value="not-attended">Not Attended</SelectItem>
-                          </SelectContent>
-                        </Select>
+                          <Trash2 size={14} />
+                        </Button>
                       </div>
                     </div>
                   </motion.div>
                 ))}
               </div>
             ) : (
-              <p className="text-gray-500">No bookings yet</p>
+              <p className="text-gray-500">No bookings match the current filters</p>
             )}
           </CardContent>
         </Card>

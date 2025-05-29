@@ -28,7 +28,18 @@ export interface Booking {
   additionalInfo: string;
   closerId: string;
   timeSlotId: string;
-  status: 'confirmed' | 'completed' | 'no-show' | 'reschedule' | 'not-attended';
+  callStatus: 'confirmed' | 'completed' | 'no-show' | 'reschedule' | 'not-attended';
+  dealStatus: 'closed' | 'follow-up' | 'client-loss' | 'unqualified';
+  closedDate?: string;
+  paymentLinkSent: boolean;
+  contractLinkSent: boolean;
+  offerMade: boolean;
+  adSpend?: string;
+  country?: string;
+  zipCode?: string;
+  note?: string;
+  recordingLink?: string;
+  followUpDate?: string;
   createdAt: string;
 }
 
@@ -39,6 +50,7 @@ export interface ContactSubmission {
   phone?: string;
   message: string;
   source: 'home' | 'contact';
+  status: 'new' | 'handled';
   createdAt: string;
 }
 

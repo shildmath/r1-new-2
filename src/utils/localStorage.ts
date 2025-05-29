@@ -71,6 +71,22 @@ export const storage = {
   getContactSubmissions: (): ContactSubmission[] => storage.get<ContactSubmission>(STORAGE_KEYS.CONTACT_SUBMISSIONS),
   setContactSubmissions: (submissions: ContactSubmission[]): void => storage.set(STORAGE_KEYS.CONTACT_SUBMISSIONS, submissions),
 
+  // Function to add contact form submission
+  addContactSubmission: (name: string, email: string, phone: string, message: string, source: 'home' | 'contact'): void => {
+    const submissions = storage.getContactSubmissions();
+    const newSubmission: ContactSubmission = {
+      id: Date.now().toString(),
+      name,
+      email,
+      phone,
+      message,
+      source,
+      status: 'new',
+      createdAt: new Date().toISOString()
+    };
+    storage.setContactSubmissions([...submissions, newSubmission]);
+  },
+
   // Testimonials
   getTestimonials: (): Testimonial[] => storage.get<Testimonial>(STORAGE_KEYS.TESTIMONIALS),
   setTestimonials: (testimonials: Testimonial[]): void => storage.set(STORAGE_KEYS.TESTIMONIALS, testimonials),

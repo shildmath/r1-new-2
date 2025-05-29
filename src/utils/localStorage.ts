@@ -121,17 +121,27 @@ export const storage = {
 
   // Initialize default data
   initializeDefaults: (): void => {
-    // Create default admin user if none exists
     const users = storage.getUsers();
     if (users.length === 0) {
       const defaultAdmin: User = {
         id: '1',
         name: 'Admin User',
         email: 'admin@aiadmaxify.com',
+        password: 'admin123',
         role: 'admin',
         createdAt: new Date().toISOString()
       };
-      storage.setUsers([defaultAdmin]);
+      
+      const defaultCloser: User = {
+        id: '2',
+        name: 'John Closer',
+        email: 'closer@aiadmaxify.com',
+        password: 'closer123',
+        role: 'closer',
+        createdAt: new Date().toISOString()
+      };
+      
+      storage.setUsers([defaultAdmin, defaultCloser]);
     }
 
     // Initialize default testimonials if none exist

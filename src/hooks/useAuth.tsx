@@ -6,6 +6,7 @@ import { storage } from '@/utils/localStorage';
 interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<boolean>;
+  register: (name: string, email: string, password: string, role: 'admin' | 'closer') => Promise<boolean>;
   logout: () => void;
   isLoading: boolean;
 }
@@ -17,7 +18,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Initialize defaults and check for existing user
     storage.initializeDefaults();
     const currentUser = storage.getCurrentUser();
     setUser(currentUser);
@@ -27,11 +27,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = async (email: string, password: string): Promise<boolean> => {
     setIsLoading(true);
     
-    // Simple authentication - in real app, this would be server-side
     const users = storage.getUsers();
-    const foundUser = users.find(u => u.email === email);
+    const foundUser = users.find(u => u.email === email && u.password === password);
     
-    if (foundUser && password === 'admin123') { // Simple password for demo
+    if (foundUser) {
       setUser(foundUser);
       storage.setCurrentUser(foundUser);
       setIsLoading(false);
@@ -42,13 +41,42 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return false;
   };
 
+  const register = async (name: string, email: string, password: string, role: 'admin' | 'closer'): Promise<boolean> => {
+    setIsLoading(true);
+    
+    const users = storage.getUsers();
+    const existingUser = users.find(u => u.email === email);
+    
+    if (existingUser) {
+      setIsLoading(false);
+      return false;
+    }
+
+    const newUser: User = {
+      id: Date.now().toString(),
+      name,
+      email,
+      password,
+      role,
+      createdAt: new Date().toISOString()
+    };
+
+    const updatedUsers = [...users, newUser];
+    storage.setUsers(updatedUsers);
+    
+    setUser(newUser);
+    storage.setCurrentUser(newUser);
+    setIsLoading(false);
+    return true;
+  };
+
   const logout = () => {
     setUser(null);
     storage.setCurrentUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, login, register, logout, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

@@ -25,7 +25,10 @@ const StrategyCallForm = () => {
   });
 
   useEffect(() => {
-    // Get available time slots with closer information
+    loadAvailableSlots();
+  }, []);
+
+  const loadAvailableSlots = () => {
     const timeSlots = storage.getTimeSlots().filter(slot => !slot.isBooked);
     const users = storage.getUsers();
     
@@ -37,7 +40,6 @@ const StrategyCallForm = () => {
       };
     });
 
-    // Group by date and time, showing only unique combinations
     const uniqueSlots = slotsWithClosers.reduce((acc: (TimeSlot & { closerName: string })[], slot) => {
       const exists = acc.find(s => s.date === slot.date && s.time === slot.time);
       if (!exists) {
@@ -53,7 +55,7 @@ const StrategyCallForm = () => {
       }
       return dateCompare;
     }));
-  }, []);
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({
@@ -94,7 +96,6 @@ const StrategyCallForm = () => {
     }
 
     try {
-      // Find an available closer for the selected time slot
       const assignedCloserId = findAvailableCloser(formData.preferredDate, formData.preferredTime);
       
       if (!assignedCloserId) {
@@ -106,12 +107,11 @@ const StrategyCallForm = () => {
         return;
       }
 
-      // Create the booking
       const newBooking: Booking = {
         id: Date.now().toString(),
         ...formData,
         closerId: assignedCloserId,
-        timeSlotId: '', // Will be set when we update the time slot
+        timeSlotId: '',
         status: 'confirmed',
         createdAt: new Date().toISOString()
       };
@@ -151,16 +151,7 @@ const StrategyCallForm = () => {
       });
 
       // Refresh available slots
-      const newAvailableSlots = storage.getTimeSlots().filter(slot => !slot.isBooked);
-      const users = storage.getUsers();
-      const slotsWithClosers = newAvailableSlots.map(slot => {
-        const closer = users.find(user => user.id === slot.closerId);
-        return {
-          ...slot,
-          closerName: closer?.name || 'Unknown Closer'
-        };
-      });
-      setAvailableSlots(slotsWithClosers);
+      loadAvailableSlots();
 
     } catch (error) {
       toast({

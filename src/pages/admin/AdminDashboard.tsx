@@ -1,64 +1,75 @@
 
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { storage } from '@/utils/localStorage';
-import { 
-  Users, 
-  MessageSquare, 
-  Calendar, 
-  Star,
-  TrendingUp,
-  Clock
-} from 'lucide-react';
+import { User, Booking, ContactSubmission, TimeSlot } from '@/types/admin';
+import { Users, Calendar, MessageSquare, Clock } from 'lucide-react';
 
 const AdminDashboard = () => {
-  const users = storage.getUsers();
-  const contactSubmissions = storage.getContactSubmissions();
-  const bookings = storage.getBookings();
-  const testimonials = storage.getTestimonials();
-  const timeSlots = storage.getTimeSlots();
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalClosers: 0,
+    totalBookings: 0,
+    totalContactSubmissions: 0,
+    availableTimeSlots: 0,
+    bookedTimeSlots: 0
+  });
 
-  const stats = [
+  useEffect(() => {
+    const users: User[] = storage.getUsers();
+    const bookings: Booking[] = storage.getBookings();
+    const contactSubmissions: ContactSubmission[] = storage.getContactSubmissions();
+    const timeSlots: TimeSlot[] = storage.getTimeSlots();
+
+    setStats({
+      totalUsers: users.length,
+      totalClosers: users.filter(user => user.role === 'closer').length,
+      totalBookings: bookings.length,
+      totalContactSubmissions: contactSubmissions.length,
+      availableTimeSlots: timeSlots.filter(slot => !slot.isBooked).length,
+      bookedTimeSlots: timeSlots.filter(slot => slot.isBooked).length
+    });
+  }, []);
+
+  const statCards = [
     {
-      title: 'Total Users',
-      value: users.length,
+      title: "Total Users",
+      value: stats.totalUsers,
       icon: Users,
-      color: 'bg-blue-500'
+      color: "bg-blue-500"
     },
     {
-      title: 'Contact Submissions',
-      value: contactSubmissions.length,
-      icon: MessageSquare,
-      color: 'bg-green-500'
+      title: "Active Closers",
+      value: stats.totalClosers,
+      icon: Users,
+      color: "bg-green-500"
     },
     {
-      title: 'Bookings',
-      value: bookings.length,
+      title: "Strategy Call Bookings",
+      value: stats.totalBookings,
       icon: Calendar,
-      color: 'bg-purple-500'
+      color: "bg-purple-500"
     },
     {
-      title: 'Testimonials',
-      value: testimonials.length,
-      icon: Star,
-      color: 'bg-yellow-500'
+      title: "Contact Submissions",
+      value: stats.totalContactSubmissions,
+      icon: MessageSquare,
+      color: "bg-orange-500"
     },
     {
-      title: 'Available Time Slots',
-      value: timeSlots.filter(slot => !slot.isBooked).length,
+      title: "Available Time Slots",
+      value: stats.availableTimeSlots,
       icon: Clock,
-      color: 'bg-indigo-500'
+      color: "bg-green-600"
     },
     {
-      title: 'Booked Time Slots',
-      value: timeSlots.filter(slot => slot.isBooked).length,
-      icon: TrendingUp,
-      color: 'bg-red-500'
+      title: "Booked Time Slots",
+      value: stats.bookedTimeSlots,
+      icon: Clock,
+      color: "bg-red-500"
     }
   ];
-
-  const recentBookings = bookings.slice(-5).reverse();
-  const recentSubmissions = contactSubmissions.slice(-5).reverse();
 
   return (
     <div className="space-y-6">
@@ -67,95 +78,75 @@ const AdminDashboard = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        <h1 className="text-3xl font-bold text-primary mb-6">Dashboard</h1>
+        <h1 className="text-3xl font-bold text-primary mb-6">Admin Dashboard</h1>
         
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {stats.map((stat, index) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {statCards.map((stat, index) => (
             <motion.div
               key={stat.title}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: index * 0.1 }}
             >
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center space-x-4">
-                    <div className={`w-12 h-12 rounded-lg ${stat.color} flex items-center justify-center`}>
-                      <stat.icon className="text-white" size={24} />
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-600">{stat.title}</p>
-                      <p className="text-2xl font-bold text-primary">{stat.value}</p>
-                    </div>
+              <Card className="agency-card">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    {stat.title}
+                  </CardTitle>
+                  <div className={`w-8 h-8 ${stat.color} rounded-full flex items-center justify-center`}>
+                    <stat.icon className="text-white" size={16} />
                   </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{stat.value}</div>
                 </CardContent>
               </Card>
             </motion.div>
           ))}
         </div>
 
-        {/* Recent Activity */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Recent Bookings */}
-          <Card>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+          <Card className="agency-card">
             <CardHeader>
-              <CardTitle>Recent Bookings</CardTitle>
+              <CardTitle>Recent Activity</CardTitle>
             </CardHeader>
             <CardContent>
-              {recentBookings.length > 0 ? (
-                <div className="space-y-4">
-                  {recentBookings.map((booking) => (
-                    <div key={booking.id} className="flex justify-between items-center p-3 bg-gray-50 rounded">
-                      <div>
-                        <p className="font-medium">{booking.firstName} {booking.lastName}</p>
-                        <p className="text-sm text-gray-600">{booking.email}</p>
-                        <p className="text-xs text-gray-500">{booking.preferredDate} at {booking.preferredTime}</p>
-                      </div>
-                      <span className={`px-2 py-1 rounded text-xs ${
-                        booking.status === 'confirmed' ? 'bg-green-100 text-green-800' :
-                        booking.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-red-100 text-red-800'
-                      }`}>
-                        {booking.status}
-                      </span>
-                    </div>
-                  ))}
+              <div className="space-y-4">
+                <div className="flex items-center space-x-3">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <p className="text-sm text-gray-600">System initialized with default data</p>
                 </div>
-              ) : (
-                <p className="text-gray-500">No bookings yet</p>
-              )}
+                <div className="flex items-center space-x-3">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                  <p className="text-sm text-gray-600">Admin panel ready for use</p>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                  <p className="text-sm text-gray-600">Booking system active</p>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
-          {/* Recent Contact Submissions */}
-          <Card>
+          <Card className="agency-card">
             <CardHeader>
-              <CardTitle>Recent Contact Submissions</CardTitle>
+              <CardTitle>Quick Actions</CardTitle>
             </CardHeader>
             <CardContent>
-              {recentSubmissions.length > 0 ? (
-                <div className="space-y-4">
-                  {recentSubmissions.map((submission) => (
-                    <div key={submission.id} className="p-3 bg-gray-50 rounded">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <p className="font-medium">{submission.name}</p>
-                          <p className="text-sm text-gray-600">{submission.email}</p>
-                          <p className="text-xs text-gray-500 mt-1">{submission.message.substring(0, 100)}...</p>
-                        </div>
-                        <span className={`px-2 py-1 rounded text-xs ${
-                          submission.source === 'home' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'
-                        }`}>
-                          {submission.source}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
+              <div className="space-y-3">
+                <div className="p-3 bg-gray-50 rounded-lg">
+                  <h4 className="font-medium text-sm">Manage Users</h4>
+                  <p className="text-xs text-gray-600">Add, edit, or remove admin and closer accounts</p>
                 </div>
-              ) : (
-                <p className="text-gray-500">No submissions yet</p>
-              )}
+                <div className="p-3 bg-gray-50 rounded-lg">
+                  <h4 className="font-medium text-sm">View Bookings</h4>
+                  <p className="text-xs text-gray-600">Monitor and manage strategy call appointments</p>
+                </div>
+                <div className="p-3 bg-gray-50 rounded-lg">
+                  <h4 className="font-medium text-sm">Website Content</h4>
+                  <p className="text-xs text-gray-600">Update testimonials, services, and page content</p>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>

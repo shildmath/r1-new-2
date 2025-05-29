@@ -3,6 +3,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
+  password: string;
   role: 'admin' | 'closer';
   createdAt: string;
 }
@@ -27,7 +28,7 @@ export interface Booking {
   additionalInfo: string;
   closerId: string;
   timeSlotId: string;
-  status: 'confirmed' | 'pending' | 'cancelled';
+  status: 'confirmed' | 'completed' | 'no-show' | 'reschedule' | 'not-attended';
   createdAt: string;
 }
 

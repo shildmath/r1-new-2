@@ -8,6 +8,7 @@ import {
   LayoutDashboard, 
   Users, 
   MessageSquare, 
+  Calendar,
   Star, 
   Briefcase, 
   UserCheck, 
@@ -27,13 +28,14 @@ const AdminLayout = () => {
 
   const handleLogout = () => {
     logout();
-    navigate('/admin/login');
+    navigate('/auth');
   };
 
   const menuItems = [
     { path: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
     { path: '/admin/users', icon: Users, label: 'Users' },
     { path: '/admin/contact-submissions', icon: MessageSquare, label: 'Contact Submissions' },
+    { path: '/admin/bookings', icon: Calendar, label: 'Strategy Call Bookings' },
     { path: '/admin/testimonials', icon: Star, label: 'Testimonials' },
     { path: '/admin/services', icon: Briefcase, label: 'Services' },
     { path: '/admin/team', icon: UserCheck, label: 'Team Members' },

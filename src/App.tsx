@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -13,12 +14,13 @@ import Contact from "./pages/Contact";
 import StrategyCall from "./pages/StrategyCall";
 import NotFound from "./pages/NotFound";
 
-// Admin imports
-import AdminLogin from "./pages/AdminLogin";
+// Auth imports
+import AuthPage from "./pages/AuthPage";
 import AdminLayout from "./components/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import UsersPage from "./pages/admin/UsersPage";
 import ContactSubmissionsPage from "./pages/admin/ContactSubmissionsPage";
+import BookingsPage from "./pages/admin/BookingsPage";
 import CloserPanel from "./pages/CloserPanel";
 
 const queryClient = new QueryClient({
@@ -39,14 +41,14 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   }
   
   if (!user) {
-    return <Navigate to="/admin/login" replace />;
+    return <Navigate to="/auth" replace />;
   }
   
   return <>{children}</>;
 };
 
-// Closer Route component
-const CloserRoute = ({ children }: { children: React.ReactNode }) => {
+// Admin Route component
+const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, isLoading } = useAuth();
   
   if (isLoading) {
@@ -54,7 +56,7 @@ const CloserRoute = ({ children }: { children: React.ReactNode }) => {
   }
   
   if (!user) {
-    return <Navigate to="/admin/login" replace />;
+    return <Navigate to="/auth" replace />;
   }
   
   if (user.role === 'closer') {
@@ -84,8 +86,8 @@ const App = () => {
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/strategy-call" element={<StrategyCall />} />
                 
-                {/* Admin login */}
-                <Route path="/admin/login" element={<AdminLogin />} />
+                {/* Auth route */}
+                <Route path="/auth" element={<AuthPage />} />
                 
                 {/* Closer panel */}
                 <Route path="/closer-panel" element={
@@ -97,14 +99,15 @@ const App = () => {
                 {/* Admin routes */}
                 <Route path="/admin" element={
                   <ProtectedRoute>
-                    <CloserRoute>
+                    <AdminRoute>
                       <AdminLayout />
-                    </CloserRoute>
+                    </AdminRoute>
                   </ProtectedRoute>
                 }>
                   <Route index element={<AdminDashboard />} />
                   <Route path="users" element={<UsersPage />} />
                   <Route path="contact-submissions" element={<ContactSubmissionsPage />} />
+                  <Route path="bookings" element={<BookingsPage />} />
                   <Route path="testimonials" element={<div>Testimonials Management Page</div>} />
                   <Route path="services" element={<div>Services Management Page</div>} />
                   <Route path="team" element={<div>Team Management Page</div>} />

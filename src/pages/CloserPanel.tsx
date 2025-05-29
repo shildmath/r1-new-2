@@ -5,15 +5,18 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { storage } from '@/utils/localStorage';
 import { TimeSlot, Booking } from '@/types/admin';
-import { Calendar, Clock, Plus, Trash2, User } from 'lucide-react';
+import { Calendar, Clock, Plus, Trash2, User, LogOut } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const CloserPanel = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -27,15 +30,18 @@ const CloserPanel = () => {
       const allTimeSlots = storage.getTimeSlots();
       const allBookings = storage.getBookings();
       
-      // Filter time slots for current closer
       const closerTimeSlots = allTimeSlots.filter(slot => slot.closerId === user.id);
       setTimeSlots(closerTimeSlots);
       
-      // Filter bookings for current closer
       const closerBookings = allBookings.filter(booking => booking.closerId === user.id);
       setBookings(closerBookings);
     }
   }, [user]);
+
+  const handleLogout = () => {
+    logout();
+    navigate('/auth');
+  };
 
   const handleAddTimeSlot = (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,6 +83,34 @@ const CloserPanel = () => {
     });
   };
 
+  const handleStatusChange = (bookingId: string, newStatus: Booking['status']) => {
+    const allBookings = storage.getBookings();
+    const updatedBookings = allBookings.map(booking => 
+      booking.id === bookingId ? { ...booking, status: newStatus } : booking
+    );
+    
+    storage.setBookings(updatedBookings);
+    setBookings(prev => prev.map(booking => 
+      booking.id === bookingId ? { ...booking, status: newStatus } : booking
+    ));
+    
+    toast({
+      title: "Status Updated",
+      description: "Booking status has been updated successfully.",
+    });
+  };
+
+  const getStatusColor = (status: Booking['status']) => {
+    switch (status) {
+      case 'confirmed': return 'bg-blue-500';
+      case 'completed': return 'bg-green-500';
+      case 'no-show': return 'bg-red-500';
+      case 'reschedule': return 'bg-yellow-500';
+      case 'not-attended': return 'bg-gray-500';
+      default: return 'bg-blue-500';
+    }
+  };
+
   const availableSlots = timeSlots.filter(slot => !slot.isBooked);
   const bookedSlots = timeSlots.filter(slot => slot.isBooked);
 
@@ -90,9 +124,15 @@ const CloserPanel = () => {
       >
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold text-primary">Closer Panel</h1>
-          <div className="flex items-center space-x-3">
-            <User size={20} className="text-primary" />
-            <span className="text-lg font-medium">{user?.name}</span>
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-3">
+              <User size={20} className="text-primary" />
+              <span className="text-lg font-medium">{user?.name}</span>
+            </div>
+            <Button onClick={handleLogout} variant="outline" className="flex items-center space-x-2">
+              <LogOut size={16} />
+              <span>Logout</span>
+            </Button>
           </div>
         </div>
 
@@ -242,7 +282,7 @@ const CloserPanel = () => {
                     className="p-4 bg-blue-50 border border-blue-200 rounded-lg"
                   >
                     <div className="flex justify-between items-start">
-                      <div>
+                      <div className="flex-1">
                         <h4 className="font-medium text-primary">
                           {booking.firstName} {booking.lastName}
                         </h4>
@@ -257,12 +297,26 @@ const CloserPanel = () => {
                           </p>
                         )}
                       </div>
-                      <Badge variant={
-                        booking.status === 'confirmed' ? 'default' :
-                        booking.status === 'pending' ? 'secondary' : 'destructive'
-                      }>
-                        {booking.status}
-                      </Badge>
+                      <div className="flex flex-col items-end space-y-2">
+                        <Badge className={getStatusColor(booking.status)}>
+                          {booking.status.replace('-', ' ').toUpperCase()}
+                        </Badge>
+                        <Select 
+                          value={booking.status} 
+                          onValueChange={(value: Booking['status']) => handleStatusChange(booking.id, value)}
+                        >
+                          <SelectTrigger className="w-40">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="confirmed">Confirmed</SelectItem>
+                            <SelectItem value="completed">Completed</SelectItem>
+                            <SelectItem value="no-show">No Show</SelectItem>
+                            <SelectItem value="reschedule">Reschedule</SelectItem>
+                            <SelectItem value="not-attended">Not Attended</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
                   </motion.div>
                 ))}

@@ -12,7 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 
 const ContactSubmissionsPage = () => {
   const [submissions, setSubmissions] = useState<ContactSubmission[]>(storage.getContactSubmissions());
-  const [statusFilter, setStatusFilter] = useState<string>('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
   const { toast } = useToast();
 
   const handleStatusChange = (submissionId: string, newStatus: 'new' | 'handled') => {
@@ -38,7 +38,7 @@ const ContactSubmissionsPage = () => {
   };
 
   const filteredSubmissions = submissions.filter(submission => {
-    if (statusFilter && submission.status !== statusFilter) return false;
+    if (statusFilter !== 'all' && submission.status !== statusFilter) return false;
     return true;
   });
 
@@ -60,7 +60,7 @@ const ContactSubmissionsPage = () => {
                 <SelectValue placeholder="All Status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Status</SelectItem>
+                <SelectItem value="all">All Status</SelectItem>
                 <SelectItem value="new">New Messages</SelectItem>
                 <SelectItem value="handled">Handled Messages</SelectItem>
               </SelectContent>

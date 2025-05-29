@@ -217,10 +217,10 @@ const BookingsPage = () => {
                       </div>
                       <div className="flex items-center space-x-3">
                         <Badge className={getCallStatusColor(booking.callStatus)}>
-                          {booking.callStatus.replace('-', ' ').toUpperCase()}
+                          {(booking.callStatus || 'confirmed').replace('-', ' ').toUpperCase()}
                         </Badge>
                         <Badge className={getDealStatusColor(booking.dealStatus)}>
-                          {booking.dealStatus.replace('-', ' ').toUpperCase()}
+                          {(booking.dealStatus || 'follow-up').replace('-', ' ').toUpperCase()}
                         </Badge>
                         <Dialog open={showDetails && selectedBooking?.id === booking.id} onOpenChange={setShowDetails}>
                           <DialogTrigger asChild>
@@ -243,7 +243,7 @@ const BookingsPage = () => {
                                 <div>
                                   <label className="text-sm font-medium mb-2 block">Call Status</label>
                                   <Select 
-                                    value={booking.callStatus} 
+                                    value={booking.callStatus || 'confirmed'} 
                                     onValueChange={(value: Booking['callStatus']) => handleStatusChange(booking.id, 'callStatus', value)}
                                   >
                                     <SelectTrigger>
@@ -262,7 +262,7 @@ const BookingsPage = () => {
                                 <div>
                                   <label className="text-sm font-medium mb-2 block">Deal Status</label>
                                   <Select 
-                                    value={booking.dealStatus} 
+                                    value={booking.dealStatus || 'follow-up'} 
                                     onValueChange={(value: Booking['dealStatus']) => handleStatusChange(booking.id, 'dealStatus', value)}
                                   >
                                     <SelectTrigger>
@@ -409,7 +409,7 @@ const BookingsPage = () => {
                         <h4 className="font-medium mb-2">Status Quick Actions</h4>
                         <div className="space-y-2">
                           <Select 
-                            value={booking.callStatus} 
+                            value={booking.callStatus || 'confirmed'} 
                             onValueChange={(value: Booking['callStatus']) => handleStatusChange(booking.id, 'callStatus', value)}
                           >
                             <SelectTrigger className="h-8">
@@ -424,7 +424,7 @@ const BookingsPage = () => {
                             </SelectContent>
                           </Select>
                           <Select 
-                            value={booking.dealStatus} 
+                            value={booking.dealStatus || 'follow-up'} 
                             onValueChange={(value: Booking['dealStatus']) => handleStatusChange(booking.id, 'dealStatus', value)}
                           >
                             <SelectTrigger className="h-8">

@@ -1,35 +1,59 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
+import { storage } from '@/utils/localStorage';
+import { TimeSlot, Booking, User } from '@/types/admin';
 import { Calendar } from 'lucide-react';
 
 const StrategyCallForm = () => {
   const { toast } = useToast();
+  const [availableSlots, setAvailableSlots] = useState<(TimeSlot & { closerName: string })[]>([]);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
     email: '',
     phone: '',
-    company: '',
-    website: '',
-    industry: '',
-    teamSize: '',
-    revenue: '',
-    currentMarketing: [],
-    challenges: '',
-    goals: '',
-    timeline: '',
-    budget: '',
+    preferredDate: '',
     preferredTime: '',
     additionalInfo: ''
   });
+
+  useEffect(() => {
+    // Get available time slots with closer information
+    const timeSlots = storage.getTimeSlots().filter(slot => !slot.isBooked);
+    const users = storage.getUsers();
+    
+    const slotsWithClosers = timeSlots.map(slot => {
+      const closer = users.find(user => user.id === slot.closerId);
+      return {
+        ...slot,
+        closerName: closer?.name || 'Unknown Closer'
+      };
+    });
+
+    // Group by date and time, showing only unique combinations
+    const uniqueSlots = slotsWithClosers.reduce((acc: (TimeSlot & { closerName: string })[], slot) => {
+      const exists = acc.find(s => s.date === slot.date && s.time === slot.time);
+      if (!exists) {
+        acc.push(slot);
+      }
+      return acc;
+    }, []);
+
+    setAvailableSlots(uniqueSlots.sort((a, b) => {
+      const dateCompare = new Date(a.date).getTime() - new Date(b.date).getTime();
+      if (dateCompare === 0) {
+        return a.time.localeCompare(b.time);
+      }
+      return dateCompare;
+    }));
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({
@@ -38,41 +62,81 @@ const StrategyCallForm = () => {
     });
   };
 
-  const handleSelectChange = (name: string, value: string) => {
+  const handleTimeSlotChange = (value: string) => {
+    const [date, time] = value.split('|');
     setFormData({
       ...formData,
-      [name]: value
+      preferredDate: date,
+      preferredTime: time
     });
   };
 
-  const handleCheckboxChange = (value: string, checked: boolean) => {
-    if (checked) {
-      setFormData({
-        ...formData,
-        currentMarketing: [...formData.currentMarketing, value]
-      });
-    } else {
-      setFormData({
-        ...formData,
-        currentMarketing: formData.currentMarketing.filter(item => item !== value)
-      });
-    }
+  const findAvailableCloser = (date: string, time: string): string | null => {
+    const timeSlots = storage.getTimeSlots();
+    const availableSlot = timeSlots.find(slot => 
+      slot.date === date && 
+      slot.time === time && 
+      !slot.isBooked
+    );
+    return availableSlot?.closerId || null;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    try {
-      // TODO: Replace with Supabase integration
-      console.log('Strategy call form submitted:', {
-        ...formData,
-        type: 'strategy_call',
-        submittedAt: new Date().toISOString()
+    if (!formData.preferredDate || !formData.preferredTime) {
+      toast({
+        title: "Error",
+        description: "Please select a preferred date and time.",
+        variant: "destructive"
       });
+      return;
+    }
+
+    try {
+      // Find an available closer for the selected time slot
+      const assignedCloserId = findAvailableCloser(formData.preferredDate, formData.preferredTime);
       
+      if (!assignedCloserId) {
+        toast({
+          title: "Error",
+          description: "Selected time slot is no longer available. Please choose another time.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Create the booking
+      const newBooking: Booking = {
+        id: Date.now().toString(),
+        ...formData,
+        closerId: assignedCloserId,
+        timeSlotId: '', // Will be set when we update the time slot
+        status: 'confirmed',
+        createdAt: new Date().toISOString()
+      };
+
+      // Update the time slot to mark it as booked
+      const timeSlots = storage.getTimeSlots();
+      const updatedTimeSlots = timeSlots.map(slot => {
+        if (slot.closerId === assignedCloserId && 
+            slot.date === formData.preferredDate && 
+            slot.time === formData.preferredTime && 
+            !slot.isBooked) {
+          newBooking.timeSlotId = slot.id;
+          return { ...slot, isBooked: true, clientId: newBooking.id };
+        }
+        return slot;
+      });
+
+      // Save the booking and updated time slots
+      const bookings = storage.getBookings();
+      storage.setBookings([...bookings, newBooking]);
+      storage.setTimeSlots(updatedTimeSlots);
+
       toast({
         title: "Strategy Call Booked!",
-        description: "Thank you! We'll send you a calendar link within 30 minutes to schedule your free consultation.",
+        description: "Thank you! Your strategy call has been confirmed. You'll receive a confirmation email shortly.",
       });
       
       // Reset form
@@ -81,19 +145,23 @@ const StrategyCallForm = () => {
         lastName: '',
         email: '',
         phone: '',
-        company: '',
-        website: '',
-        industry: '',
-        teamSize: '',
-        revenue: '',
-        currentMarketing: [],
-        challenges: '',
-        goals: '',
-        timeline: '',
-        budget: '',
+        preferredDate: '',
         preferredTime: '',
         additionalInfo: ''
       });
+
+      // Refresh available slots
+      const newAvailableSlots = storage.getTimeSlots().filter(slot => !slot.isBooked);
+      const users = storage.getUsers();
+      const slotsWithClosers = newAvailableSlots.map(slot => {
+        const closer = users.find(user => user.id === slot.closerId);
+        return {
+          ...slot,
+          closerName: closer?.name || 'Unknown Closer'
+        };
+      });
+      setAvailableSlots(slotsWithClosers);
+
     } catch (error) {
       toast({
         title: "Error",
@@ -102,19 +170,6 @@ const StrategyCallForm = () => {
       });
     }
   };
-
-  const marketingChannels = [
-    'Social Media Marketing',
-    'Google Ads (PPC)',
-    'SEO & Content Marketing',
-    'Email Marketing',
-    'Facebook/Instagram Ads',
-    'LinkedIn Marketing',
-    'YouTube Marketing',
-    'Influencer Marketing',
-    'Traditional Advertising',
-    'No current marketing'
-  ];
 
   return (
     <motion.div
@@ -154,7 +209,7 @@ const StrategyCallForm = () => {
                 <Input
                   name="phone"
                   type="tel"
-                  placeholder="Phone Number *"
+                  placeholder="Phone Number with Country Code *"
                   value={formData.phone}
                   onChange={handleInputChange}
                   required
@@ -162,185 +217,69 @@ const StrategyCallForm = () => {
               </div>
             </div>
 
-            {/* Business Information */}
+            {/* Time Slot Selection */}
             <div>
-              <h3 className="text-lg font-semibold text-primary mb-4">Business Information</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <Input
-                  name="company"
-                  placeholder="Company Name *"
-                  value={formData.company}
-                  onChange={handleInputChange}
-                  required
-                />
-                <Input
-                  name="website"
-                  placeholder="Website URL"
-                  value={formData.website}
-                  onChange={handleInputChange}
-                />
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Select value={formData.industry} onValueChange={(value) => handleSelectChange('industry', value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Industry *" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="technology">Technology</SelectItem>
-                    <SelectItem value="ecommerce">E-commerce</SelectItem>
-                    <SelectItem value="healthcare">Healthcare</SelectItem>
-                    <SelectItem value="finance">Finance</SelectItem>
-                    <SelectItem value="education">Education</SelectItem>
-                    <SelectItem value="real-estate">Real Estate</SelectItem>
-                    <SelectItem value="professional-services">Professional Services</SelectItem>
-                    <SelectItem value="manufacturing">Manufacturing</SelectItem>
-                    <SelectItem value="retail">Retail</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
-                  </SelectContent>
-                </Select>
-                
-                <Select value={formData.teamSize} onValueChange={(value) => handleSelectChange('teamSize', value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Team Size" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="1-5">1-5 employees</SelectItem>
-                    <SelectItem value="6-20">6-20 employees</SelectItem>
-                    <SelectItem value="21-50">21-50 employees</SelectItem>
-                    <SelectItem value="51-100">51-100 employees</SelectItem>
-                    <SelectItem value="100+">100+ employees</SelectItem>
-                  </SelectContent>
-                </Select>
-                
-                <Select value={formData.revenue} onValueChange={(value) => handleSelectChange('revenue', value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Annual Revenue" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="under-100k">Under $100K</SelectItem>
-                    <SelectItem value="100k-500k">$100K - $500K</SelectItem>
-                    <SelectItem value="500k-1m">$500K - $1M</SelectItem>
-                    <SelectItem value="1m-5m">$1M - $5M</SelectItem>
-                    <SelectItem value="5m-10m">$5M - $10M</SelectItem>
-                    <SelectItem value="over-10m">Over $10M</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            {/* Current Marketing */}
-            <div>
-              <h3 className="text-lg font-semibold text-primary mb-4">Current Marketing Activities</h3>
-              <p className="text-gray-600 mb-4">Select all that apply:</p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {marketingChannels.map((channel) => (
-                  <div key={channel} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={channel}
-                      checked={formData.currentMarketing.includes(channel)}
-                      onCheckedChange={(checked) => handleCheckboxChange(channel, checked as boolean)}
-                    />
-                    <label htmlFor={channel} className="text-sm text-gray-700">
-                      {channel}
-                    </label>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Goals and Challenges */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <h3 className="text-lg font-semibold text-primary mb-4">Time Slot Selection</h3>
               <div>
                 <label className="text-sm font-medium text-primary mb-2 block">
-                  Main Business Goals *
+                  Select Available Time Slot *
                 </label>
-                <Textarea
-                  name="goals"
-                  placeholder="What are your main business and marketing goals for the next 12 months?"
-                  value={formData.goals}
-                  onChange={handleInputChange}
-                  className="min-h-[100px]"
-                  required
-                />
+                <Select 
+                  value={formData.preferredDate && formData.preferredTime ? `${formData.preferredDate}|${formData.preferredTime}` : ''} 
+                  onValueChange={handleTimeSlotChange}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choose an available time slot" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableSlots.length > 0 ? (
+                      availableSlots.map((slot) => (
+                        <SelectItem key={`${slot.date}|${slot.time}`} value={`${slot.date}|${slot.time}`}>
+                          {new Date(slot.date).toLocaleDateString()} at {slot.time}
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <SelectItem value="no-slots" disabled>
+                        No available time slots
+                      </SelectItem>
+                    )}
+                  </SelectContent>
+                </Select>
+                {availableSlots.length === 0 && (
+                  <p className="text-sm text-red-600 mt-2">
+                    No time slots are currently available. Please check back later or contact us directly.
+                  </p>
+                )}
               </div>
-              <div>
-                <label className="text-sm font-medium text-primary mb-2 block">
-                  Current Challenges *
-                </label>
-                <Textarea
-                  name="challenges"
-                  placeholder="What are your biggest marketing challenges right now?"
-                  value={formData.challenges}
-                  onChange={handleInputChange}
-                  className="min-h-[100px]"
-                  required
-                />
-              </div>
-            </div>
-
-            {/* Budget and Timeline */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Select value={formData.budget} onValueChange={(value) => handleSelectChange('budget', value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Marketing Budget *" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="under-2k">Under $2,000/month</SelectItem>
-                  <SelectItem value="2k-5k">$2,000 - $5,000/month</SelectItem>
-                  <SelectItem value="5k-10k">$5,000 - $10,000/month</SelectItem>
-                  <SelectItem value="10k-25k">$10,000 - $25,000/month</SelectItem>
-                  <SelectItem value="25k-50k">$25,000 - $50,000/month</SelectItem>
-                  <SelectItem value="over-50k">Over $50,000/month</SelectItem>
-                </SelectContent>
-              </Select>
-              
-              <Select value={formData.timeline} onValueChange={(value) => handleSelectChange('timeline', value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Timeline to Start *" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="immediately">Immediately</SelectItem>
-                  <SelectItem value="1-2-weeks">1-2 weeks</SelectItem>
-                  <SelectItem value="1-month">Within 1 month</SelectItem>
-                  <SelectItem value="2-3-months">2-3 months</SelectItem>
-                  <SelectItem value="exploring">Just exploring</SelectItem>
-                </SelectContent>
-              </Select>
-              
-              <Select value={formData.preferredTime} onValueChange={(value) => handleSelectChange('preferredTime', value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Preferred Call Time" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="morning">Morning (8am-12pm EST)</SelectItem>
-                  <SelectItem value="afternoon">Afternoon (12pm-5pm EST)</SelectItem>
-                  <SelectItem value="evening">Evening (5pm-8pm EST)</SelectItem>
-                  <SelectItem value="flexible">Flexible</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
 
             {/* Additional Information */}
             <div>
-              <label className="text-sm font-medium text-primary mb-2 block">
-                Additional Information
-              </label>
-              <Textarea
-                name="additionalInfo"
-                placeholder="Anything else you'd like us to know before our call?"
-                value={formData.additionalInfo}
-                onChange={handleInputChange}
-                className="min-h-[80px]"
-              />
+              <h3 className="text-lg font-semibold text-primary mb-4">Additional Information</h3>
+              <div>
+                <label className="text-sm font-medium text-primary mb-2 block">
+                  Additional Notes (Optional)
+                </label>
+                <Textarea
+                  name="additionalInfo"
+                  placeholder="Anything else you'd like us to know before our call?"
+                  value={formData.additionalInfo}
+                  onChange={handleInputChange}
+                  className="min-h-[80px]"
+                />
+              </div>
             </div>
 
             <div className="text-center pt-6">
-              <Button type="submit" className="agency-btn text-lg px-12 py-4">
+              <Button 
+                type="submit" 
+                className="agency-btn text-lg px-12 py-4"
+                disabled={availableSlots.length === 0}
+              >
                 Book My Free Strategy Call <Calendar className="ml-2" size={20} />
               </Button>
               <p className="text-sm text-gray-600 mt-4">
-                No spam, no obligations. We'll send you a calendar link within 30 minutes.
+                No spam, no obligations. You'll receive a confirmation email shortly.
               </p>
             </div>
           </form>

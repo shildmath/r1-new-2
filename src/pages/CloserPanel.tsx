@@ -4,13 +4,16 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { storage } from '@/utils/localStorage';
 import { TimeSlot, Booking } from '@/types/admin';
-import { Calendar, Clock, Plus, Trash2, User, LogOut, Eye, Filter } from 'lucide-react';
+import { Calendar, Clock, Plus, Trash2, User, LogOut, Eye, Filter, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const CloserPanel = () => {
@@ -20,11 +23,15 @@ const CloserPanel = () => {
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [showDetails, setShowDetails] = useState(false);
   const [filters, setFilters] = useState({
-    callStatus: '',
-    dealStatus: '',
+    callStatus: 'all',
+    dealStatus: 'all',
     dateFrom: '',
-    dateTo: ''
+    dateTo: '',
+    timeFrom: '',
+    timeTo: ''
   });
   const [formData, setFormData] = useState({
     date: '',
@@ -47,6 +54,21 @@ const CloserPanel = () => {
   const handleLogout = () => {
     logout();
     navigate('/auth');
+  };
+
+  const clearFilters = () => {
+    setFilters({
+      callStatus: 'all',
+      dealStatus: 'all',
+      dateFrom: '',
+      dateTo: '',
+      timeFrom: '',
+      timeTo: ''
+    });
+    toast({
+      title: "Filters Cleared",
+      description: "All filters have been reset.",
+    });
   };
 
   const handleAddTimeSlot = (e: React.FormEvent) => {
@@ -103,6 +125,27 @@ const CloserPanel = () => {
     toast({
       title: "Status Updated",
       description: "Booking status has been updated successfully.",
+    });
+  };
+
+  const handleFieldUpdate = (bookingId: string, field: string, value: any) => {
+    const allBookings = storage.getBookings();
+    const updatedBookings = allBookings.map(booking => 
+      booking.id === bookingId ? { ...booking, [field]: value } : booking
+    );
+    
+    storage.setBookings(updatedBookings);
+    setBookings(prev => prev.map(booking => 
+      booking.id === bookingId ? { ...booking, [field]: value } : booking
+    ));
+    
+    if (selectedBooking && selectedBooking.id === bookingId) {
+      setSelectedBooking({ ...selectedBooking, [field]: value });
+    }
+    
+    toast({
+      title: "Field Updated",
+      description: "Booking field has been updated successfully.",
     });
   };
 
@@ -164,10 +207,12 @@ const CloserPanel = () => {
   };
 
   const filteredBookings = bookings.filter(booking => {
-    if (filters.callStatus && booking.callStatus !== filters.callStatus) return false;
-    if (filters.dealStatus && booking.dealStatus !== filters.dealStatus) return false;
+    if (filters.callStatus !== 'all' && booking.callStatus !== filters.callStatus) return false;
+    if (filters.dealStatus !== 'all' && booking.dealStatus !== filters.dealStatus) return false;
     if (filters.dateFrom && booking.preferredDate < filters.dateFrom) return false;
     if (filters.dateTo && booking.preferredDate > filters.dateTo) return false;
+    if (filters.timeFrom && booking.preferredTime < filters.timeFrom) return false;
+    if (filters.timeTo && booking.preferredTime > filters.timeTo) return false;
     return true;
   });
 
@@ -182,8 +227,19 @@ const CloserPanel = () => {
         transition={{ duration: 0.6 }}
         className="max-w-6xl mx-auto space-y-6"
       >
+        {/* Header with Navigation */}
         <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-primary">Closer Panel</h1>
+          <div className="flex items-center space-x-4">
+            <Button variant="outline" size="sm">
+              <ChevronLeft size={16} />
+              Previous
+            </Button>
+            <h1 className="text-3xl font-bold text-primary">Closer Panel</h1>
+            <Button variant="outline" size="sm">
+              Next
+              <ChevronRight size={16} />
+            </Button>
+          </div>
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-3">
               <User size={20} className="text-primary" />
@@ -377,6 +433,43 @@ const CloserPanel = () => {
                     <SelectItem value="unqualified">Unqualified</SelectItem>
                   </SelectContent>
                 </Select>
+                
+                <Input 
+                  type="date" 
+                  placeholder="From Date"
+                  value={filters.dateFrom}
+                  onChange={(e) => setFilters({...filters, dateFrom: e.target.value})}
+                  className="w-32"
+                />
+                
+                <Input 
+                  type="date" 
+                  placeholder="To Date"
+                  value={filters.dateTo}
+                  onChange={(e) => setFilters({...filters, dateTo: e.target.value})}
+                  className="w-32"
+                />
+                
+                <Input 
+                  type="time" 
+                  placeholder="From Time"
+                  value={filters.timeFrom}
+                  onChange={(e) => setFilters({...filters, timeFrom: e.target.value})}
+                  className="w-32"
+                />
+                
+                <Input 
+                  type="time" 
+                  placeholder="To Time"
+                  value={filters.timeTo}
+                  onChange={(e) => setFilters({...filters, timeTo: e.target.value})}
+                  className="w-32"
+                />
+                
+                <Button variant="outline" onClick={clearFilters}>
+                  <X size={16} className="mr-2" />
+                  Clear
+                </Button>
               </div>
             </div>
           </CardHeader>
@@ -413,10 +506,10 @@ const CloserPanel = () => {
                       </div>
                       <div className="flex flex-col items-end space-y-2">
                         <div className="flex space-x-2">
-                          <Badge className={getCallStatusColor(booking.callStatus)}>
+                          <Badge className={getCallStatusColor(booking.callStatus || 'confirmed')}>
                             {(booking.callStatus || 'confirmed').replace('-', ' ').toUpperCase()}
                           </Badge>
-                          <Badge className={getDealStatusColor(booking.dealStatus)}>
+                          <Badge className={getDealStatusColor(booking.dealStatus || 'follow-up')}>
                             {(booking.dealStatus || 'follow-up').replace('-', ' ').toUpperCase()}
                           </Badge>
                         </div>
@@ -454,14 +547,170 @@ const CloserPanel = () => {
                           </Select>
                         </div>
                         
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleDeleteBooking(booking.id)}
-                          className="text-red-600 hover:text-red-700"
-                        >
-                          <Trash2 size={14} />
-                        </Button>
+                        <div className="flex space-x-2">
+                          <Dialog open={showDetails && selectedBooking?.id === booking.id} onOpenChange={setShowDetails}>
+                            <DialogTrigger asChild>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setSelectedBooking(booking)}
+                              >
+                                <Eye size={14} />
+                                See More
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                              <DialogHeader>
+                                <DialogTitle>Booking Details - {booking.firstName} {booking.lastName}</DialogTitle>
+                              </DialogHeader>
+                              <div className="space-y-6">
+                                {/* Status Updates */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                  <div>
+                                    <label className="text-sm font-medium mb-2 block">Call Status</label>
+                                    <Select 
+                                      value={booking.callStatus || 'confirmed'} 
+                                      onValueChange={(value: Booking['callStatus']) => handleStatusChange(booking.id, 'callStatus', value)}
+                                    >
+                                      <SelectTrigger>
+                                        <SelectValue />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="confirmed">Confirmed</SelectItem>
+                                        <SelectItem value="completed">Completed</SelectItem>
+                                        <SelectItem value="no-show">No Show</SelectItem>
+                                        <SelectItem value="reschedule">Reschedule</SelectItem>
+                                        <SelectItem value="not-attended">Not Attended</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
+
+                                  <div>
+                                    <label className="text-sm font-medium mb-2 block">Deal Status</label>
+                                    <Select 
+                                      value={booking.dealStatus || 'follow-up'} 
+                                      onValueChange={(value: Booking['dealStatus']) => handleStatusChange(booking.id, 'dealStatus', value)}
+                                    >
+                                      <SelectTrigger>
+                                        <SelectValue />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="closed">Closed</SelectItem>
+                                        <SelectItem value="follow-up">Follow Up</SelectItem>
+                                        <SelectItem value="client-loss">Client Loss</SelectItem>
+                                        <SelectItem value="unqualified">Unqualified</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
+                                </div>
+
+                                {/* Additional Fields */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                  <div>
+                                    <label className="text-sm font-medium mb-2 block">Closed Date</label>
+                                    <Input 
+                                      type="date"
+                                      value={booking.closedDate || ''}
+                                      onChange={(e) => handleFieldUpdate(booking.id, 'closedDate', e.target.value)}
+                                    />
+                                  </div>
+
+                                  <div>
+                                    <label className="text-sm font-medium mb-2 block">Follow Up Date</label>
+                                    <Input 
+                                      type="date"
+                                      value={booking.followUpDate || ''}
+                                      onChange={(e) => handleFieldUpdate(booking.id, 'followUpDate', e.target.value)}
+                                    />
+                                  </div>
+
+                                  <div>
+                                    <label className="text-sm font-medium mb-2 block">Ad Spend</label>
+                                    <Input 
+                                      placeholder="$0.00"
+                                      value={booking.adSpend || ''}
+                                      onChange={(e) => handleFieldUpdate(booking.id, 'adSpend', e.target.value)}
+                                    />
+                                  </div>
+
+                                  <div>
+                                    <label className="text-sm font-medium mb-2 block">Country/Area</label>
+                                    <Input 
+                                      placeholder="Country/Area"
+                                      value={booking.country || ''}
+                                      onChange={(e) => handleFieldUpdate(booking.id, 'country', e.target.value)}
+                                    />
+                                  </div>
+
+                                  <div>
+                                    <label className="text-sm font-medium mb-2 block">Zip Code</label>
+                                    <Input 
+                                      placeholder="Zip Code"
+                                      value={booking.zipCode || ''}
+                                      onChange={(e) => handleFieldUpdate(booking.id, 'zipCode', e.target.value)}
+                                    />
+                                  </div>
+
+                                  <div>
+                                    <label className="text-sm font-medium mb-2 block">Recording Link</label>
+                                    <Input 
+                                      placeholder="Recording URL"
+                                      value={booking.recordingLink || ''}
+                                      onChange={(e) => handleFieldUpdate(booking.id, 'recordingLink', e.target.value)}
+                                    />
+                                  </div>
+                                </div>
+
+                                {/* Checkboxes */}
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                  <div className="flex items-center space-x-2">
+                                    <Checkbox 
+                                      checked={booking.paymentLinkSent}
+                                      onCheckedChange={(checked) => handleFieldUpdate(booking.id, 'paymentLinkSent', checked)}
+                                    />
+                                    <label className="text-sm font-medium">Payment Link Sent</label>
+                                  </div>
+
+                                  <div className="flex items-center space-x-2">
+                                    <Checkbox 
+                                      checked={booking.contractLinkSent}
+                                      onCheckedChange={(checked) => handleFieldUpdate(booking.id, 'contractLinkSent', checked)}
+                                    />
+                                    <label className="text-sm font-medium">Contract Link Sent</label>
+                                  </div>
+
+                                  <div className="flex items-center space-x-2">
+                                    <Checkbox 
+                                      checked={booking.offerMade}
+                                      onCheckedChange={(checked) => handleFieldUpdate(booking.id, 'offerMade', checked)}
+                                    />
+                                    <label className="text-sm font-medium">Offer Made</label>
+                                  </div>
+                                </div>
+
+                                {/* Note */}
+                                <div>
+                                  <label className="text-sm font-medium mb-2 block">Note - Reason</label>
+                                  <Textarea 
+                                    placeholder="Add notes or reasons..."
+                                    value={booking.note || ''}
+                                    onChange={(e) => handleFieldUpdate(booking.id, 'note', e.target.value)}
+                                    rows={4}
+                                  />
+                                </div>
+                              </div>
+                            </DialogContent>
+                          </Dialog>
+                          
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDeleteBooking(booking.id)}
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            <Trash2 size={14} />
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </motion.div>

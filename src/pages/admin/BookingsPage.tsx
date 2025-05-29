@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Checkbox } from '@/components/ui/checkbox';
 import { storage } from '@/utils/localStorage';
 import { Booking, User } from '@/types/admin';
-import { Calendar, User as UserIcon, Phone, Mail, Trash2, Eye, Filter } from 'lucide-react';
+import { Calendar, User as UserIcon, Phone, Mail, Trash2, Eye, Filter, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const BookingsPage = () => {
@@ -26,6 +26,19 @@ const BookingsPage = () => {
     dateTo: ''
   });
   const { toast } = useToast();
+
+  const clearFilters = () => {
+    setFilters({
+      callStatus: 'all',
+      dealStatus: 'all',
+      dateFrom: '',
+      dateTo: ''
+    });
+    toast({
+      title: "Filters Cleared",
+      description: "All filters have been reset.",
+    });
+  };
 
   const getCloserName = (closerId: string) => {
     const closer = users.find(user => user.id === closerId);
@@ -120,7 +133,20 @@ const BookingsPage = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        <h1 className="text-3xl font-bold text-primary mb-6">Strategy Call Bookings</h1>
+        {/* Header with Navigation */}
+        <div className="flex justify-between items-center mb-6">
+          <div className="flex items-center space-x-4">
+            <Button variant="outline" size="sm">
+              <ChevronLeft size={16} />
+              Previous
+            </Button>
+            <h1 className="text-3xl font-bold text-primary">Strategy Call Bookings</h1>
+            <Button variant="outline" size="sm">
+              Next
+              <ChevronRight size={16} />
+            </Button>
+          </div>
+        </div>
 
         {/* Filters */}
         <Card className="mb-6">
@@ -183,6 +209,13 @@ const BookingsPage = () => {
                 />
               </div>
             </div>
+            
+            <div className="flex justify-end mt-4">
+              <Button variant="outline" onClick={clearFilters}>
+                <X size={16} className="mr-2" />
+                Clear Filters
+              </Button>
+            </div>
           </CardContent>
         </Card>
 
@@ -216,10 +249,10 @@ const BookingsPage = () => {
                         </div>
                       </div>
                       <div className="flex items-center space-x-3">
-                        <Badge className={getCallStatusColor(booking.callStatus)}>
+                        <Badge className={getCallStatusColor(booking.callStatus || 'confirmed')}>
                           {(booking.callStatus || 'confirmed').replace('-', ' ').toUpperCase()}
                         </Badge>
-                        <Badge className={getDealStatusColor(booking.dealStatus)}>
+                        <Badge className={getDealStatusColor(booking.dealStatus || 'follow-up')}>
                           {(booking.dealStatus || 'follow-up').replace('-', ' ').toUpperCase()}
                         </Badge>
                         <Dialog open={showDetails && selectedBooking?.id === booking.id} onOpenChange={setShowDetails}>

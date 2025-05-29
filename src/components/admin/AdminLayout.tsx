@@ -17,7 +17,9 @@ import {
   Home, 
   LogOut,
   Menu,
-  X
+  X,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 
 const AdminLayout = () => {
@@ -43,6 +45,10 @@ const AdminLayout = () => {
     { path: '/admin/social-links', icon: Share2, label: 'Social Links' },
     { path: '/admin/home-content', icon: Home, label: 'Home Page Content' },
   ];
+
+  const currentIndex = menuItems.findIndex(item => item.path === location.pathname);
+  const previousPage = currentIndex > 0 ? menuItems[currentIndex - 1] : null;
+  const nextPage = currentIndex < menuItems.length - 1 ? menuItems[currentIndex + 1] : null;
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -117,14 +123,42 @@ const AdminLayout = () => {
       <div className="flex-1 flex flex-col min-h-screen">
         {/* Top bar */}
         <div className="bg-white shadow-sm border-b h-16 flex items-center justify-between px-6">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="lg:hidden"
-            onClick={() => setSidebarOpen(true)}
-          >
-            <Menu size={20} />
-          </Button>
+          <div className="flex items-center space-x-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="lg:hidden"
+              onClick={() => setSidebarOpen(true)}
+            >
+              <Menu size={20} />
+            </Button>
+            
+            {/* Navigation buttons */}
+            <div className="hidden md:flex items-center space-x-2">
+              {previousPage && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate(previousPage.path)}
+                  className="flex items-center space-x-2"
+                >
+                  <ChevronLeft size={16} />
+                  <span>{previousPage.label}</span>
+                </Button>
+              )}
+              {nextPage && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate(nextPage.path)}
+                  className="flex items-center space-x-2"
+                >
+                  <span>{nextPage.label}</span>
+                  <ChevronRight size={16} />
+                </Button>
+              )}
+            </div>
+          </div>
 
           <div className="flex items-center space-x-4">
             <span className="text-sm text-gray-600">

@@ -218,7 +218,16 @@ const Index = () => {
               className="relative"
             >
               <div className="relative bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20 shadow-2xl">
+
+
+
+                
                 {/* Working Team Image */}
+
+                
+  {/* =================================================================================================================================*/}
+
+                
                 <div className="relative mb-6">
                   <img 
                     src="https://images.unsplash.com/photo-1605810230434-7631ac76ec81?w=400&h=300&fit=crop" 
@@ -227,6 +236,18 @@ const Index = () => {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent rounded-2xl" />
                 </div>
+
+
+
+
+
+  {/* =================================================================================================================================*/}
+
+
+
+
+
+                
                 
                 {/* Rotating Animation Below */}
                 <motion.div

@@ -1,3 +1,4 @@
+
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -8,6 +9,7 @@ import Footer from '@/components/Footer';
 import ContactForm from '@/components/ContactForm';
 import ContactInfo from '@/components/ContactInfo';
 import { ArrowRight, CheckCircle } from 'lucide-react';
+
 const Contact = () => {
   const reasons = [{
     icon: CheckCircle,
@@ -26,7 +28,9 @@ const Contact = () => {
     title: "No Obligation",
     description: "No pressure, just valuable insights and recommendations"
   }];
-  return <>
+
+  return (
+    <>
       <Navbar />
       
       {/* Hero Section */}
@@ -118,16 +122,17 @@ const Contact = () => {
               </div>
 
               <div className="space-y-6">
-                {reasons.map((reason, index) => <motion.div key={index} initial={{
-                opacity: 0,
-                y: 20
-              }} whileInView={{
-                opacity: 1,
-                y: 0
-              }} transition={{
-                duration: 0.6,
-                delay: index * 0.1
-              }} className="flex items-start space-x-4 group">
+                {reasons.map((reason, index) => (
+                  <motion.div key={index} initial={{
+                    opacity: 0,
+                    y: 20
+                  }} whileInView={{
+                    opacity: 1,
+                    y: 0
+                  }} transition={{
+                    duration: 0.6,
+                    delay: index * 0.1
+                  }} className="flex items-start space-x-4 group">
                     <div className="w-8 h-8 bg-gradient-to-br from-accent to-primary rounded-full flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
                       <reason.icon size={16} className="text-white" />
                     </div>
@@ -135,7 +140,8 @@ const Contact = () => {
                       <h4 className="font-semibold text-primary mb-2">{reason.title}</h4>
                       <p className="text-gray-600">{reason.description}</p>
                     </div>
-                  </motion.div>)}
+                  </motion.div>
+                ))}
               </div>
 
               <Card className="bg-gradient-to-br from-accent to-primary text-white border-0">
@@ -158,6 +164,8 @@ const Contact = () => {
       </section>
 
       <Footer />
-    </>;
+    </>
+  );
 };
+
 export default Contact;

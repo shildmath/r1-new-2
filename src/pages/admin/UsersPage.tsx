@@ -20,6 +20,7 @@ const UsersPage = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    password: '',
     role: 'closer' as 'admin' | 'closer'
   });
 
@@ -44,7 +45,10 @@ const UsersPage = () => {
       // Add new user
       const newUser: User = {
         id: Date.now().toString(),
-        ...formData,
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        role: formData.role,
         createdAt: new Date().toISOString()
       };
       const updatedUsers = [...users, newUser];
@@ -57,13 +61,14 @@ const UsersPage = () => {
       });
     }
 
-    setFormData({ name: '', email: '', role: 'closer' });
+    setFormData({ name: '', email: '', password: '', role: 'closer' });
   };
 
   const handleEdit = (user: User) => {
     setFormData({
       name: user.name,
       email: user.email,
+      password: user.password,
       role: user.role
     });
     setIsEditing(user.id);
@@ -81,7 +86,7 @@ const UsersPage = () => {
   };
 
   const resetForm = () => {
-    setFormData({ name: '', email: '', role: 'closer' });
+    setFormData({ name: '', email: '', password: '', role: 'closer' });
     setIsEditing(null);
     setShowAddForm(false);
   };
@@ -138,6 +143,19 @@ const UsersPage = () => {
                       required
                     />
                   </div>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-primary mb-2 block">
+                    Password
+                  </label>
+                  <Input
+                    type="password"
+                    placeholder="Enter password"
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    required
+                  />
                 </div>
 
                 <div>

@@ -356,7 +356,7 @@ const CloserPanel = () => {
                     <SelectValue placeholder="Call Status" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All</SelectItem>
+                    <SelectItem value="all">All</SelectItem>
                     <SelectItem value="confirmed">Confirmed</SelectItem>
                     <SelectItem value="completed">Completed</SelectItem>
                     <SelectItem value="no-show">No Show</SelectItem>
@@ -370,7 +370,7 @@ const CloserPanel = () => {
                     <SelectValue placeholder="Deal Status" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All</SelectItem>
+                    <SelectItem value="all">All</SelectItem>
                     <SelectItem value="closed">Closed</SelectItem>
                     <SelectItem value="follow-up">Follow Up</SelectItem>
                     <SelectItem value="client-loss">Client Loss</SelectItem>
@@ -414,16 +414,16 @@ const CloserPanel = () => {
                       <div className="flex flex-col items-end space-y-2">
                         <div className="flex space-x-2">
                           <Badge className={getCallStatusColor(booking.callStatus)}>
-                            {booking.callStatus.replace('-', ' ').toUpperCase()}
+                            {(booking.callStatus || 'confirmed').replace('-', ' ').toUpperCase()}
                           </Badge>
                           <Badge className={getDealStatusColor(booking.dealStatus)}>
-                            {booking.dealStatus.replace('-', ' ').toUpperCase()}
+                            {(booking.dealStatus || 'follow-up').replace('-', ' ').toUpperCase()}
                           </Badge>
                         </div>
                         
                         <div className="flex space-x-2">
                           <Select 
-                            value={booking.callStatus} 
+                            value={booking.callStatus || 'confirmed'} 
                             onValueChange={(value: Booking['callStatus']) => handleStatusChange(booking.id, 'callStatus', value)}
                           >
                             <SelectTrigger className="w-32">
@@ -439,7 +439,7 @@ const CloserPanel = () => {
                           </Select>
                           
                           <Select 
-                            value={booking.dealStatus} 
+                            value={booking.dealStatus || 'follow-up'} 
                             onValueChange={(value: Booking['dealStatus']) => handleStatusChange(booking.id, 'dealStatus', value)}
                           >
                             <SelectTrigger className="w-32">

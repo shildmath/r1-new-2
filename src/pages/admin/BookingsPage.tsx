@@ -20,8 +20,8 @@ const BookingsPage = () => {
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [showDetails, setShowDetails] = useState(false);
   const [filters, setFilters] = useState({
-    callStatus: '',
-    dealStatus: '',
+    callStatus: 'all',
+    dealStatus: 'all',
     dateFrom: '',
     dateTo: ''
   });
@@ -106,8 +106,8 @@ const BookingsPage = () => {
   };
 
   const filteredBookings = bookings.filter(booking => {
-    if (filters.callStatus && booking.callStatus !== filters.callStatus) return false;
-    if (filters.dealStatus && booking.dealStatus !== filters.dealStatus) return false;
+    if (filters.callStatus !== 'all' && booking.callStatus !== filters.callStatus) return false;
+    if (filters.dealStatus !== 'all' && booking.dealStatus !== filters.dealStatus) return false;
     if (filters.dateFrom && booking.preferredDate < filters.dateFrom) return false;
     if (filters.dateTo && booking.preferredDate > filters.dateTo) return false;
     return true;
@@ -139,7 +139,7 @@ const BookingsPage = () => {
                     <SelectValue placeholder="All statuses" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All statuses</SelectItem>
+                    <SelectItem value="all">All statuses</SelectItem>
                     <SelectItem value="confirmed">Confirmed</SelectItem>
                     <SelectItem value="completed">Completed</SelectItem>
                     <SelectItem value="no-show">No Show</SelectItem>
@@ -156,7 +156,7 @@ const BookingsPage = () => {
                     <SelectValue placeholder="All deals" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All deals</SelectItem>
+                    <SelectItem value="all">All deals</SelectItem>
                     <SelectItem value="closed">Closed</SelectItem>
                     <SelectItem value="follow-up">Follow Up</SelectItem>
                     <SelectItem value="client-loss">Client Loss</SelectItem>

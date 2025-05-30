@@ -4,48 +4,85 @@ import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
 import { storage } from '@/utils/localStorage';
 import { Booking, User } from '@/types/admin';
-import { Calendar, User as UserIcon, Phone, Mail, Trash2, Eye, Filter, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { exportBookingsToCSV } from '@/utils/csvExport';
+import { Calendar, Clock, User as UserIcon, Trash2, Filter, Eye, X, ChevronLeft, ChevronRight, Download } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const BookingsPage = () => {
   const [bookings, setBookings] = useState<Booking[]>(storage.getBookings());
-  const [users, setUsers] = useState<User[]>(storage.getUsers());
+  const [users] = useState<User[]>(storage.getUsers());
+  const [closerFilter, setCloserFilter] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [dealFilter, setDealFilter] = useState<string>('all');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [showDetails, setShowDetails] = useState(false);
-  const [filters, setFilters] = useState({
-    callStatus: 'all',
-    dealStatus: 'all',
-    dateFrom: '',
-    dateTo: ''
-  });
   const { toast } = useToast();
 
-  const clearFilters = () => {
-    setFilters({
-      callStatus: 'all',
-      dealStatus: 'all',
-      dateFrom: '',
-      dateTo: ''
+  const handleStatusChange = (bookingId: string, field: string, value: string) => {
+    const updatedBookings = bookings.map(booking => 
+      booking.id === bookingId ? { ...booking, [field]: value } : booking
+    );
+    setBookings(updatedBookings);
+    storage.setBookings(updatedBookings);
+    toast({
+      title: "Status Updated",
+      description: "Booking status has been updated successfully.",
     });
+  };
+
+  const handleDelete = (bookingId: string) => {
+    const updatedBookings = bookings.filter(booking => booking.id !== bookingId);
+    setBookings(updatedBookings);
+    storage.setBookings(updatedBookings);
+    toast({
+      title: "Booking Deleted",
+      description: "Booking has been deleted successfully.",
+    });
+  };
+
+  const clearFilters = () => {
+    setCloserFilter('all');
+    setStatusFilter('all');
+    setDealFilter('all');
+    setDateFrom('');
+    setDateTo('');
     toast({
       title: "Filters Cleared",
       description: "All filters have been reset.",
     });
   };
 
-  const getCloserName = (closerId: string) => {
-    const closer = users.find(user => user.id === closerId);
-    return closer?.name || 'Unknown Closer';
+  const handleExportCSV = () => {
+    exportBookingsToCSV(filteredBookings);
+    toast({
+      title: "CSV Exported",
+      description: "Bookings have been exported to CSV file.",
+    });
   };
 
-  const getCallStatusColor = (status: Booking['callStatus']) => {
+  const filteredBookings = bookings.filter(booking => {
+    if (closerFilter !== 'all' && booking.closerId !== closerFilter) return false;
+    if (statusFilter !== 'all' && booking.callStatus !== statusFilter) return false;
+    if (dealFilter !== 'all' && booking.dealStatus !== dealFilter) return false;
+    if (dateFrom && booking.preferredDate < dateFrom) return false;
+    if (dateTo && booking.preferredDate > dateTo) return false;
+    return true;
+  });
+
+  const getCloserName = (closerId: string) => {
+    const closer = users.find(user => user.id === closerId);
+    return closer ? closer.name : 'Unknown';
+  };
+
+  const getCallStatusColor = (status: string) => {
     switch (status) {
       case 'confirmed': return 'bg-blue-500';
       case 'completed': return 'bg-green-500';
@@ -56,7 +93,7 @@ const BookingsPage = () => {
     }
   };
 
-  const getDealStatusColor = (status: Booking['dealStatus']) => {
+  const getDealStatusColor = (status: string) => {
     switch (status) {
       case 'closed': return 'bg-green-600';
       case 'follow-up': return 'bg-blue-600';
@@ -66,65 +103,10 @@ const BookingsPage = () => {
     }
   };
 
-  const handleStatusChange = (bookingId: string, field: string, value: string) => {
-    const updatedBookings = bookings.map(booking => 
-      booking.id === bookingId ? { ...booking, [field]: value } : booking
-    );
-    
-    setBookings(updatedBookings);
-    storage.setBookings(updatedBookings);
-    
-    toast({
-      title: "Status Updated",
-      description: "Booking status has been updated successfully.",
-    });
-  };
-
-  const handleFieldUpdate = (bookingId: string, field: string, value: any) => {
-    const updatedBookings = bookings.map(booking => 
-      booking.id === bookingId ? { ...booking, [field]: value } : booking
-    );
-    
-    setBookings(updatedBookings);
-    storage.setBookings(updatedBookings);
-    
-    toast({
-      title: "Field Updated",
-      description: "Booking field has been updated successfully.",
-    });
-  };
-
-  const handleDelete = (bookingId: string) => {
-    const updatedBookings = bookings.filter(booking => booking.id !== bookingId);
-    setBookings(updatedBookings);
-    storage.setBookings(updatedBookings);
-    
-    // Also free up the time slot
-    const timeSlots = storage.getTimeSlots();
-    const updatedTimeSlots = timeSlots.map(slot => {
-      const booking = bookings.find(b => b.id === bookingId);
-      if (booking && slot.closerId === booking.closerId && 
-          slot.date === booking.preferredDate && 
-          slot.time === booking.preferredTime) {
-        return { ...slot, isBooked: false, clientId: undefined };
-      }
-      return slot;
-    });
-    storage.setTimeSlots(updatedTimeSlots);
-    
-    toast({
-      title: "Booking Deleted",
-      description: "Booking has been deleted and time slot freed up.",
-    });
-  };
-
-  const filteredBookings = bookings.filter(booking => {
-    if (filters.callStatus !== 'all' && booking.callStatus !== filters.callStatus) return false;
-    if (filters.dealStatus !== 'all' && booking.dealStatus !== filters.dealStatus) return false;
-    if (filters.dateFrom && booking.preferredDate < filters.dateFrom) return false;
-    if (filters.dateTo && booking.preferredDate > filters.dateTo) return false;
-    return true;
-  });
+  const totalBookings = bookings.length;
+  const confirmedBookings = bookings.filter(b => b.callStatus === 'confirmed').length;
+  const completedBookings = bookings.filter(b => b.callStatus === 'completed').length;
+  const closedDeals = bookings.filter(b => b.dealStatus === 'closed').length;
 
   return (
     <div className="space-y-6">
@@ -146,26 +128,106 @@ const BookingsPage = () => {
               <ChevronRight size={16} />
             </Button>
           </div>
+          
+          <div className="flex items-center space-x-4">
+            <Button onClick={handleExportCSV} className="agency-btn flex items-center space-x-2">
+              <Download size={16} />
+              <span>Export CSV</span>
+            </Button>
+            <div className="flex items-center space-x-2">
+              <Calendar size={20} className="text-primary" />
+              <Badge variant="secondary">{totalBookings}</Badge>
+            </div>
+          </div>
+        </div>
+
+        <p className="text-gray-600 mb-6">Manage all strategy call bookings and track their progress</p>
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 rounded-lg bg-blue-500 flex items-center justify-center">
+                  <Calendar className="text-white" size={24} />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Total Bookings</p>
+                  <p className="text-2xl font-bold text-primary">{totalBookings}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 rounded-lg bg-yellow-500 flex items-center justify-center">
+                  <Clock className="text-white" size={24} />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Confirmed</p>
+                  <p className="text-2xl font-bold text-primary">{confirmedBookings}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 rounded-lg bg-green-500 flex items-center justify-center">
+                  <UserIcon className="text-white" size={24} />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Completed</p>
+                  <p className="text-2xl font-bold text-primary">{completedBookings}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 rounded-lg bg-purple-500 flex items-center justify-center">
+                  <Calendar className="text-white" size={24} />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Closed Deals</p>
+                  <p className="text-2xl font-bold text-primary">{closedDeals}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Filters */}
         <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Filter size={20} />
-              <span>Filters</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div>
-                <label className="text-sm font-medium mb-2 block">Call Status</label>
-                <Select value={filters.callStatus} onValueChange={(value) => setFilters({...filters, callStatus: value})}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="All statuses" />
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <Filter size={20} className="text-primary" />
+                <Select value={closerFilter} onValueChange={setCloserFilter}>
+                  <SelectTrigger className="w-40">
+                    <SelectValue placeholder="All Closers" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All statuses</SelectItem>
+                    <SelectItem value="all">All Closers</SelectItem>
+                    {users.filter(user => user.role === 'closer').map((closer) => (
+                      <SelectItem key={closer.id} value={closer.id}>
+                        {closer.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="w-32">
+                    <SelectValue placeholder="Call Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All</SelectItem>
                     <SelectItem value="confirmed">Confirmed</SelectItem>
                     <SelectItem value="completed">Completed</SelectItem>
                     <SelectItem value="no-show">No Show</SelectItem>
@@ -173,44 +235,37 @@ const BookingsPage = () => {
                     <SelectItem value="not-attended">Not Attended</SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
-
-              <div>
-                <label className="text-sm font-medium mb-2 block">Deal Status</label>
-                <Select value={filters.dealStatus} onValueChange={(value) => setFilters({...filters, dealStatus: value})}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="All deals" />
+                
+                <Select value={dealFilter} onValueChange={setDealFilter}>
+                  <SelectTrigger className="w-32">
+                    <SelectValue placeholder="Deal Status" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All deals</SelectItem>
+                    <SelectItem value="all">All</SelectItem>
                     <SelectItem value="closed">Closed</SelectItem>
                     <SelectItem value="follow-up">Follow Up</SelectItem>
                     <SelectItem value="client-loss">Client Loss</SelectItem>
                     <SelectItem value="unqualified">Unqualified</SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
-
-              <div>
-                <label className="text-sm font-medium mb-2 block">Date From</label>
+                
                 <Input 
                   type="date" 
-                  value={filters.dateFrom}
-                  onChange={(e) => setFilters({...filters, dateFrom: e.target.value})}
+                  placeholder="From Date"
+                  value={dateFrom}
+                  onChange={(e) => setDateFrom(e.target.value)}
+                  className="w-32"
                 />
-              </div>
-
-              <div>
-                <label className="text-sm font-medium mb-2 block">Date To</label>
+                
                 <Input 
                   type="date" 
-                  value={filters.dateTo}
-                  onChange={(e) => setFilters({...filters, dateTo: e.target.value})}
+                  placeholder="To Date"
+                  value={dateTo}
+                  onChange={(e) => setDateTo(e.target.value)}
+                  className="w-32"
                 />
               </div>
-            </div>
-            
-            <div className="flex justify-end mt-4">
+              
               <Button variant="outline" onClick={clearFilters}>
                 <X size={16} className="mr-2" />
                 Clear Filters
@@ -220,294 +275,167 @@ const BookingsPage = () => {
         </Card>
 
         {filteredBookings.length > 0 ? (
-          <div className="space-y-4">
-            {filteredBookings.map((booking) => (
-              <motion.div
-                key={booking.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-              >
-                <Card>
-                  <CardHeader>
-                    <div className="flex justify-between items-start">
-                      <div className="flex items-center space-x-4">
-                        <div className="w-12 h-12 bg-gradient-to-br from-accent to-primary rounded-full flex items-center justify-center">
-                          <Calendar className="text-white" size={20} />
+          <Card>
+            <CardContent className="p-0">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Client</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Phone</TableHead>
+                    <TableHead>Date & Time</TableHead>
+                    <TableHead>Closer</TableHead>
+                    <TableHead>Call Status</TableHead>
+                    <TableHead>Deal Status</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredBookings.map((booking) => (
+                    <TableRow key={booking.id}>
+                      <TableCell className="font-medium">
+                        {booking.firstName} {booking.lastName}
+                      </TableCell>
+                      <TableCell>{booking.email}</TableCell>
+                      <TableCell>{booking.phone}</TableCell>
+                      <TableCell>
+                        <div className="space-y-1">
+                          <p className="font-medium">{booking.preferredDate}</p>
+                          <p className="text-sm text-gray-600">{booking.preferredTime}</p>
                         </div>
-                        <div>
-                          <CardTitle className="text-lg">
-                            {booking.firstName} {booking.lastName}
-                          </CardTitle>
-                          <p className="text-sm text-gray-600 flex items-center space-x-2">
-                            <Mail size={14} />
-                            <span>{booking.email}</span>
-                          </p>
-                          <p className="text-sm text-gray-600 flex items-center space-x-2">
-                            <Phone size={14} />
-                            <span>{booking.phone}</span>
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-3">
+                      </TableCell>
+                      <TableCell>{getCloserName(booking.closerId)}</TableCell>
+                      <TableCell>
                         <Badge className={getCallStatusColor(booking.callStatus || 'confirmed')}>
                           {(booking.callStatus || 'confirmed').replace('-', ' ').toUpperCase()}
                         </Badge>
+                      </TableCell>
+                      <TableCell>
                         <Badge className={getDealStatusColor(booking.dealStatus || 'follow-up')}>
                           {(booking.dealStatus || 'follow-up').replace('-', ' ').toUpperCase()}
                         </Badge>
-                        <Dialog open={showDetails && selectedBooking?.id === booking.id} onOpenChange={setShowDetails}>
-                          <DialogTrigger asChild>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => setSelectedBooking(booking)}
-                            >
-                              <Eye size={14} />
-                              See More
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-                            <DialogHeader>
-                              <DialogTitle>Booking Details - {booking.firstName} {booking.lastName}</DialogTitle>
-                            </DialogHeader>
-                            <div className="space-y-6">
-                              {/* Basic Info */}
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                  <label className="text-sm font-medium mb-2 block">Call Status</label>
-                                  <Select 
-                                    value={booking.callStatus || 'confirmed'} 
-                                    onValueChange={(value: Booking['callStatus']) => handleStatusChange(booking.id, 'callStatus', value)}
-                                  >
-                                    <SelectTrigger>
-                                      <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      <SelectItem value="confirmed">Confirmed</SelectItem>
-                                      <SelectItem value="completed">Completed</SelectItem>
-                                      <SelectItem value="no-show">No Show</SelectItem>
-                                      <SelectItem value="reschedule">Reschedule</SelectItem>
-                                      <SelectItem value="not-attended">Not Attended</SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center space-x-2">
+                          <Dialog open={showDetails && selectedBooking?.id === booking.id} onOpenChange={setShowDetails}>
+                            <DialogTrigger asChild>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => setSelectedBooking(booking)}
+                              >
+                                <Eye size={14} />
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                              <DialogHeader>
+                                <DialogTitle>Booking Details - {booking.firstName} {booking.lastName}</DialogTitle>
+                              </DialogHeader>
+                              {selectedBooking && (
+                                <div className="space-y-6">
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                      <label className="text-sm font-medium text-gray-600">Full Name</label>
+                                      <p className="font-medium">{selectedBooking.firstName} {selectedBooking.lastName}</p>
+                                    </div>
+                                    <div>
+                                      <label className="text-sm font-medium text-gray-600">Email</label>
+                                      <p className="font-medium">{selectedBooking.email}</p>
+                                    </div>
+                                    <div>
+                                      <label className="text-sm font-medium text-gray-600">Phone</label>
+                                      <p className="font-medium">{selectedBooking.phone}</p>
+                                    </div>
+                                    <div>
+                                      <label className="text-sm font-medium text-gray-600">Closer</label>
+                                      <p className="font-medium">{getCloserName(selectedBooking.closerId)}</p>
+                                    </div>
+                                    <div>
+                                      <label className="text-sm font-medium text-gray-600">Date & Time</label>
+                                      <p className="font-medium">{selectedBooking.preferredDate} at {selectedBooking.preferredTime}</p>
+                                    </div>
+                                    <div>
+                                      <label className="text-sm font-medium text-gray-600">Created</label>
+                                      <p className="font-medium">{new Date(selectedBooking.createdAt).toLocaleString()}</p>
+                                    </div>
+                                  </div>
+                                  
+                                  {selectedBooking.additionalInfo && (
+                                    <div>
+                                      <label className="text-sm font-medium text-gray-600">Additional Information</label>
+                                      <div className="mt-2 p-4 bg-gray-50 rounded-lg">
+                                        <p className="whitespace-pre-wrap">{selectedBooking.additionalInfo}</p>
+                                      </div>
+                                    </div>
+                                  )}
 
-                                <div>
-                                  <label className="text-sm font-medium mb-2 block">Deal Status</label>
-                                  <Select 
-                                    value={booking.dealStatus || 'follow-up'} 
-                                    onValueChange={(value: Booking['dealStatus']) => handleStatusChange(booking.id, 'dealStatus', value)}
-                                  >
-                                    <SelectTrigger>
-                                      <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      <SelectItem value="closed">Closed</SelectItem>
-                                      <SelectItem value="follow-up">Follow Up</SelectItem>
-                                      <SelectItem value="client-loss">Client Loss</SelectItem>
-                                      <SelectItem value="unqualified">Unqualified</SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                </div>
-                              </div>
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                      <label className="text-sm font-medium text-gray-600">Call Status</label>
+                                      <Badge className={`mt-2 ${getCallStatusColor(selectedBooking.callStatus || 'confirmed')}`}>
+                                        {(selectedBooking.callStatus || 'confirmed').replace('-', ' ').toUpperCase()}
+                                      </Badge>
+                                    </div>
+                                    <div>
+                                      <label className="text-sm font-medium text-gray-600">Deal Status</label>
+                                      <Badge className={`mt-2 ${getDealStatusColor(selectedBooking.dealStatus || 'follow-up')}`}>
+                                        {(selectedBooking.dealStatus || 'follow-up').replace('-', ' ').toUpperCase()}
+                                      </Badge>
+                                    </div>
+                                  </div>
 
-                              {/* Additional Fields */}
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                  <label className="text-sm font-medium mb-2 block">Closed Date</label>
-                                  <Input 
-                                    type="date"
-                                    value={booking.closedDate || ''}
-                                    onChange={(e) => handleFieldUpdate(booking.id, 'closedDate', e.target.value)}
-                                  />
+                                  {/* Additional fields if available */}
+                                  {(selectedBooking.country || selectedBooking.adSpend || selectedBooking.note) && (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                      {selectedBooking.country && (
+                                        <div>
+                                          <label className="text-sm font-medium text-gray-600">Country/Area</label>
+                                          <p className="font-medium">{selectedBooking.country}</p>
+                                        </div>
+                                      )}
+                                      {selectedBooking.adSpend && (
+                                        <div>
+                                          <label className="text-sm font-medium text-gray-600">Ad Spend</label>
+                                          <p className="font-medium">{selectedBooking.adSpend}</p>
+                                        </div>
+                                      )}
+                                      {selectedBooking.note && (
+                                        <div className="md:col-span-2">
+                                          <label className="text-sm font-medium text-gray-600">Notes</label>
+                                          <div className="mt-2 p-4 bg-gray-50 rounded-lg">
+                                            <p className="whitespace-pre-wrap">{selectedBooking.note}</p>
+                                          </div>
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
                                 </div>
-
-                                <div>
-                                  <label className="text-sm font-medium mb-2 block">Follow Up Date</label>
-                                  <Input 
-                                    type="date"
-                                    value={booking.followUpDate || ''}
-                                    onChange={(e) => handleFieldUpdate(booking.id, 'followUpDate', e.target.value)}
-                                  />
-                                </div>
-
-                                <div>
-                                  <label className="text-sm font-medium mb-2 block">Ad Spend</label>
-                                  <Input 
-                                    placeholder="$0.00"
-                                    value={booking.adSpend || ''}
-                                    onChange={(e) => handleFieldUpdate(booking.id, 'adSpend', e.target.value)}
-                                  />
-                                </div>
-
-                                <div>
-                                  <label className="text-sm font-medium mb-2 block">Country/Area</label>
-                                  <Input 
-                                    placeholder="Country/Area"
-                                    value={booking.country || ''}
-                                    onChange={(e) => handleFieldUpdate(booking.id, 'country', e.target.value)}
-                                  />
-                                </div>
-
-                                <div>
-                                  <label className="text-sm font-medium mb-2 block">Zip Code</label>
-                                  <Input 
-                                    placeholder="Zip Code"
-                                    value={booking.zipCode || ''}
-                                    onChange={(e) => handleFieldUpdate(booking.id, 'zipCode', e.target.value)}
-                                  />
-                                </div>
-
-                                <div>
-                                  <label className="text-sm font-medium mb-2 block">Recording Link</label>
-                                  <Input 
-                                    placeholder="Recording URL"
-                                    value={booking.recordingLink || ''}
-                                    onChange={(e) => handleFieldUpdate(booking.id, 'recordingLink', e.target.value)}
-                                  />
-                                </div>
-                              </div>
-
-                              {/* Checkboxes */}
-                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div className="flex items-center space-x-2">
-                                  <Checkbox 
-                                    checked={booking.paymentLinkSent}
-                                    onCheckedChange={(checked) => handleFieldUpdate(booking.id, 'paymentLinkSent', checked)}
-                                  />
-                                  <label className="text-sm font-medium">Payment Link Sent</label>
-                                </div>
-
-                                <div className="flex items-center space-x-2">
-                                  <Checkbox 
-                                    checked={booking.contractLinkSent}
-                                    onCheckedChange={(checked) => handleFieldUpdate(booking.id, 'contractLinkSent', checked)}
-                                  />
-                                  <label className="text-sm font-medium">Contract Link Sent</label>
-                                </div>
-
-                                <div className="flex items-center space-x-2">
-                                  <Checkbox 
-                                    checked={booking.offerMade}
-                                    onCheckedChange={(checked) => handleFieldUpdate(booking.id, 'offerMade', checked)}
-                                  />
-                                  <label className="text-sm font-medium">Offer Made</label>
-                                </div>
-                              </div>
-
-                              {/* Note */}
-                              <div>
-                                <label className="text-sm font-medium mb-2 block">Note - Reason</label>
-                                <Textarea 
-                                  placeholder="Add notes or reasons..."
-                                  value={booking.note || ''}
-                                  onChange={(e) => handleFieldUpdate(booking.id, 'note', e.target.value)}
-                                  rows={4}
-                                />
-                              </div>
-                            </div>
-                          </DialogContent>
-                        </Dialog>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleDelete(booking.id)}
-                          className="text-red-600 hover:text-red-700"
-                        >
-                          <Trash2 size={14} />
-                        </Button>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="bg-gray-50 p-4 rounded-lg">
-                        <h4 className="font-medium mb-2 flex items-center space-x-2">
-                          <Calendar size={16} />
-                          <span>Appointment</span>
-                        </h4>
-                        <p className="text-sm text-gray-700">
-                          <strong>Date:</strong> {booking.preferredDate}
-                        </p>
-                        <p className="text-sm text-gray-700">
-                          <strong>Time:</strong> {booking.preferredTime}
-                        </p>
-                        <p className="text-sm text-gray-700 flex items-center space-x-1">
-                          <UserIcon size={14} />
-                          <strong>Closer:</strong> {getCloserName(booking.closerId)}
-                        </p>
-                      </div>
-                      
-                      <div className="bg-gray-50 p-4 rounded-lg">
-                        <h4 className="font-medium mb-2">Status Quick Actions</h4>
-                        <div className="space-y-2">
-                          <Select 
-                            value={booking.callStatus || 'confirmed'} 
-                            onValueChange={(value: Booking['callStatus']) => handleStatusChange(booking.id, 'callStatus', value)}
+                              )}
+                            </DialogContent>
+                          </Dialog>
+                          
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDelete(booking.id)}
+                            className="text-red-600 hover:text-red-700"
                           >
-                            <SelectTrigger className="h-8">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="confirmed">Confirmed</SelectItem>
-                              <SelectItem value="completed">Completed</SelectItem>
-                              <SelectItem value="no-show">No Show</SelectItem>
-                              <SelectItem value="reschedule">Reschedule</SelectItem>
-                              <SelectItem value="not-attended">Not Attended</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <Select 
-                            value={booking.dealStatus || 'follow-up'} 
-                            onValueChange={(value: Booking['dealStatus']) => handleStatusChange(booking.id, 'dealStatus', value)}
-                          >
-                            <SelectTrigger className="h-8">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="closed">Closed</SelectItem>
-                              <SelectItem value="follow-up">Follow Up</SelectItem>
-                              <SelectItem value="client-loss">Client Loss</SelectItem>
-                              <SelectItem value="unqualified">Unqualified</SelectItem>
-                            </SelectContent>
-                          </Select>
+                            <Trash2 size={14} />
+                          </Button>
                         </div>
-                      </div>
-
-                      <div className="bg-gray-50 p-4 rounded-lg">
-                        <h4 className="font-medium mb-2">Quick Info</h4>
-                        <p className="text-xs text-gray-500">
-                          Created: {new Date(booking.createdAt).toLocaleString()}
-                        </p>
-                        {booking.country && (
-                          <p className="text-xs text-gray-500">
-                            Location: {booking.country}
-                          </p>
-                        )}
-                        {booking.adSpend && (
-                          <p className="text-xs text-gray-500">
-                            Ad Spend: {booking.adSpend}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                    
-                    {booking.additionalInfo && (
-                      <div className="mt-4 bg-blue-50 p-4 rounded-lg">
-                        <h4 className="font-medium mb-2">Additional Information:</h4>
-                        <p className="text-gray-700">{booking.additionalInfo}</p>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
         ) : (
           <Card>
             <CardContent className="p-12 text-center">
               <Calendar size={48} className="mx-auto text-gray-400 mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No Bookings</h3>
-              <p className="text-gray-600">Strategy call bookings will appear here when clients book appointments.</p>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No Bookings Found</h3>
+              <p className="text-gray-600">No bookings match the current filters. Try adjusting your filter criteria.</p>
             </CardContent>
           </Card>
         )}

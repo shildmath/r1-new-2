@@ -6,14 +6,19 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { storage } from '@/utils/localStorage';
 import { ContactSubmission } from '@/types/admin';
-import { MessageSquare, Mail, Phone, Trash2, Filter, Eye, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { exportContactSubmissionsToCSV } from '@/utils/csvExport';
+import { MessageSquare, Mail, Phone, Trash2, Filter, Eye, X, ChevronLeft, ChevronRight, Download } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const ContactSubmissionsPage = () => {
   const [submissions, setSubmissions] = useState<ContactSubmission[]>(storage.getContactSubmissions());
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [sourceFilter, setSourceFilter] = useState<string>('all');
+  const [selectedSubmission, setSelectedSubmission] = useState<ContactSubmission | null>(null);
+  const [showDetails, setShowDetails] = useState(false);
   const { toast } = useToast();
 
   const handleStatusChange = (submissionId: string, newStatus: 'new' | 'handled') => {
@@ -40,16 +45,31 @@ const ContactSubmissionsPage = () => {
 
   const clearFilters = () => {
     setStatusFilter('all');
+    setSourceFilter('all');
     toast({
       title: "Filters Cleared",
       description: "All filters have been reset.",
     });
   };
 
+  const handleExportCSV = () => {
+    exportContactSubmissionsToCSV(filteredSubmissions);
+    toast({
+      title: "CSV Exported",
+      description: "Contact submissions have been exported to CSV file.",
+    });
+  };
+
   const filteredSubmissions = submissions.filter(submission => {
     if (statusFilter !== 'all' && submission.status !== statusFilter) return false;
+    if (sourceFilter !== 'all' && submission.source !== sourceFilter) return false;
     return true;
   });
+
+  const newSubmissions = submissions.filter(sub => sub.status === 'new').length;
+  const handledSubmissions = submissions.filter(sub => sub.status === 'handled').length;
+  const homeSubmissions = submissions.filter(sub => sub.source === 'home').length;
+  const contactSubmissions = submissions.filter(sub => sub.source === 'contact').length;
 
   return (
     <div className="space-y-6">
@@ -72,13 +92,78 @@ const ContactSubmissionsPage = () => {
             </Button>
           </div>
           
-          <div className="flex items-center space-x-2">
-            <MessageSquare size={20} className="text-primary" />
-            <Badge variant="secondary">{submissions.length}</Badge>
+          <div className="flex items-center space-x-4">
+            <Button onClick={handleExportCSV} className="agency-btn flex items-center space-x-2">
+              <Download size={16} />
+              <span>Export CSV</span>
+            </Button>
+            <div className="flex items-center space-x-2">
+              <MessageSquare size={20} className="text-primary" />
+              <Badge variant="secondary">{submissions.length}</Badge>
+            </div>
           </div>
         </div>
 
         <p className="text-gray-600 mb-6">View and manage all contact form submissions from both Home and Contact pages</p>
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 rounded-lg bg-red-500 flex items-center justify-center">
+                  <MessageSquare className="text-white" size={24} />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">New Messages</p>
+                  <p className="text-2xl font-bold text-primary">{newSubmissions}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 rounded-lg bg-green-500 flex items-center justify-center">
+                  <MessageSquare className="text-white" size={24} />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Handled</p>
+                  <p className="text-2xl font-bold text-primary">{handledSubmissions}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 rounded-lg bg-blue-500 flex items-center justify-center">
+                  <MessageSquare className="text-white" size={24} />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">From Home Page</p>
+                  <p className="text-2xl font-bold text-primary">{homeSubmissions}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 rounded-lg bg-purple-500 flex items-center justify-center">
+                  <MessageSquare className="text-white" size={24} />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">From Contact Page</p>
+                  <p className="text-2xl font-bold text-primary">{contactSubmissions}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Filters */}
         <Card className="mb-6">
@@ -94,6 +179,17 @@ const ContactSubmissionsPage = () => {
                     <SelectItem value="all">All Status</SelectItem>
                     <SelectItem value="new">New Messages</SelectItem>
                     <SelectItem value="handled">Handled Messages</SelectItem>
+                  </SelectContent>
+                </Select>
+                
+                <Select value={sourceFilter} onValueChange={setSourceFilter}>
+                  <SelectTrigger className="w-40">
+                    <SelectValue placeholder="All Sources" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Sources</SelectItem>
+                    <SelectItem value="home">Home Page</SelectItem>
+                    <SelectItem value="contact">Contact Page</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -114,7 +210,7 @@ const ContactSubmissionsPage = () => {
                   <TableRow>
                     <TableHead>Name</TableHead>
                     <TableHead>Email</TableHead>
-                    <TableHead>Company</TableHead>
+                    <TableHead>Phone</TableHead>
                     <TableHead>Source</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Date</TableHead>
@@ -131,7 +227,7 @@ const ContactSubmissionsPage = () => {
                       <TableCell>{submission.phone || '-'}</TableCell>
                       <TableCell>
                         <Badge variant={submission.source === 'home' ? 'default' : 'secondary'}>
-                          {submission.source === 'home' ? 'Contact Page' : 'Contact Page'}
+                          {submission.source === 'home' ? 'Home Page' : 'Contact Page'}
                         </Badge>
                       </TableCell>
                       <TableCell>
@@ -146,9 +242,59 @@ const ContactSubmissionsPage = () => {
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center space-x-2">
-                          <Button variant="outline" size="sm">
-                            <Eye size={14} />
-                          </Button>
+                          <Dialog open={showDetails && selectedSubmission?.id === submission.id} onOpenChange={setShowDetails}>
+                            <DialogTrigger asChild>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => setSelectedSubmission(submission)}
+                              >
+                                <Eye size={14} />
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-2xl">
+                              <DialogHeader>
+                                <DialogTitle>Contact Submission Details</DialogTitle>
+                              </DialogHeader>
+                              {selectedSubmission && (
+                                <div className="space-y-4">
+                                  <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                      <label className="text-sm font-medium text-gray-600">Name</label>
+                                      <p className="font-medium">{selectedSubmission.name}</p>
+                                    </div>
+                                    <div>
+                                      <label className="text-sm font-medium text-gray-600">Email</label>
+                                      <p className="font-medium">{selectedSubmission.email}</p>
+                                    </div>
+                                    <div>
+                                      <label className="text-sm font-medium text-gray-600">Phone</label>
+                                      <p className="font-medium">{selectedSubmission.phone || 'Not provided'}</p>
+                                    </div>
+                                    <div>
+                                      <label className="text-sm font-medium text-gray-600">Source</label>
+                                      <p className="font-medium">{selectedSubmission.source === 'home' ? 'Home Page' : 'Contact Page'}</p>
+                                    </div>
+                                    <div>
+                                      <label className="text-sm font-medium text-gray-600">Status</label>
+                                      <p className="font-medium">{selectedSubmission.status === 'new' ? 'New Message' : 'Handled'}</p>
+                                    </div>
+                                    <div>
+                                      <label className="text-sm font-medium text-gray-600">Date</label>
+                                      <p className="font-medium">{new Date(selectedSubmission.createdAt).toLocaleString()}</p>
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <label className="text-sm font-medium text-gray-600">Message</label>
+                                    <div className="mt-2 p-4 bg-gray-50 rounded-lg">
+                                      <p className="whitespace-pre-wrap">{selectedSubmission.message}</p>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                            </DialogContent>
+                          </Dialog>
+                          
                           <Select 
                             value={submission.status} 
                             onValueChange={(value: 'new' | 'handled') => handleStatusChange(submission.id, value)}
@@ -161,6 +307,7 @@ const ContactSubmissionsPage = () => {
                               <SelectItem value="handled">Handled</SelectItem>
                             </SelectContent>
                           </Select>
+                          
                           <Button
                             variant="outline"
                             size="sm"

@@ -2,295 +2,225 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Send } from 'lucide-react';
+import { storage } from '@/utils/localStorage';
+import { Mail, Phone, MapPin, Clock } from 'lucide-react';
 
 const ContactForm = () => {
   const { toast } = useToast();
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
+    name: '',
     email: '',
     phone: '',
-    company: '',
-    website: '',
-    budget: '',
-    services: '',
     message: ''
   });
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
-
-  const handleSelectChange = (name: string, value: string) => {
-    setFormData({
-      ...formData,
-      [name]: value
-    });
-  };
-
-  const sendToGoogleSheets = async (data: any) => {
-    const googleSheetsUrl = 'https://script.google.com/macros/s/AKfycbwCGlS3dHzH8FqQWJ4nKP5L6lHdZ9QbPvX2ykGmwjGv0_kO8jGjLNxzDQXJZ6zR6gQ/exec';
-    
-    const formDataToSend = new FormData();
-    formDataToSend.append('firstName', data.firstName);
-    formDataToSend.append('lastName', data.lastName);
-    formDataToSend.append('email', data.email);
-    formDataToSend.append('phone', data.phone);
-    formDataToSend.append('company', data.company);
-    formDataToSend.append('website', data.website);
-    formDataToSend.append('budget', data.budget);
-    formDataToSend.append('services', data.services);
-    formDataToSend.append('message', data.message);
-    formDataToSend.append('timestamp', new Date().toISOString());
-
-    try {
-      const response = await fetch(googleSheetsUrl, {
-        method: 'POST',
-        body: formDataToSend,
-        mode: 'no-cors'
-      });
-
-      return true;
-    } catch (error) {
-      console.error('Error sending to Google Sheets:', error);
-      throw error;
-    }
-  };
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+    setIsSubmitting(true);
+
     try {
-      // Send to Google Sheets
-      await sendToGoogleSheets(formData);
-      
-      console.log('Contact form submitted:', {
-        ...formData,
-        type: 'contact',
-        submittedAt: new Date().toISOString()
-      });
-      
-      toast({
-        title: "Message Sent Successfully!",
-        description: "Thank you for contacting us. We'll get back to you within 24 hours.",
-      });
-      
+      // Add contact submission to localStorage
+      storage.addContactSubmission(
+        formData.name,
+        formData.email,
+        formData.phone,
+        formData.message,
+        'contact'
+      );
+
       // Reset form
       setFormData({
-        firstName: '',
-        lastName: '',
+        name: '',
         email: '',
         phone: '',
-        company: '',
-        website: '',
-        budget: '',
-        services: '',
         message: ''
       });
-    } catch (error) {
+
       toast({
         title: "Message Sent!",
-        description: "Your message has been received. We'll get back to you within 24 hours.",
+        description: "Thank you for your message. We'll get back to you within 24 hours.",
       });
-      
-      // Reset form even if Google Sheets fails (fallback)
-      setFormData({
-        firstName: '',
-        lastName: '',
-        email: '',
-        phone: '',
-        company: '',
-        website: '',
-        budget: '',
-        services: '',
-        message: ''
+    } catch (error) {
+      console.error('Contact form submission error:', error);
+      toast({
+        title: "Message Failed",
+        description: "There was an error sending your message. Please try again.",
+        variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
+  const handleChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
   return (
-    <motion.div
-      initial={{ opacity: 0, x: -50 }}
-      whileInView={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.8 }}
-      className="slide-up"
-    >
-      <Card className="agency-card glow-border">
-        <CardHeader>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="bounce-in"
-          >
-            <CardTitle className="text-2xl font-bold text-primary">Send Us a Message</CardTitle>
-            <CardDescription className="text-gray-600">
-              Fill out the form below and we'll get back to you within 24 hours with a 
-              custom strategy for your business.
-            </CardDescription>
-          </motion.div>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <motion.div 
-              className="grid grid-cols-1 md:grid-cols-2 gap-4"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-            >
-              <div>
-                <Input
-                  name="firstName"
-                  placeholder="First Name *"
-                  value={formData.firstName}
-                  onChange={handleInputChange}
-                  required
-                  className="focus:ring-2 focus:ring-purple-500 transition-all duration-300"
-                />
-              </div>
-              <div>
-                <Input
-                  name="lastName"
-                  placeholder="Last Name *"
-                  value={formData.lastName}
-                  onChange={handleInputChange}
-                  required
-                  className="focus:ring-2 focus:ring-purple-500 transition-all duration-300"
-                />
-              </div>
-            </motion.div>
+    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-white to-accent/5 py-20">
+      <div className="container mx-auto px-4">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="max-w-4xl mx-auto"
+        >
+          <div className="text-center mb-12">
+            <h1 className="text-4xl md:text-5xl font-bold text-primary mb-6">
+              Get in Touch
+            </h1>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Ready to transform your business? Let's discuss how we can help you achieve your goals.
+            </p>
+          </div>
 
-            <motion.div 
-              className="grid grid-cols-1 md:grid-cols-2 gap-4"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-            >
-              <div>
-                <Input
-                  name="email"
-                  type="email"
-                  placeholder="Email Address *"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  required
-                  className="focus:ring-2 focus:ring-purple-500 transition-all duration-300"
-                />
-              </div>
-              <div>
-                <Input
-                  name="phone"
-                  type="tel"
-                  placeholder="Phone Number"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  className="focus:ring-2 focus:ring-purple-500 transition-all duration-300"
-                />
-              </div>
-            </motion.div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            {/* Contact Form */}
+            <Card className="shadow-2xl">
+              <CardHeader className="bg-gradient-to-r from-primary to-accent text-white">
+                <CardTitle className="text-2xl">Send us a Message</CardTitle>
+              </CardHeader>
+              <CardContent className="p-8">
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div>
+                    <label className="text-sm font-medium text-primary mb-2 block">
+                      Full Name *
+                    </label>
+                    <Input
+                      placeholder="Enter your full name"
+                      value={formData.name}
+                      onChange={(e) => handleChange('name', e.target.value)}
+                      required
+                      className="h-12"
+                    />
+                  </div>
 
-            <motion.div 
-              className="grid grid-cols-1 md:grid-cols-2 gap-4"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-            >
-              <div>
-                <Input
-                  name="company"
-                  placeholder="Company Name *"
-                  value={formData.company}
-                  onChange={handleInputChange}
-                  required
-                  className="focus:ring-2 focus:ring-purple-500 transition-all duration-300"
-                />
-              </div>
-              <div>
-                <Input
-                  name="website"
-                  placeholder="Website URL"
-                  value={formData.website}
-                  onChange={handleInputChange}
-                  className="focus:ring-2 focus:ring-purple-500 transition-all duration-300"
-                />
-              </div>
-            </motion.div>
+                  <div>
+                    <label className="text-sm font-medium text-primary mb-2 block">
+                      Email Address *
+                    </label>
+                    <Input
+                      type="email"
+                      placeholder="your.email@example.com"
+                      value={formData.email}
+                      onChange={(e) => handleChange('email', e.target.value)}
+                      required
+                      className="h-12"
+                    />
+                  </div>
 
-            <motion.div 
-              className="grid grid-cols-1 md:grid-cols-2 gap-4"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-            >
-              <div>
-                <Select value={formData.budget} onValueChange={(value) => handleSelectChange('budget', value)}>
-                  <SelectTrigger className="focus:ring-2 focus:ring-purple-500 transition-all duration-300">
-                    <SelectValue placeholder="Monthly Budget" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="under-5k">Under $5,000</SelectItem>
-                    <SelectItem value="5k-10k">$5,000 - $10,000</SelectItem>
-                    <SelectItem value="10k-25k">$10,000 - $25,000</SelectItem>
-                    <SelectItem value="25k-50k">$25,000 - $50,000</SelectItem>
-                    <SelectItem value="over-50k">Over $50,000</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Select value={formData.services} onValueChange={(value) => handleSelectChange('services', value)}>
-                  <SelectTrigger className="focus:ring-2 focus:ring-purple-500 transition-all duration-300">
-                    <SelectValue placeholder="Services Interested In" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="social-media">Social Media Marketing</SelectItem>
-                    <SelectItem value="seo">SEO & Content</SelectItem>
-                    <SelectItem value="ppc">PPC Advertising</SelectItem>
-                    <SelectItem value="email">Email Marketing</SelectItem>
-                    <SelectItem value="cro">Conversion Optimization</SelectItem>
-                    <SelectItem value="full-service">Full Service Marketing</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </motion.div>
+                  <div>
+                    <label className="text-sm font-medium text-primary mb-2 block">
+                      Phone Number
+                    </label>
+                    <Input
+                      placeholder="+1 (555) 123-4567"
+                      value={formData.phone}
+                      onChange={(e) => handleChange('phone', e.target.value)}
+                      className="h-12"
+                    />
+                  </div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.5 }}
-            >
-              <Textarea
-                name="message"
-                placeholder="Tell us about your business, goals, and current marketing challenges... *"
-                value={formData.message}
-                onChange={handleInputChange}
-                className="min-h-[120px] focus:ring-2 focus:ring-purple-500 transition-all duration-300"
-                required
-              />
-            </motion.div>
+                  <div>
+                    <label className="text-sm font-medium text-primary mb-2 block">
+                      Message *
+                    </label>
+                    <Textarea
+                      placeholder="Tell us about your project, goals, or questions..."
+                      value={formData.message}
+                      onChange={(e) => handleChange('message', e.target.value)}
+                      required
+                      rows={5}
+                      className="resize-none"
+                    />
+                  </div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.6 }}
-              whileHover={{ scale: 1.02 }}
-            >
-              <Button type="submit" className="agency-btn w-full text-lg py-3 shimmer">
-                Send Message <Send className="ml-2" size={20} />
-              </Button>
-            </motion.div>
-          </form>
-        </CardContent>
-      </Card>
-    </motion.div>
+                  <Button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full h-12 text-lg font-semibold agency-btn"
+                  >
+                    {isSubmitting ? (
+                      <div className="flex items-center space-x-2">
+                        <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+                        <span>Sending...</span>
+                      </div>
+                    ) : (
+                      'Send Message'
+                    )}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+
+            {/* Contact Information */}
+            <div className="space-y-8">
+              <Card className="p-8">
+                <h3 className="text-2xl font-bold text-primary mb-6">Contact Information</h3>
+                <div className="space-y-6">
+                  <div className="flex items-start space-x-4">
+                    <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Mail className="text-primary" size={24} />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-primary">Email</h4>
+                      <p className="text-gray-600">info@aiadmaxify.com</p>
+                      <p className="text-gray-600">support@aiadmaxify.com</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start space-x-4">
+                    <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Phone className="text-primary" size={24} />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-primary">Phone</h4>
+                      <p className="text-gray-600">+1 (555) 123-4567</p>
+                      <p className="text-gray-600">+1 (555) 987-6543</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start space-x-4">
+                    <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <MapPin className="text-primary" size={24} />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-primary">Address</h4>
+                      <p className="text-gray-600">123 Business Street</p>
+                      <p className="text-gray-600">New York, NY 10001</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start space-x-4">
+                    <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Clock className="text-primary" size={24} />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-primary">Business Hours</h4>
+                      <p className="text-gray-600">Monday - Friday: 9:00 AM - 6:00 PM EST</p>
+                      <p className="text-gray-600">Saturday: 10:00 AM - 4:00 PM EST</p>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+
+              <Card className="p-8 bg-gradient-to-r from-primary to-accent text-white">
+                <h3 className="text-2xl font-bold mb-4">Ready to Get Started?</h3>
+                <p className="mb-6">Book a free strategy call to discuss your project in detail.</p>
+                <Button className="bg-white text-primary hover:bg-gray-100">
+                  Schedule a Call
+                </Button>
+              </Card>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    </div>
   );
 };
 

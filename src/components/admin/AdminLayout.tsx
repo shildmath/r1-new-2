@@ -51,7 +51,7 @@ const AdminLayout = () => {
   const nextPage = currentIndex < menuItems.length - 1 ? menuItems[currentIndex + 1] : null;
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-gray-50 flex w-full">
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div 
@@ -133,7 +133,7 @@ const AdminLayout = () => {
               <Menu size={20} />
             </Button>
             
-            {/* Navigation buttons */}
+            {/* Side Navigation buttons */}
             <div className="hidden md:flex items-center space-x-2">
               {previousPage && (
                 <Button

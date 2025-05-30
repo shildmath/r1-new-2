@@ -12,8 +12,9 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { storage } from '@/utils/localStorage';
+import { exportBookingsToCSV } from '@/utils/csvExport';
 import { TimeSlot, Booking } from '@/types/admin';
-import { Calendar, Clock, Plus, Trash2, User, LogOut, Eye, Filter, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Calendar, Clock, Plus, Trash2, User, LogOut, Eye, Filter, X, ChevronLeft, ChevronRight, Download } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const CloserPanel = () => {
@@ -68,6 +69,14 @@ const CloserPanel = () => {
     toast({
       title: "Filters Cleared",
       description: "All filters have been reset.",
+    });
+  };
+
+  const handleExportCSV = () => {
+    exportBookingsToCSV(filteredBookings);
+    toast({
+      title: "CSV Exported",
+      description: "Your bookings have been exported to CSV file.",
     });
   };
 
@@ -225,7 +234,7 @@ const CloserPanel = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="max-w-6xl mx-auto space-y-6"
+        className="max-w-7xl mx-auto space-y-6"
       >
         {/* Header with Navigation */}
         <div className="flex justify-between items-center">
@@ -241,6 +250,10 @@ const CloserPanel = () => {
             </Button>
           </div>
           <div className="flex items-center space-x-4">
+            <Button onClick={handleExportCSV} className="agency-btn flex items-center space-x-2">
+              <Download size={16} />
+              <span>Export CSV</span>
+            </Button>
             <div className="flex items-center space-x-3">
               <User size={20} className="text-primary" />
               <span className="text-lg font-medium">{user?.name}</span>
@@ -481,11 +494,11 @@ const CloserPanel = () => {
                     key={booking.id}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    className="p-4 bg-blue-50 border border-blue-200 rounded-lg"
+                    className="p-6 bg-blue-50 border border-blue-200 rounded-lg"
                   >
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
-                        <h4 className="font-medium text-primary">
+                        <h4 className="font-medium text-primary text-lg">
                           {booking.firstName} {booking.lastName}
                         </h4>
                         <p className="text-sm text-gray-600">{booking.email}</p>
@@ -504,7 +517,7 @@ const CloserPanel = () => {
                           </p>
                         )}
                       </div>
-                      <div className="flex flex-col items-end space-y-2">
+                      <div className="flex flex-col items-end space-y-3">
                         <div className="flex space-x-2">
                           <Badge className={getCallStatusColor(booking.callStatus || 'confirmed')}>
                             {(booking.callStatus || 'confirmed').replace('-', ' ').toUpperCase()}

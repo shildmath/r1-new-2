@@ -19,7 +19,8 @@ import {
   Menu,
   X,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Clock
 } from 'lucide-react';
 
 const AdminLayout = () => {
@@ -38,6 +39,7 @@ const AdminLayout = () => {
     { path: '/admin/users', icon: Users, label: 'Users' },
     { path: '/admin/contact-submissions', icon: MessageSquare, label: 'Contact Submissions' },
     { path: '/admin/bookings', icon: Calendar, label: 'Strategy Call Bookings' },
+    { path: '/admin/time-slots', icon: Clock, label: 'Time Slots Management' },
     { path: '/admin/testimonials', icon: Star, label: 'Testimonials' },
     { path: '/admin/services', icon: Briefcase, label: 'Services' },
     { path: '/admin/team', icon: UserCheck, label: 'Team Members' },
@@ -51,7 +53,7 @@ const AdminLayout = () => {
   const nextPage = currentIndex < menuItems.length - 1 ? menuItems[currentIndex + 1] : null;
 
   return (
-    <div className="min-h-screen bg-gray-50 flex w-full">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex w-full">
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div 
@@ -64,14 +66,14 @@ const AdminLayout = () => {
       <motion.div
         initial={false}
         animate={{ x: sidebarOpen ? 0 : -300 }}
-        className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform lg:transform-none lg:translate-x-0 transition-transform duration-300 ease-in-out`}
+        className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white shadow-xl transform lg:transform-none lg:translate-x-0 transition-transform duration-300 ease-in-out rounded-r-2xl lg:rounded-none`}
       >
-        <div className="flex items-center justify-between h-16 px-6 border-b">
-          <h1 className="text-xl font-bold text-primary">Admin Panel</h1>
+        <div className="flex items-center justify-between h-16 px-6 border-b bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-tr-2xl lg:rounded-none">
+          <h1 className="text-xl font-bold">Admin Panel</h1>
           <Button
             variant="ghost"
             size="icon"
-            className="lg:hidden"
+            className="lg:hidden text-white hover:bg-white/20"
             onClick={() => setSidebarOpen(false)}
           >
             <X size={20} />
@@ -80,8 +82,13 @@ const AdminLayout = () => {
 
         <nav className="mt-6">
           <div className="px-6 mb-4">
-            <p className="text-sm text-gray-600">Welcome, {user?.name}</p>
-            <p className="text-xs text-gray-500 capitalize">{user?.role}</p>
+            <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
+              <p className="text-sm font-medium text-blue-800">Welcome back!</p>
+              <p className="text-lg font-bold text-blue-900">{user?.name}</p>
+              <p className="text-xs text-blue-600 capitalize bg-blue-100 px-2 py-1 rounded-full inline-block mt-1">
+                {user?.role}
+              </p>
+            </div>
           </div>
 
           <ul className="space-y-2 px-4">
@@ -91,15 +98,15 @@ const AdminLayout = () => {
                 <li key={item.path}>
                   <Link
                     to={item.path}
-                    className={`flex items-center space-x-3 px-4 py-2 rounded-lg transition-colors ${
+                    className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 ${
                       isActive 
-                        ? 'bg-primary text-white' 
-                        : 'text-gray-700 hover:bg-gray-100'
+                        ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg transform scale-105' 
+                        : 'text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 hover:text-blue-700'
                     }`}
                     onClick={() => setSidebarOpen(false)}
                   >
                     <item.icon size={20} />
-                    <span>{item.label}</span>
+                    <span className="font-medium">{item.label}</span>
                   </Link>
                 </li>
               );
@@ -110,7 +117,7 @@ const AdminLayout = () => {
         <div className="absolute bottom-4 left-4 right-4">
           <Button
             variant="outline"
-            className="w-full flex items-center space-x-2"
+            className="w-full flex items-center space-x-2 border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300"
             onClick={handleLogout}
           >
             <LogOut size={16} />
@@ -122,7 +129,7 @@ const AdminLayout = () => {
       {/* Main content */}
       <div className="flex-1 flex flex-col min-h-screen">
         {/* Top bar */}
-        <div className="bg-white shadow-sm border-b h-16 flex items-center justify-between px-6">
+        <div className="bg-white shadow-sm border-b h-16 flex items-center justify-between px-6 rounded-bl-2xl lg:rounded-none">
           <div className="flex items-center space-x-4">
             <Button
               variant="ghost"
@@ -140,7 +147,7 @@ const AdminLayout = () => {
                   variant="outline"
                   size="sm"
                   onClick={() => navigate(previousPage.path)}
-                  className="flex items-center space-x-2"
+                  className="flex items-center space-x-2 bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200 text-blue-700 hover:from-blue-100 hover:to-blue-200"
                 >
                   <ChevronLeft size={16} />
                   <span>{previousPage.label}</span>
@@ -151,7 +158,7 @@ const AdminLayout = () => {
                   variant="outline"
                   size="sm"
                   onClick={() => navigate(nextPage.path)}
-                  className="flex items-center space-x-2"
+                  className="flex items-center space-x-2 bg-gradient-to-r from-purple-50 to-purple-100 border-purple-200 text-purple-700 hover:from-purple-100 hover:to-purple-200"
                 >
                   <span>{nextPage.label}</span>
                   <ChevronRight size={16} />
@@ -161,9 +168,14 @@ const AdminLayout = () => {
           </div>
 
           <div className="flex items-center space-x-4">
-            <span className="text-sm text-gray-600">
-              {new Date().toLocaleDateString()}
-            </span>
+            <div className="text-sm text-gray-600 bg-gray-50 px-3 py-1 rounded-full">
+              {new Date().toLocaleDateString('en-US', { 
+                weekday: 'short', 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+              })}
+            </div>
           </div>
         </div>
 

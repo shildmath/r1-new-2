@@ -29,7 +29,7 @@ export interface Booking {
   closerId: string;
   timeSlotId: string;
   callStatus: 'confirmed' | 'completed' | 'no-show' | 'reschedule' | 'not-attended';
-  dealStatus: 'closed' | 'follow-up' | 'client-loss' | 'unqualified';
+  dealStatus: 'closed' | 'follow-up' | 'client-loss' | 'unqualified' | 'not-started';
   closedDate?: string;
   paymentLinkSent: boolean;
   contractLinkSent: boolean;

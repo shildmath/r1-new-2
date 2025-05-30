@@ -50,7 +50,7 @@ export interface ContactSubmission {
   phone?: string;
   message: string;
   source: 'home' | 'contact';
-  status: 'new' | 'handled';
+  status: 'new' | 'contacted' | 'closed';
   createdAt: string;
 }
 

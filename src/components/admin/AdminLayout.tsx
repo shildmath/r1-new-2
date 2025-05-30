@@ -20,7 +20,8 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
-  Clock
+  Clock,
+  Mail
 } from 'lucide-react';
 
 const AdminLayout = () => {
@@ -38,6 +39,7 @@ const AdminLayout = () => {
     { path: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
     { path: '/admin/users', icon: Users, label: 'Users' },
     { path: '/admin/contact-submissions', icon: MessageSquare, label: 'Contact Submissions' },
+    { path: '/admin/home-page-contacts', icon: Mail, label: 'Home Page Contacts' },
     { path: '/admin/bookings', icon: Calendar, label: 'Strategy Call Bookings' },
     { path: '/admin/time-slots', icon: Clock, label: 'Time Slots Management' },
     { path: '/admin/testimonials', icon: Star, label: 'Testimonials' },

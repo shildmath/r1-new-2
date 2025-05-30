@@ -21,6 +21,8 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import UsersPage from "./pages/admin/UsersPage";
 import ContactSubmissionsPage from "./pages/admin/ContactSubmissionsPage";
 import BookingsPage from "./pages/admin/BookingsPage";
+import TimeSlotsPage from "./pages/admin/TimeSlotsPage";
+import HomePageContactPage from "./pages/admin/HomePageContactPage";
 import CloserPanel from "./pages/CloserPanel";
 
 const queryClient = new QueryClient({
@@ -107,7 +109,9 @@ const App = () => {
                   <Route index element={<AdminDashboard />} />
                   <Route path="users" element={<UsersPage />} />
                   <Route path="contact-submissions" element={<ContactSubmissionsPage />} />
+                  <Route path="home-page-contacts" element={<HomePageContactPage />} />
                   <Route path="bookings" element={<BookingsPage />} />
+                  <Route path="time-slots" element={<TimeSlotsPage />} />
                   <Route path="testimonials" element={<div>Testimonials Management Page</div>} />
                   <Route path="services" element={<div>Services Management Page</div>} />
                   <Route path="team" element={<div>Team Management Page</div>} />

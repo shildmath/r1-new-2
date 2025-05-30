@@ -21,24 +21,18 @@ const HomeContactForm = () => {
     setIsSubmitting(true);
 
     try {
+      console.log('Submitting home contact form:', formData);
+      
       // Add contact submission to localStorage with proper source
-      const submissionData = {
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone || '',
-        message: formData.message,
-        source: 'home' as const
-      };
-
       storage.addContactSubmission(
-        submissionData.name,
-        submissionData.email,
-        submissionData.phone,
-        submissionData.message,
-        submissionData.source
+        formData.name,
+        formData.email,
+        formData.phone || '',
+        formData.message,
+        'home'
       );
 
-      console.log('Contact form submitted from home page:', submissionData);
+      console.log('Contact form submitted successfully from home page');
 
       // Reset form
       setFormData({

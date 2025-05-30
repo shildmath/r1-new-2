@@ -76,7 +76,7 @@ const TimeSlotsPage = () => {
     };
 
     const updatedSlots = [...timeSlots, slot];
-    storage.saveTimeSlots(updatedSlots);
+    storage.setTimeSlots(updatedSlots);
     setTimeSlots(updatedSlots);
     setNewSlot({ closerId: '', date: '', time: '' });
 
@@ -90,7 +90,7 @@ const TimeSlotsPage = () => {
     const updatedSlots = timeSlots.map(slot => 
       slot.id === updatedSlot.id ? updatedSlot : slot
     );
-    storage.saveTimeSlots(updatedSlots);
+    storage.setTimeSlots(updatedSlots);
     setTimeSlots(updatedSlots);
     setEditingSlot(null);
 
@@ -102,7 +102,7 @@ const TimeSlotsPage = () => {
 
   const deleteTimeSlot = (slotId: string) => {
     const updatedSlots = timeSlots.filter(slot => slot.id !== slotId);
-    storage.saveTimeSlots(updatedSlots);
+    storage.setTimeSlots(updatedSlots);
     setTimeSlots(updatedSlots);
 
     toast({

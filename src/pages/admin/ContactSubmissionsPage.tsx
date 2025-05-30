@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -24,7 +23,7 @@ const ContactSubmissionsPage = () => {
   const [showDetails, setShowDetails] = useState(false);
   const { toast } = useToast();
 
-  const handleStatusChange = (submissionId: string, status: 'new' | 'handled') => {
+  const handleStatusChange = (submissionId: string, status: 'new' | 'contacted' | 'closed') => {
     const updatedSubmissions = submissions.map(submission => 
       submission.id === submissionId ? { ...submission, status } : submission
     );
@@ -64,7 +63,12 @@ const ContactSubmissionsPage = () => {
   });
 
   const getStatusColor = (status: string) => {
-    return status === 'new' ? 'bg-orange-500' : 'bg-green-500';
+    switch (status) {
+      case 'new': return 'bg-orange-500';
+      case 'contacted': return 'bg-blue-500';
+      case 'closed': return 'bg-green-500';
+      default: return 'bg-gray-500';
+    }
   };
 
   const getSourceColor = (source: string) => {
@@ -73,8 +77,8 @@ const ContactSubmissionsPage = () => {
 
   const totalSubmissions = submissions.length;
   const newSubmissions = submissions.filter(s => s.status === 'new').length;
-  const handledSubmissions = submissions.filter(s => s.status === 'handled').length;
-  const homeSubmissions = submissions.filter(s => s.source === 'home').length;
+  const contactedSubmissions = submissions.filter(s => s.status === 'contacted').length;
+  const closedSubmissions = submissions.filter(s => s.status === 'closed').length;
 
   return (
     <div className="space-y-6">
@@ -136,30 +140,30 @@ const ContactSubmissionsPage = () => {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white shadow-xl">
+          <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-xl">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-green-100 text-sm font-medium">Handled</p>
-                  <p className="text-3xl font-bold">{handledSubmissions}</p>
-                  <p className="text-green-200 text-xs mt-1">Completed</p>
+                  <p className="text-blue-100 text-sm font-medium">Contacted</p>
+                  <p className="text-3xl font-bold">{contactedSubmissions}</p>
+                  <p className="text-blue-200 text-xs mt-1">In progress</p>
                 </div>
-                <div className="w-12 h-12 bg-green-400 rounded-xl flex items-center justify-center">
+                <div className="w-12 h-12 bg-blue-400 rounded-xl flex items-center justify-center">
                   <Users className="text-white" size={24} />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-white shadow-xl">
+          <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white shadow-xl">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-purple-100 text-sm font-medium">Home Page</p>
-                  <p className="text-3xl font-bold">{homeSubmissions}</p>
-                  <p className="text-purple-200 text-xs mt-1">From homepage</p>
+                  <p className="text-green-100 text-sm font-medium">Closed</p>
+                  <p className="text-3xl font-bold">{closedSubmissions}</p>
+                  <p className="text-green-200 text-xs mt-1">Completed</p>
                 </div>
-                <div className="w-12 h-12 bg-purple-400 rounded-xl flex items-center justify-center">
+                <div className="w-12 h-12 bg-green-400 rounded-xl flex items-center justify-center">
                   <Calendar className="text-white" size={24} />
                 </div>
               </div>
@@ -195,7 +199,8 @@ const ContactSubmissionsPage = () => {
                   <SelectContent>
                     <SelectItem value="all">All Status</SelectItem>
                     <SelectItem value="new">New</SelectItem>
-                    <SelectItem value="handled">Handled</SelectItem>
+                    <SelectItem value="contacted">Contacted</SelectItem>
+                    <SelectItem value="closed">Closed</SelectItem>
                   </SelectContent>
                 </Select>
                 
@@ -264,14 +269,15 @@ const ContactSubmissionsPage = () => {
                         <TableCell>
                           <Select 
                             value={submission.status} 
-                            onValueChange={(value: 'new' | 'handled') => handleStatusChange(submission.id, value)}
+                            onValueChange={(value: 'new' | 'contacted' | 'closed') => handleStatusChange(submission.id, value)}
                           >
                             <SelectTrigger className="w-28">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
                               <SelectItem value="new">New</SelectItem>
-                              <SelectItem value="handled">Handled</SelectItem>
+                              <SelectItem value="contacted">Contacted</SelectItem>
+                              <SelectItem value="closed">Closed</SelectItem>
                             </SelectContent>
                           </Select>
                         </TableCell>
@@ -343,10 +349,10 @@ const ContactSubmissionsPage = () => {
                                   <div className="flex justify-end space-x-3">
                                     <Button
                                       variant="outline"
-                                      onClick={() => handleStatusChange(selectedSubmission.id, selectedSubmission.status === 'new' ? 'handled' : 'new')}
-                                      className={selectedSubmission.status === 'new' ? 'border-green-200 text-green-600 hover:bg-green-50' : 'border-orange-200 text-orange-600 hover:bg-orange-50'}
+                                      onClick={() => handleStatusChange(selectedSubmission.id, selectedSubmission.status === 'new' ? 'contacted' : selectedSubmission.status === 'contacted' ? 'closed' : 'new')}
+                                      className={selectedSubmission.status === 'new' ? 'border-blue-200 text-blue-600 hover:bg-blue-50' : selectedSubmission.status === 'contacted' ? 'border-green-200 text-green-600 hover:bg-green-50' : 'border-orange-200 text-orange-600 hover:bg-orange-50'}
                                     >
-                                      Mark as {selectedSubmission.status === 'new' ? 'Handled' : 'New'}
+                                      Mark as {selectedSubmission.status === 'new' ? 'Contacted' : selectedSubmission.status === 'contacted' ? 'Closed' : 'New'}
                                     </Button>
                                   </div>
                                 </div>

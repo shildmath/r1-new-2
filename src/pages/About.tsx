@@ -2,7 +2,7 @@
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Users, Target, Award, TrendingUp, Calendar, CheckCircle } from 'lucide-react';
+import { Users, Target, Award, TrendingUp, Calendar, CheckCircle, Zap, Users2, Medal } from 'lucide-react';
 
 const About = () => {
   const stats = [
@@ -15,76 +15,89 @@ const About = () => {
   const journey = [
     {
       year: '2017',
-      title: 'Foundation',
-      description: 'Started as a small digital marketing consultancy with a vision to revolutionize online advertising.',
-      achievements: ['First client acquired', 'Team of 3 founded', 'Initial strategies developed']
+      title: 'Company Founded',
+      description: 'Started with a vision to revolutionize digital marketing through AI',
+      icon: Zap,
+      color: 'bg-blue-500'
     },
     {
       year: '2018',
-      title: 'Growth Phase',
-      description: 'Expanded services and began incorporating AI technologies into our marketing strategies.',
-      achievements: ['50+ clients served', 'AI integration started', 'First major campaign success']
+      title: 'First AI Implementation', 
+      description: 'Developed proprietary AI algorithms for customer targeting',
+      icon: Target,
+      color: 'bg-purple-500'
     },
     {
       year: '2019',
-      title: 'Innovation',
-      description: 'Developed proprietary AI algorithms for better targeting and campaign optimization.',
-      achievements: ['Proprietary AI developed', '100+ clients milestone', 'Industry recognition']
+      title: '100+ Clients Milestone',
+      description: 'Reached our first major client milestone with 300% average ROI',
+      icon: Users2,
+      color: 'bg-pink-500'
     },
     {
       year: '2020',
-      title: 'Expansion',
-      description: 'Despite global challenges, we thrived by helping businesses adapt to digital-first strategies.',
-      achievements: ['Remote-first operations', '200+ clients served', 'COVID-19 adaptation strategies']
+      title: 'AI Marketing Platform',
+      description: 'Launched comprehensive AI-powered marketing platform',
+      icon: Award,
+      color: 'bg-red-500'
     },
     {
       year: '2021',
-      title: 'AI Leadership',
-      description: 'Became industry leaders in AI-powered marketing with breakthrough results for clients.',
-      achievements: ['AI leadership established', '300+ clients milestone', 'Industry awards received']
+      title: 'Industry Recognition',
+      description: 'Won "Best AI Marketing Agency" award from Digital Marketing Institute',
+      icon: Medal,
+      color: 'bg-orange-500'
     },
     {
       year: '2022',
-      title: 'Scale & Excellence',
-      description: 'Scaled operations globally while maintaining our commitment to personalized service.',
-      achievements: ['Global expansion', '400+ clients served', 'Excellence certifications']
+      title: 'Global Expansion',
+      description: 'Expanded operations to serve clients across 15 countries',
+      icon: TrendingUp,
+      color: 'bg-green-500'
     },
     {
       year: '2023',
-      title: 'Market Dominance',
-      description: 'Established ourselves as the go-to agency for AI-powered marketing solutions.',
-      achievements: ['Market leadership', '500+ clients milestone', 'Strategic partnerships']
+      title: '500+ Success Stories',
+      description: 'Helped over 500 businesses achieve remarkable growth',
+      icon: CheckCircle,
+      color: 'bg-emerald-500'
     },
     {
       year: '2024',
-      title: 'Future Vision',
-      description: 'Continued innovation with next-generation AI technologies and predictive analytics.',
-      achievements: ['Next-gen AI launch', 'Predictive analytics', 'Industry transformation']
+      title: 'AI Innovation Lab',
+      description: 'Established dedicated R&D lab for next-gen marketing AI',
+      icon: Zap,
+      color: 'bg-cyan-500'
     },
     {
       year: '2025',
-      title: 'Innovation Frontier',
-      description: 'Leading the industry into the future with cutting-edge AI solutions and unprecedented results.',
-      achievements: ['Industry frontier', 'AI evolution', 'Future-ready solutions']
+      title: 'Future Vision',
+      description: 'Leading the next wave of AI-powered marketing transformation',
+      icon: Target,
+      color: 'bg-blue-600'
     }
   ];
 
   const values = [
     {
       title: 'Innovation First',
-      description: 'We constantly push the boundaries of what\'s possible in digital marketing through cutting-edge AI technology.'
-    },
-    {
-      title: 'Results Driven',
-      description: 'Every strategy we implement is designed with one goal in mind: delivering measurable, impactful results for our clients.'
+      description: 'We leverage cutting-edge AI technology to deliver unprecedented marketing results.',
+      icon: Zap
     },
     {
       title: 'Client Success',
-      description: 'Your success is our success. We\'re committed to being true partners in your business growth journey.'
+      description: 'Your success is our success. We\'re committed to delivering measurable results.',
+      icon: Users2
     },
     {
-      title: 'Transparency',
-      description: 'We believe in complete transparency in our processes, reporting, and communication with our clients.'
+      title: 'Excellence',
+      description: 'We maintain the highest standards in everything we do, from strategy to execution.',
+      icon: Award
+    },
+    {
+      title: 'Results-Driven',
+      description: 'Every campaign is optimized for maximum ROI and business growth.',
+      icon: Target
     }
   ];
 
@@ -99,16 +112,32 @@ const About = () => {
             transition={{ duration: 0.8 }}
             className="text-center max-w-4xl mx-auto"
           >
-            <h1 className="text-4xl md:text-6xl font-bold text-primary mb-6">
-              About AIAdMaxify
-            </h1>
-            <p className="text-xl text-gray-600 mb-8">
-              We're not just another marketing agency. We're your growth partners, 
-              leveraging cutting-edge AI technology to transform your business and maximize your advertising potential.
-            </p>
-            <Badge className="text-lg py-2 px-6 bg-gradient-to-r from-primary to-accent">
-              Established 2017 • 500+ Success Stories
-            </Badge>
+            <motion.h1 
+              className="text-4xl md:text-6xl font-bold text-primary mb-6"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+            >
+              About <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">AIAdMaxify</span>
+            </motion.h1>
+            <motion.p 
+              className="text-xl text-gray-600 mb-8"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+            >
+              We're a team of passionate digital marketing experts and AI specialists 
+              dedicated to transforming businesses through intelligent marketing solutions.
+            </motion.p>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, delay: 0.6 }}
+            >
+              <Badge className="text-lg py-2 px-6 bg-gradient-to-r from-primary to-accent">
+                Established 2017 • 500+ Success Stories
+              </Badge>
+            </motion.div>
           </motion.div>
         </div>
       </section>
@@ -123,11 +152,16 @@ const About = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
+                whileHover={{ scale: 1.05, y: -5 }}
                 className="text-center"
               >
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r from-primary to-accent flex items-center justify-center">
+                <motion.div 
+                  className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r from-primary to-accent flex items-center justify-center"
+                  whileHover={{ rotate: 360 }}
+                  transition={{ duration: 0.6 }}
+                >
                   <stat.icon className="text-white" size={32} />
-                </div>
+                </motion.div>
                 <h3 className="text-3xl font-bold text-primary mb-2">{stat.value}</h3>
                 <p className="text-gray-600">{stat.label}</p>
               </motion.div>
@@ -146,18 +180,22 @@ const About = () => {
             className="text-center mb-16"
           >
             <h2 className="text-3xl md:text-4xl font-bold text-primary mb-6">
-              Our Journey: 2017 - 2025
+              Our <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Journey</span>
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              From a small startup to industry leaders, here's how we've grown and evolved 
-              to become the premier AI-powered marketing agency.
+              From a small startup in 2017 to an industry-leading AI marketing agency in 2025
             </p>
           </motion.div>
 
           <div className="max-w-6xl mx-auto">
             <div className="relative">
               {/* Timeline line */}
-              <div className="hidden md:block absolute left-1/2 transform -translate-x-px h-full w-0.5 bg-gradient-to-b from-primary to-accent"></div>
+              <motion.div 
+                className="hidden md:block absolute left-1/2 transform -translate-x-px h-full w-0.5 bg-gradient-to-b from-primary to-accent"
+                initial={{ height: 0 }}
+                animate={{ height: "100%" }}
+                transition={{ duration: 2, delay: 0.5 }}
+              ></motion.div>
               
               {journey.map((milestone, index) => (
                 <motion.div
@@ -170,32 +208,37 @@ const About = () => {
                   }`}
                 >
                   {/* Timeline dot */}
-                  <div className="hidden md:block absolute left-1/2 transform -translate-x-1/2 w-4 h-4 bg-primary rounded-full border-4 border-white shadow-lg z-10"></div>
+                  <motion.div 
+                    className={`hidden md:block absolute left-1/2 transform -translate-x-1/2 w-12 h-12 ${milestone.color} rounded-full border-4 border-white shadow-lg z-10 flex items-center justify-center`}
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ duration: 0.5, delay: index * 0.2 + 0.5 }}
+                    whileHover={{ scale: 1.2 }}
+                  >
+                    <milestone.icon className="text-white" size={20} />
+                  </motion.div>
                   
                   {/* Content */}
                   <div className={`w-full md:w-5/12 ${index % 2 === 0 ? 'md:pr-8' : 'md:pl-8'}`}>
-                    <Card className="p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
-                      <CardContent className="p-0">
-                        <div className="flex items-center mb-4">
-                          <div className="w-12 h-12 rounded-full bg-gradient-to-r from-primary to-accent flex items-center justify-center mr-4">
-                            <Calendar className="text-white" size={20} />
-                          </div>
-                          <div>
-                            <h3 className="text-2xl font-bold text-primary">{milestone.year}</h3>
-                            <h4 className="text-lg font-semibold text-gray-800">{milestone.title}</h4>
-                          </div>
-                        </div>
-                        <p className="text-gray-600 mb-4">{milestone.description}</p>
-                        <div className="space-y-2">
-                          {milestone.achievements.map((achievement, achIndex) => (
-                            <div key={achIndex} className="flex items-center">
-                              <CheckCircle className="text-green-500 mr-2" size={16} />
-                              <span className="text-sm text-gray-700">{achievement}</span>
+                    <motion.div
+                      whileHover={{ scale: 1.02, y: -5 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <Card className="p-6 shadow-lg hover:shadow-xl transition-shadow duration-300 border-l-4 border-l-primary">
+                        <CardContent className="p-0">
+                          <div className="flex items-center mb-4">
+                            <div className={`w-12 h-12 rounded-full ${milestone.color} flex items-center justify-center mr-4 md:hidden`}>
+                              <milestone.icon className="text-white" size={20} />
                             </div>
-                          ))}
-                        </div>
-                      </CardContent>
-                    </Card>
+                            <div>
+                              <Badge className={`${milestone.color} text-white mb-2`}>{milestone.year}</Badge>
+                              <h4 className="text-lg font-semibold text-gray-800">{milestone.title}</h4>
+                            </div>
+                          </div>
+                          <p className="text-gray-600">{milestone.description}</p>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
                   </div>
                 </motion.div>
               ))}
@@ -214,25 +257,101 @@ const About = () => {
             className="text-center mb-16"
           >
             <h2 className="text-3xl md:text-4xl font-bold text-primary mb-6">
-              Our Core Values
+              Our <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Values</span>
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              These principles guide everything we do and shape how we serve our clients.
+              The principles that guide everything we do
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
             {values.map((value, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
+                whileHover={{ scale: 1.05, y: -10 }}
+                className="text-center"
               >
-                <Card className="p-6 h-full hover:shadow-lg transition-shadow duration-300">
+                <Card className="p-6 h-full hover:shadow-lg transition-all duration-300 border-t-4 border-t-primary">
                   <CardContent className="p-0">
+                    <motion.div 
+                      className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center"
+                      whileHover={{ rotate: 360 }}
+                      transition={{ duration: 0.6 }}
+                    >
+                      <value.icon className="text-white" size={24} />
+                    </motion.div>
                     <h3 className="text-xl font-bold text-primary mb-4">{value.title}</h3>
                     <p className="text-gray-600">{value.description}</p>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Team Section */}
+      <section className="py-20">
+        <div className="container mx-auto px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold text-primary mb-6">
+              Meet Our <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Team</span>
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              The brilliant minds behind our AI-powered marketing success
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+            {[
+              {
+                name: 'Alex Johnson',
+                role: 'CEO & Founder',
+                bio: '10+ years in digital marketing and AI strategy',
+                image: '/lovable-uploads/f28d1397-f087-49e3-b66b-6f8a17346fdc.png'
+              },
+              {
+                name: 'Sarah Chen',
+                role: 'Head of AI Marketing',
+                bio: 'Former Google AI researcher with 8 years experience',
+                image: '/lovable-uploads/80bafa31-117d-4d13-ac9f-23a08b241713.png'
+              },
+              {
+                name: 'Mike Rodriguez',
+                role: 'Creative Director',
+                bio: 'Award-winning designer with 12 years in digital',
+                image: '/lovable-uploads/80380992-ea0d-49be-9c56-569a7baa5096.png'
+              }
+            ].map((member, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+                whileHover={{ scale: 1.05, y: -10 }}
+              >
+                <Card className="p-6 text-center hover:shadow-xl transition-all duration-300">
+                  <CardContent className="p-0">
+                    <motion.div 
+                      className="w-24 h-24 mx-auto mb-4 rounded-full bg-gradient-to-r from-primary to-accent overflow-hidden"
+                      whileHover={{ scale: 1.1 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                        <Users className="text-gray-400" size={32} />
+                      </div>
+                    </motion.div>
+                    <h3 className="text-xl font-bold text-primary mb-2">{member.name}</h3>
+                    <p className="text-purple-600 font-medium mb-3">{member.role}</p>
+                    <p className="text-gray-600 text-sm">{member.bio}</p>
                   </CardContent>
                 </Card>
               </motion.div>
@@ -256,12 +375,20 @@ const About = () => {
               Join hundreds of successful businesses who have transformed their growth with our AI-powered marketing solutions.
             </p>
             <div className="flex flex-col md:flex-row gap-4 justify-center">
-              <button className="bg-white text-primary px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
+              <motion.button 
+                className="bg-white text-primary px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
                 Get Started Today
-              </button>
-              <button className="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold hover:bg-white hover:text-primary transition-colors">
+              </motion.button>
+              <motion.button 
+                className="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold hover:bg-white hover:text-primary transition-colors"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
                 Schedule a Call
-              </button>
+              </motion.button>
             </div>
           </motion.div>
         </div>

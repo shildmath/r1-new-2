@@ -4,12 +4,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Mail, Phone, MapPin, Clock } from 'lucide-react';
 import ContactForm from '@/components/ContactForm';
 import { storage } from '@/utils/localStorage';
+import Navbar from '@/components/Navbar';
+import EnhancedFooter from '@/components/EnhancedFooter';
 
 const Contact = () => {
   const contactInfo = storage.getContactInfo();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      <Navbar />
+      
       {/* Hero Section */}
       <section className="pt-24 pb-16 px-4">
         <div className="max-w-7xl mx-auto">
@@ -28,7 +32,24 @@ const Contact = () => {
           </motion.div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-            {/* Contact Information */}
+            {/* Contact Form */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+            >
+              <Card className="shadow-2xl border-0 bg-white/80 backdrop-blur-sm">
+                <CardHeader className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-xl">
+                  <CardTitle className="text-2xl text-center">Send Us a Message</CardTitle>
+                  <p className="text-blue-100 text-center">We'll get back to you within 24 hours</p>
+                </CardHeader>
+                <CardContent className="p-8">
+                  <ContactForm />
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            {/* Why Choose Us */}
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -40,64 +61,6 @@ const Contact = () => {
                 <p className="text-gray-600 text-lg leading-relaxed mb-8">
                   Whether you're looking to scale your existing business or launch something new, our team of experts is here to help you navigate the digital landscape and achieve extraordinary growth.
                 </p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Card className="group hover:shadow-xl transition-all duration-300 border-l-4 border-l-blue-500">
-                  <CardContent className="p-6">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                        <Mail className="text-white" size={24} />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-gray-800 mb-1">Email Us</h3>
-                        <p className="text-gray-600 text-sm">{contactInfo.email}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="group hover:shadow-xl transition-all duration-300 border-l-4 border-l-green-500">
-                  <CardContent className="p-6">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                        <Phone className="text-white" size={24} />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-gray-800 mb-1">Call Us</h3>
-                        <p className="text-gray-600 text-sm">{contactInfo.phone}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="group hover:shadow-xl transition-all duration-300 border-l-4 border-l-purple-500">
-                  <CardContent className="p-6">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                        <MapPin className="text-white" size={24} />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-gray-800 mb-1">Visit Us</h3>
-                        <p className="text-gray-600 text-sm">{contactInfo.address}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="group hover:shadow-xl transition-all duration-300 border-l-4 border-l-orange-500">
-                  <CardContent className="p-6">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                        <Clock className="text-white" size={24} />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-gray-800 mb-1">Business Hours</h3>
-                        <p className="text-gray-600 text-sm">{contactInfo.hours}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
               </div>
 
               <Card className="bg-gradient-to-r from-blue-500 to-purple-600 text-white">
@@ -121,23 +84,6 @@ const Contact = () => {
                       <span>Transparent reporting and real-time analytics</span>
                     </li>
                   </ul>
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            {/* Contact Form */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-            >
-              <Card className="shadow-2xl border-0 bg-white/80 backdrop-blur-sm">
-                <CardHeader className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-xl">
-                  <CardTitle className="text-2xl text-center">Send Us a Message</CardTitle>
-                  <p className="text-blue-100 text-center">We'll get back to you within 24 hours</p>
-                </CardHeader>
-                <CardContent className="p-8">
-                  <ContactForm />
                 </CardContent>
               </Card>
             </motion.div>
@@ -180,6 +126,8 @@ const Contact = () => {
           </motion.div>
         </div>
       </section>
+
+      <EnhancedFooter />
     </div>
   );
 };

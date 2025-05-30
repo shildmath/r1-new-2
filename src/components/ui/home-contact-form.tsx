@@ -21,14 +21,24 @@ const HomeContactForm = () => {
     setIsSubmitting(true);
 
     try {
-      // Add contact submission to localStorage
+      // Add contact submission to localStorage with proper source
+      const submissionData = {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone || '',
+        message: formData.message,
+        source: 'home' as const
+      };
+
       storage.addContactSubmission(
-        formData.name,
-        formData.email,
-        formData.phone,
-        formData.message,
-        'home'
+        submissionData.name,
+        submissionData.email,
+        submissionData.phone,
+        submissionData.message,
+        submissionData.source
       );
+
+      console.log('Contact form submitted from home page:', submissionData);
 
       // Reset form
       setFormData({
@@ -39,7 +49,7 @@ const HomeContactForm = () => {
       });
 
       toast({
-        title: "Message Sent!",
+        title: "Message Sent Successfully!",
         description: "Thank you for your message. We'll get back to you within 24 hours.",
       });
     } catch (error) {

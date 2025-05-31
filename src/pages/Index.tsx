@@ -500,33 +500,7 @@ const Index = () => {
               </div>
             </motion.div>
 
-            <motion.div initial={{
-            opacity: 0,
-            x: 50
-          }} whileInView={{
-            opacity: 1,
-            x: 0
-          }} transition={{
-            duration: 0.8
-          }}>
-              <Card className="bg-white/10 backdrop-blur-lg border-white/20 shadow-2xl">
-                
-                <CardContent>
-                  <form onSubmit={handleContactSubmit} className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <Input placeholder="First Name" className="bg-white/20 border-white/30 text-white placeholder:text-gray-300" required />
-                      <Input placeholder="Last Name" className="bg-white/20 border-white/30 text-white placeholder:text-gray-300" required />
-                    </div>
-                    <Input type="email" placeholder="Email Address" className="bg-white/20 border-white/30 text-white placeholder:text-gray-300" required />
-                    <Input placeholder="Company Name" className="bg-white/20 border-white/30 text-white placeholder:text-gray-300" required />
-                    <Textarea placeholder="Tell us about your business and marketing goals..." className="bg-white/20 border-white/30 text-white placeholder:text-gray-300 min-h-[100px]" required />
-                    <Button type="submit" className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 w-full text-lg py-3">
-                      Get Free Strategy Call <Zap className="ml-2" size={20} />
-                    </Button>
-                  </form>
-                </CardContent>
-              </Card>
-            </motion.div>
+            
           </div>
         </div>
       </section>

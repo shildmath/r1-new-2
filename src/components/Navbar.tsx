@@ -2,11 +2,13 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Menu, X } from 'lucide-react';
+import { useSupabaseAuth } from '@/hooks/useSupabaseAuth';
+import { Menu, X, User, LogOut } from 'lucide-react';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const { user, logout } = useSupabaseAuth();
 
   const navItems = [
     { name: 'Home', path: '/' },
@@ -17,6 +19,10 @@ const Navbar = () => {
   ];
 
   const isActive = (path: string) => location.pathname === path;
+
+  const handleLogout = async () => {
+    await logout();
+  };
 
   return (
     <nav className="bg-white shadow-lg fixed w-full top-0 z-50">
@@ -49,6 +55,25 @@ const Navbar = () => {
             <Link to="/strategy-call">
               <Button className="agency-btn">Book Strategy Call</Button>
             </Link>
+            
+            {/* User menu */}
+            {user && (
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2 text-sm text-gray-600">
+                  <User size={16} />
+                  <span>Welcome!</span>
+                </div>
+                <Button
+                  onClick={handleLogout}
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center space-x-1"
+                >
+                  <LogOut size={16} />
+                  <span>Logout</span>
+                </Button>
+              </div>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -85,6 +110,27 @@ const Navbar = () => {
                   <Button className="agency-btn w-full">Book Strategy Call</Button>
                 </Link>
               </div>
+              
+              {/* Mobile user menu */}
+              {user && (
+                <div className="px-3 py-2 border-t mt-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2 text-sm text-gray-600">
+                      <User size={16} />
+                      <span>Welcome!</span>
+                    </div>
+                    <Button
+                      onClick={handleLogout}
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center space-x-1"
+                    >
+                      <LogOut size={16} />
+                      <span>Logout</span>
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}

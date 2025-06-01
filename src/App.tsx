@@ -5,17 +5,19 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider, useAuth } from "@/hooks/useAuth";
+import { SupabaseAuthProvider, useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 import Index from "./pages/Index";
 import Services from "./pages/Services";
 import Testimonials from "./pages/Testimonials";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import StrategyCall from "./pages/StrategyCall";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 import NotFound from "./pages/NotFound";
+import ProtectedRoute from "./components/ProtectedRoute";
 
-// Auth imports
-import AuthPage from "./pages/AuthPage";
+// Admin imports
 import AdminLayout from "./components/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import UsersPage from "./pages/admin/UsersPage";
@@ -34,36 +36,20 @@ const queryClient = new QueryClient({
   },
 });
 
-// Protected Route component
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, isLoading } = useAuth();
-  
-  if (isLoading) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
-  }
-  
-  if (!user) {
-    return <Navigate to="/auth" replace />;
-  }
-  
-  return <>{children}</>;
-};
-
 // Admin Route component
 const AdminRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading } = useSupabaseAuth();
   
   if (isLoading) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   }
   
   if (!user) {
-    return <Navigate to="/auth" replace />;
+    return <Navigate to="/login" replace />;
   }
   
-  if (user.role === 'closer') {
-    return <Navigate to="/closer-panel" replace />;
-  }
+  // For now, allow any authenticated user to access admin
+  // You can add role checking here later
   
   return <>{children}</>;
 };
@@ -77,7 +63,7 @@ const App = () => {
         <TooltipProvider delayDuration={300}>
           <Toaster />
           <Sonner />
-          <AuthProvider>
+          <SupabaseAuthProvider>
             <BrowserRouter>
               <Routes>
                 {/* Public routes */}
@@ -88,8 +74,9 @@ const App = () => {
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/strategy-call" element={<StrategyCall />} />
                 
-                {/* Auth route */}
-                <Route path="/auth" element={<AuthPage />} />
+                {/* Auth routes */}
+                <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<Signup />} />
                 
                 {/* Closer panel */}
                 <Route path="/closer-panel" element={
@@ -123,7 +110,7 @@ const App = () => {
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
-          </AuthProvider>
+          </SupabaseAuthProvider>
         </TooltipProvider>
       </QueryClientProvider>
     </React.StrictMode>

@@ -35,6 +35,11 @@ const Navbar = () => {
     }
   };
 
+  const getRoleDisplayName = (role: string | null) => {
+    if (!role) return 'User';
+    return role.charAt(0).toUpperCase() + role.slice(1);
+  };
+
   return (
     <nav className="bg-white shadow-lg fixed w-full top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -68,11 +73,11 @@ const Navbar = () => {
             </Link>
             
             {/* User menu */}
-            {user && (
+            {user ? (
               <div className="flex items-center space-x-4">
                 <div className="flex items-center space-x-2 text-sm text-gray-600">
                   {getRoleIcon(userRole)}
-                  <span>Welcome {userRole}!</span>
+                  <span>Welcome {getRoleDisplayName(userRole)}!</span>
                 </div>
                 
                 {/* Role-based navigation */}
@@ -104,6 +109,12 @@ const Navbar = () => {
                   <span>Logout</span>
                 </Button>
               </div>
+            ) : (
+              <Link to="/login">
+                <Button variant="outline" size="sm">
+                  Login
+                </Button>
+              </Link>
             )}
           </div>
 
@@ -143,11 +154,11 @@ const Navbar = () => {
               </div>
               
               {/* Mobile user menu */}
-              {user && (
+              {user ? (
                 <div className="px-3 py-2 border-t mt-2 space-y-2">
                   <div className="flex items-center space-x-2 text-sm text-gray-600">
                     {getRoleIcon(userRole)}
-                    <span>Welcome {userRole}!</span>
+                    <span>Welcome {getRoleDisplayName(userRole)}!</span>
                   </div>
                   
                   {/* Role-based navigation */}
@@ -178,6 +189,14 @@ const Navbar = () => {
                     <LogOut size={16} />
                     <span>Logout</span>
                   </Button>
+                </div>
+              ) : (
+                <div className="px-3 py-2 border-t mt-2">
+                  <Link to="/login" onClick={() => setIsOpen(false)}>
+                    <Button variant="outline" size="sm" className="w-full">
+                      Login
+                    </Button>
+                  </Link>
                 </div>
               )}
             </div>

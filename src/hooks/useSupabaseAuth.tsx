@@ -52,7 +52,7 @@ export const SupabaseAuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          // Delay the role fetch to avoid conflicts
+          // Fetch role for authenticated user
           setTimeout(() => {
             fetchUserRole(session.user.id);
           }, 100);
@@ -134,29 +134,6 @@ export const SupabaseAuthProvider = ({ children }: { children: ReactNode }) => {
       });
       
       console.log('Signup result:', { user: data?.user?.id, error });
-      
-      // If signup is successful and user is confirmed, try to insert role manually
-      if (!error && data.user && !data.user.email_confirmed_at) {
-        console.log('User created but email not confirmed. Role will be set on email confirmation.');
-      } else if (!error && data.user && data.user.email_confirmed_at) {
-        console.log('User created and confirmed. Setting role manually.');
-        // User is immediately confirmed, set role
-        const { error: roleError } = await supabase
-          .from('user_roles')
-          .upsert([
-            {
-              user_id: data.user.id,
-              role: role
-            }
-          ]);
-        
-        if (roleError) {
-          console.error('Error setting user role:', roleError);
-        } else {
-          console.log('Role set successfully for user:', data.user.id);
-        }
-      }
-      
       setIsLoading(false);
       return { error };
     } catch (error) {
@@ -201,18 +178,12 @@ export const SupabaseAuthProvider = ({ children }: { children: ReactNode }) => {
 
         if (!signupError && signupData.user) {
           console.log('Demo user created, now logging in...');
-          // If user is immediately confirmed, log them in
-          if (signupData.user.email_confirmed_at) {
-            const { error: loginError } = await supabase.auth.signInWithPassword({
-              email,
-              password,
-            });
-            error = loginError;
-          } else {
-            // For demo purposes, we'll confirm the user manually if needed
-            console.log('Demo user created but needs confirmation');
-            error = signupError;
-          }
+          // Try to login after signup
+          const { error: loginError } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+          });
+          error = loginError;
         } else {
           error = signupError;
         }

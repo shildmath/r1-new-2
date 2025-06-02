@@ -23,6 +23,7 @@ const Login = () => {
     e.preventDefault();
     setIsLoading(true);
 
+    console.log('Login form submitted');
     const { error } = await login(formData.email, formData.password);
     
     if (!error) {
@@ -30,8 +31,10 @@ const Login = () => {
         title: "Login Successful",
         description: "Welcome back!",
       });
+      console.log('Login successful, navigating to home');
       navigate('/');
     } else {
+      console.error('Login failed:', error);
       toast({
         title: "Login Failed",
         description: error.message || "Invalid email or password",
@@ -44,6 +47,8 @@ const Login = () => {
 
   const handleDemoLogin = async (role: 'admin' | 'closer') => {
     setIsLoading(true);
+    console.log('Demo login requested for role:', role);
+    
     const { error } = await loginWithDemo(role);
     
     if (!error) {
@@ -51,8 +56,10 @@ const Login = () => {
         title: "Demo Login Successful",
         description: `Logged in as demo ${role}!`,
       });
+      console.log('Demo login successful, navigating to home');
       navigate('/');
     } else {
+      console.error('Demo login failed:', error);
       toast({
         title: "Demo Login Failed",
         description: error.message || "Failed to login with demo credentials",

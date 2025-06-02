@@ -40,60 +40,58 @@ const App = () => {
   console.log('App component rendering');
   
   return (
-    <React.StrictMode>
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider delayDuration={300}>
-          <Toaster />
-          <Sonner />
-          <SupabaseAuthProvider>
-            <BrowserRouter>
-              <Routes>
-                {/* Public routes */}
-                <Route path="/" element={<Index />} />
-                <Route path="/services" element={<Services />} />
-                <Route path="/testimonials" element={<Testimonials />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/contact" element={<Contact />} />
-                <Route path="/strategy-call" element={<StrategyCall />} />
-                
-                {/* Auth routes */}
-                <Route path="/login" element={<Login />} />
-                <Route path="/signup" element={<Signup />} />
-                
-                {/* Closer panel - requires closer role */}
-                <Route path="/closer-panel" element={
-                  <ProtectedRoute requiredRole="closer">
-                    <CloserPanel />
-                  </ProtectedRoute>
-                } />
-                
-                {/* Admin routes - requires admin role */}
-                <Route path="/admin" element={
-                  <ProtectedRoute requiredRole="admin">
-                    <AdminLayout />
-                  </ProtectedRoute>
-                }>
-                  <Route index element={<AdminDashboard />} />
-                  <Route path="users" element={<UsersPage />} />
-                  <Route path="contact-submissions" element={<ContactSubmissionsPage />} />
-                  <Route path="home-page-contacts" element={<HomePageContactPage />} />
-                  <Route path="bookings" element={<BookingsPage />} />
-                  <Route path="time-slots" element={<TimeSlotsPage />} />
-                  <Route path="testimonials" element={<div>Testimonials Management Page</div>} />
-                  <Route path="services" element={<div>Services Management Page</div>} />
-                  <Route path="team" element={<div>Team Management Page</div>} />
-                  <Route path="contact-info" element={<div>Contact Info Management Page</div>} />
-                  <Route path="social-links" element={<div>Social Links Management Page</div>} />
-                  <Route path="home-content" element={<div>Home Page Content Management Page</div>} />
-                </Route>
-                
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </BrowserRouter>
-          </SupabaseAuthProvider>
-        </TooltipProvider>
-      </QueryClientProvider>
-    </React.StrictMode>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider delayDuration={300}>
+        <Toaster />
+        <Sonner />
+        <SupabaseAuthProvider>
+          <BrowserRouter>
+            <Routes>
+              {/* Public routes */}
+              <Route path="/" element={<Index />} />
+              <Route path="/services" element={<Services />} />
+              <Route path="/testimonials" element={<Testimonials />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/strategy-call" element={<StrategyCall />} />
+              
+              {/* Auth routes */}
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+              
+              {/* Closer panel - requires closer role */}
+              <Route path="/closer-panel" element={
+                <ProtectedRoute requiredRole="closer">
+                  <CloserPanel />
+                </ProtectedRoute>
+              } />
+              
+              {/* Admin routes - requires admin role */}
+              <Route path="/admin" element={
+                <ProtectedRoute requiredRole="admin">
+                  <AdminLayout />
+                </ProtectedRoute>
+              }>
+                <Route index element={<AdminDashboard />} />
+                <Route path="users" element={<UsersPage />} />
+                <Route path="contact-submissions" element={<ContactSubmissionsPage />} />
+                <Route path="home-page-contacts" element={<HomePageContactPage />} />
+                <Route path="bookings" element={<BookingsPage />} />
+                <Route path="time-slots" element={<TimeSlotsPage />} />
+                <Route path="testimonials" element={<div>Testimonials Management Page</div>} />
+                <Route path="services" element={<div>Services Management Page</div>} />
+                <Route path="team" element={<div>Team Management Page</div>} />
+                <Route path="contact-info" element={<div>Contact Info Management Page</div>} />
+                <Route path="social-links" element={<div>Social Links Management Page</div>} />
+                <Route path="home-content" element={<div>Home Page Content Management Page</div>} />
+              </Route>
+              
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </SupabaseAuthProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
   );
 };
 

@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useSupabaseAuth } from '@/hooks/useSupabaseAuth';
 import { useToast } from '@/hooks/use-toast';
-import { LogIn, ArrowLeft } from 'lucide-react';
+import { LogIn, ArrowLeft, Crown, Users } from 'lucide-react';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -15,7 +15,7 @@ const Login = () => {
     password: ''
   });
   const [isLoading, setIsLoading] = useState(false);
-  const { login } = useSupabaseAuth();
+  const { login, loginWithDemo } = useSupabaseAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -35,6 +35,27 @@ const Login = () => {
       toast({
         title: "Login Failed",
         description: error.message || "Invalid email or password",
+        variant: "destructive"
+      });
+    }
+    
+    setIsLoading(false);
+  };
+
+  const handleDemoLogin = async (role: 'admin' | 'closer') => {
+    setIsLoading(true);
+    const { error } = await loginWithDemo(role);
+    
+    if (!error) {
+      toast({
+        title: "Demo Login Successful",
+        description: `Logged in as demo ${role}!`,
+      });
+      navigate('/');
+    } else {
+      toast({
+        title: "Demo Login Failed",
+        description: error.message || "Failed to login with demo credentials",
         variant: "destructive"
       });
     }
@@ -68,7 +89,42 @@ const Login = () => {
             </CardTitle>
             <p className="text-gray-600 mt-2">Welcome back! Please sign in to your account.</p>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-6">
+            {/* Demo Login Section */}
+            <div className="space-y-3">
+              <h3 className="text-sm font-medium text-primary text-center">Quick Demo Access</h3>
+              <div className="grid grid-cols-2 gap-3">
+                <Button
+                  onClick={() => handleDemoLogin('admin')}
+                  disabled={isLoading}
+                  variant="outline"
+                  className="flex flex-col items-center p-4 h-auto"
+                >
+                  <Crown size={20} className="mb-1" />
+                  <span className="text-xs">Demo Admin</span>
+                </Button>
+                <Button
+                  onClick={() => handleDemoLogin('closer')}
+                  disabled={isLoading}
+                  variant="outline"
+                  className="flex flex-col items-center p-4 h-auto"
+                >
+                  <Users size={20} className="mb-1" />
+                  <span className="text-xs">Demo Closer</span>
+                </Button>
+              </div>
+            </div>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-white px-2 text-muted-foreground">Or continue with email</span>
+              </div>
+            </div>
+
+            {/* Regular Login Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="text-sm font-medium text-primary mb-2 block">
@@ -105,7 +161,7 @@ const Login = () => {
               </Button>
             </form>
 
-            <div className="mt-6 text-center">
+            <div className="text-center">
               <p className="text-gray-600">
                 Don't have an account?{' '}
                 <Link to="/signup" className="text-primary hover:underline font-medium">

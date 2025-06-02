@@ -5,16 +5,18 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useSupabaseAuth } from '@/hooks/useSupabaseAuth';
 import { useToast } from '@/hooks/use-toast';
-import { UserPlus, ArrowLeft } from 'lucide-react';
+import { UserPlus, ArrowLeft, Crown, Users } from 'lucide-react';
 
 const Signup = () => {
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    role: 'closer' as 'admin' | 'closer'
   });
   const [isLoading, setIsLoading] = useState(false);
   const { signup } = useSupabaseAuth();
@@ -44,7 +46,7 @@ const Signup = () => {
 
     setIsLoading(true);
 
-    const { error } = await signup(formData.email, formData.password, formData.fullName);
+    const { error } = await signup(formData.email, formData.password, formData.fullName, formData.role);
     
     if (!error) {
       toast({
@@ -142,6 +144,38 @@ const Signup = () => {
                   onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                   required
                 />
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-primary mb-3 block">
+                  Select Your Role
+                </label>
+                <RadioGroup 
+                  value={formData.role} 
+                  onValueChange={(value: 'admin' | 'closer') => setFormData({ ...formData, role: value })}
+                  className="space-y-3"
+                >
+                  <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50 transition-colors">
+                    <RadioGroupItem value="admin" id="admin" />
+                    <label htmlFor="admin" className="flex items-center space-x-2 cursor-pointer flex-1">
+                      <Crown size={20} className="text-yellow-600" />
+                      <div>
+                        <div className="font-medium">Admin</div>
+                        <div className="text-sm text-gray-600">Full access to all features and settings</div>
+                      </div>
+                    </label>
+                  </div>
+                  <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50 transition-colors">
+                    <RadioGroupItem value="closer" id="closer" />
+                    <label htmlFor="closer" className="flex items-center space-x-2 cursor-pointer flex-1">
+                      <Users size={20} className="text-blue-600" />
+                      <div>
+                        <div className="font-medium">Closer</div>
+                        <div className="text-sm text-gray-600">Access to client management and bookings</div>
+                      </div>
+                    </label>
+                  </div>
+                </RadioGroup>
               </div>
 
               <Button 

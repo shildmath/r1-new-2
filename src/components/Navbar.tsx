@@ -3,12 +3,12 @@ import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useSupabaseAuth } from '@/hooks/useSupabaseAuth';
-import { Menu, X, User, LogOut } from 'lucide-react';
+import { Menu, X, User, LogOut, Crown, Users, Settings } from 'lucide-react';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
-  const { user, logout } = useSupabaseAuth();
+  const { user, userRole, logout } = useSupabaseAuth();
 
   const navItems = [
     { name: 'Home', path: '/' },
@@ -22,6 +22,17 @@ const Navbar = () => {
 
   const handleLogout = async () => {
     await logout();
+  };
+
+  const getRoleIcon = (role: string | null) => {
+    switch (role) {
+      case 'admin':
+        return <Crown size={16} className="text-yellow-600" />;
+      case 'closer':
+        return <Users size={16} className="text-blue-600" />;
+      default:
+        return <User size={16} />;
+    }
   };
 
   return (
@@ -60,9 +71,29 @@ const Navbar = () => {
             {user && (
               <div className="flex items-center space-x-4">
                 <div className="flex items-center space-x-2 text-sm text-gray-600">
-                  <User size={16} />
-                  <span>Welcome!</span>
+                  {getRoleIcon(userRole)}
+                  <span>Welcome {userRole}!</span>
                 </div>
+                
+                {/* Role-based navigation */}
+                {userRole === 'admin' && (
+                  <Link to="/admin">
+                    <Button variant="outline" size="sm" className="flex items-center space-x-1">
+                      <Settings size={16} />
+                      <span>Admin Panel</span>
+                    </Button>
+                  </Link>
+                )}
+                
+                {userRole === 'closer' && (
+                  <Link to="/closer-panel">
+                    <Button variant="outline" size="sm" className="flex items-center space-x-1">
+                      <Users size={16} />
+                      <span>Closer Panel</span>
+                    </Button>
+                  </Link>
+                )}
+                
                 <Button
                   onClick={handleLogout}
                   variant="outline"
@@ -113,22 +144,40 @@ const Navbar = () => {
               
               {/* Mobile user menu */}
               {user && (
-                <div className="px-3 py-2 border-t mt-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2 text-sm text-gray-600">
-                      <User size={16} />
-                      <span>Welcome!</span>
-                    </div>
-                    <Button
-                      onClick={handleLogout}
-                      variant="outline"
-                      size="sm"
-                      className="flex items-center space-x-1"
-                    >
-                      <LogOut size={16} />
-                      <span>Logout</span>
-                    </Button>
+                <div className="px-3 py-2 border-t mt-2 space-y-2">
+                  <div className="flex items-center space-x-2 text-sm text-gray-600">
+                    {getRoleIcon(userRole)}
+                    <span>Welcome {userRole}!</span>
                   </div>
+                  
+                  {/* Role-based navigation */}
+                  {userRole === 'admin' && (
+                    <Link to="/admin" onClick={() => setIsOpen(false)}>
+                      <Button variant="outline" size="sm" className="w-full flex items-center justify-center space-x-1">
+                        <Settings size={16} />
+                        <span>Admin Panel</span>
+                      </Button>
+                    </Link>
+                  )}
+                  
+                  {userRole === 'closer' && (
+                    <Link to="/closer-panel" onClick={() => setIsOpen(false)}>
+                      <Button variant="outline" size="sm" className="w-full flex items-center justify-center space-x-1">
+                        <Users size={16} />
+                        <span>Closer Panel</span>
+                      </Button>
+                    </Link>
+                  )}
+                  
+                  <Button
+                    onClick={handleLogout}
+                    variant="outline"
+                    size="sm"
+                    className="w-full flex items-center justify-center space-x-1"
+                  >
+                    <LogOut size={16} />
+                    <span>Logout</span>
+                  </Button>
                 </div>
               )}
             </div>

@@ -36,24 +36,6 @@ const queryClient = new QueryClient({
   },
 });
 
-// Admin Route component
-const AdminRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, isLoading } = useSupabaseAuth();
-  
-  if (isLoading) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
-  }
-  
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
-  
-  // For now, allow any authenticated user to access admin
-  // You can add role checking here later
-  
-  return <>{children}</>;
-};
-
 const App = () => {
   console.log('App component rendering');
   
@@ -78,19 +60,17 @@ const App = () => {
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
                 
-                {/* Closer panel */}
+                {/* Closer panel - requires closer role */}
                 <Route path="/closer-panel" element={
-                  <ProtectedRoute>
+                  <ProtectedRoute requiredRole="closer">
                     <CloserPanel />
                   </ProtectedRoute>
                 } />
                 
-                {/* Admin routes */}
+                {/* Admin routes - requires admin role */}
                 <Route path="/admin" element={
-                  <ProtectedRoute>
-                    <AdminRoute>
-                      <AdminLayout />
-                    </AdminRoute>
+                  <ProtectedRoute requiredRole="admin">
+                    <AdminLayout />
                   </ProtectedRoute>
                 }>
                   <Route index element={<AdminDashboard />} />

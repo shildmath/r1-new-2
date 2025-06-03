@@ -32,7 +32,6 @@ export const SupabaseAuthProvider = ({ children }: { children: ReactNode }) => {
         console.log('User role set to:', data);
       } else if (error) {
         console.error('Error fetching user role:', error);
-        // If role doesn't exist, default to closer
         setUserRole('closer');
       }
     } catch (error) {
@@ -41,10 +40,42 @@ export const SupabaseAuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const createUserProfile = async (user: User, fullName: string, role: 'admin' | 'closer') => {
+    try {
+      // Create profile
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert({
+          id: user.id,
+          email: user.email,
+          full_name: fullName
+        });
+
+      if (profileError) {
+        console.error('Error creating profile:', profileError);
+      }
+
+      // Create user role
+      const { error: roleError } = await supabase
+        .from('user_roles')
+        .insert({
+          user_id: user.id,
+          role: role
+        });
+
+      if (roleError) {
+        console.error('Error creating user role:', roleError);
+      }
+
+      console.log('User profile and role created successfully');
+    } catch (error) {
+      console.error('Error in createUserProfile:', error);
+    }
+  };
+
   useEffect(() => {
     console.log('Setting up auth state listener');
     
-    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('Auth state changed:', event, session?.user?.id);
@@ -52,7 +83,6 @@ export const SupabaseAuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          // Fetch role for authenticated user
           setTimeout(() => {
             fetchUserRole(session.user.id);
           }, 100);
@@ -64,7 +94,6 @@ export const SupabaseAuthProvider = ({ children }: { children: ReactNode }) => {
       }
     );
 
-    // Get initial session
     const getInitialSession = async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
@@ -134,6 +163,12 @@ export const SupabaseAuthProvider = ({ children }: { children: ReactNode }) => {
       });
       
       console.log('Signup result:', { user: data?.user?.id, error });
+      
+      // If signup successful, create profile and role
+      if (data.user && !error) {
+        await createUserProfile(data.user, fullName, role);
+      }
+      
       setIsLoading(false);
       return { error };
     } catch (error) {
@@ -154,13 +189,11 @@ export const SupabaseAuthProvider = ({ children }: { children: ReactNode }) => {
     console.log('Attempting demo login for role:', role);
     
     try {
-      // Try to login first
       let { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      // If login fails, create the demo account
       if (error?.message?.includes('Invalid login credentials')) {
         console.log('Demo user not found, creating account...');
         
@@ -177,8 +210,9 @@ export const SupabaseAuthProvider = ({ children }: { children: ReactNode }) => {
         });
 
         if (!signupError && signupData.user) {
+          await createUserProfile(signupData.user, role === 'admin' ? 'Demo Admin' : 'Demo Closer', role);
+          
           console.log('Demo user created, now logging in...');
-          // Try to login after signup
           const { error: loginError } = await supabase.auth.signInWithPassword({
             email,
             password,

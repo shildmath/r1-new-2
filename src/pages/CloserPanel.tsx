@@ -14,7 +14,7 @@ import { useSupabaseAuth } from '@/hooks/useSupabaseAuth';
 import { bookingService, timeSlotService } from '@/services/supabase';
 import type { Booking, TimeSlot } from '@/services/supabase';
 import { exportToCSV } from '@/utils/csvExport';
-import { Calendar, Clock, User, Phone, Mail, Filter, X, Download, Eye, Edit, LogOut, BarChart3 } from 'lucide-react';
+import { Calendar, Clock, User, Phone, Mail, Filter, X, Download, Eye, Edit, LogOut, BarChart3, Plus, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const CloserPanel = () => {
@@ -28,12 +28,23 @@ const CloserPanel = () => {
   const [showDetails, setShowDetails] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [showAddSlot, setShowAddSlot] = useState(false);
+  const [newSlot, setNewSlot] = useState({
+    date: '',
+    time: ''
+  });
   const [bookingFilters, setBookingFilters] = useState({
     callStatus: 'all',
     dealStatus: 'all',
     dateFrom: '',
     dateTo: '',
     search: ''
+  });
+  const [slotFilters, setSlotFilters] = useState({
+    status: 'all',
+    dateFrom: '',
+    dateTo: '',
+    month: ''
   });
 
   useEffect(() => {
@@ -52,7 +63,6 @@ const CloserPanel = () => {
         timeSlotService.getAll()
       ]);
       
-      // Filter time slots for current user
       const userSlots = slotsData.filter(slot => slot.closer_id === user.id);
       
       setBookings(bookingsData);
@@ -67,6 +77,61 @@ const CloserPanel = () => {
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const addTimeSlot = async () => {
+    if (!newSlot.date || !newSlot.time || !user) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all fields to add a time slot.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const slot = await timeSlotService.create({
+        closer_id: user.id,
+        date: newSlot.date,
+        time: newSlot.time,
+        is_booked: false
+      });
+
+      setTimeSlots(prev => [...prev, slot]);
+      setNewSlot({ date: '', time: '' });
+      setShowAddSlot(false);
+
+      toast({
+        title: "Time Slot Added",
+        description: "New time slot has been successfully added.",
+      });
+    } catch (error) {
+      console.error('Error adding time slot:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add time slot. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const deleteTimeSlot = async (slotId: string) => {
+    try {
+      await timeSlotService.delete(slotId);
+      setTimeSlots(prev => prev.filter(slot => slot.id !== slotId));
+
+      toast({
+        title: "Time Slot Deleted",
+        description: "Time slot has been successfully deleted.",
+      });
+    } catch (error) {
+      console.error('Error deleting time slot:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete time slot. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -86,6 +151,19 @@ const CloserPanel = () => {
     toast({
       title: "Filters Cleared",
       description: "All booking filters have been reset.",
+    });
+  };
+
+  const clearSlotFilters = () => {
+    setSlotFilters({
+      status: 'all',
+      dateFrom: '',
+      dateTo: '',
+      month: ''
+    });
+    toast({
+      title: "Slot Filters Cleared",
+      description: "All slot filters have been reset.",
     });
   };
 
@@ -154,6 +232,20 @@ const CloserPanel = () => {
     return true;
   });
 
+  const filteredTimeSlots = timeSlots.filter(slot => {
+    if (slotFilters.status !== 'all') {
+      if (slotFilters.status === 'available' && slot.is_booked) return false;
+      if (slotFilters.status === 'booked' && !slot.is_booked) return false;
+    }
+    if (slotFilters.dateFrom && slot.date < slotFilters.dateFrom) return false;
+    if (slotFilters.dateTo && slot.date > slotFilters.dateTo) return false;
+    if (slotFilters.month) {
+      const slotMonth = slot.date.substring(0, 7);
+      if (slotMonth !== slotFilters.month) return false;
+    }
+    return true;
+  });
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'confirmed': return 'bg-green-500';
@@ -171,7 +263,7 @@ const CloserPanel = () => {
   const confirmedBookings = filteredBookings.filter(b => b.call_status === 'confirmed').length;
   const completedBookings = filteredBookings.filter(b => b.call_status === 'completed').length;
   const closedDeals = filteredBookings.filter(b => b.deal_status === 'closed').length;
-  const availableSlots = timeSlots.filter(slot => !slot.is_booked).length;
+  const availableSlots = filteredTimeSlots.filter(slot => !slot.is_booked).length;
 
   if (!user) {
     return (
@@ -302,13 +394,119 @@ const CloserPanel = () => {
             </Card>
           </div>
 
-          {/* Filters */}
+          {/* Time Slots Section */}
+          <Card className="mb-8">
+            <CardHeader>
+              <div className="flex justify-between items-center">
+                <CardTitle className="text-2xl">My Time Slots</CardTitle>
+                <Button onClick={() => setShowAddSlot(true)} className="bg-green-600 hover:bg-green-700">
+                  <Plus size={16} className="mr-2" />
+                  Add Time Slot
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {/* Time Slot Filters */}
+              <div className="flex flex-wrap items-center gap-4 mb-6">
+                <div className="flex items-center space-x-2">
+                  <Filter size={20} className="text-primary" />
+                  <span className="font-medium">Slot Filters:</span>
+                </div>
+                
+                <Select value={slotFilters.status} onValueChange={(value) => setSlotFilters({...slotFilters, status: value})}>
+                  <SelectTrigger className="w-32">
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="available">Available</SelectItem>
+                    <SelectItem value="booked">Booked</SelectItem>
+                  </SelectContent>
+                </Select>
+                
+                <Input 
+                  type="month" 
+                  placeholder="Month"
+                  value={slotFilters.month}
+                  onChange={(e) => setSlotFilters({...slotFilters, month: e.target.value})}
+                  className="w-40"
+                />
+                
+                <Input 
+                  type="date" 
+                  placeholder="From Date"
+                  value={slotFilters.dateFrom}
+                  onChange={(e) => setSlotFilters({...slotFilters, dateFrom: e.target.value})}
+                  className="w-40"
+                />
+                
+                <Input 
+                  type="date" 
+                  placeholder="To Date"
+                  value={slotFilters.dateTo}
+                  onChange={(e) => setSlotFilters({...slotFilters, dateTo: e.target.value})}
+                  className="w-40"
+                />
+                
+                <Button variant="outline" onClick={clearSlotFilters}>
+                  <X size={16} className="mr-2" />
+                  Clear
+                </Button>
+              </div>
+
+              {/* Time Slots Grid */}
+              {filteredTimeSlots.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {filteredTimeSlots.map((slot) => (
+                    <Card key={slot.id} className={`${slot.is_booked ? 'bg-red-50 border-red-200' : 'bg-green-50 border-green-200'} hover:shadow-md transition-shadow`}>
+                      <CardContent className="p-4">
+                        <div className="space-y-3">
+                          <div className="flex justify-between items-start">
+                            <Badge className={slot.is_booked ? 'bg-red-500' : 'bg-green-500'}>
+                              {slot.is_booked ? 'Booked' : 'Available'}
+                            </Badge>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => deleteTimeSlot(slot.id)}
+                              className="text-red-600 hover:text-red-800"
+                            >
+                              <Trash2 size={14} />
+                            </Button>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <div className="flex items-center space-x-2">
+                              <Calendar size={14} className="text-gray-500" />
+                              <span className="text-sm font-medium">{slot.date}</span>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Clock size={14} className="text-gray-500" />
+                              <span className="text-sm font-medium">{slot.time}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <Calendar size={48} className="mx-auto text-gray-400 mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No Time Slots Found</h3>
+                  <p className="text-gray-600">Add your available time slots to start receiving bookings.</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Bookings Filters */}
           <Card className="mb-6">
             <CardContent className="p-4">
               <div className="flex flex-wrap items-center gap-4">
                 <div className="flex items-center space-x-2">
                   <Filter size={20} className="text-primary" />
-                  <span className="font-medium">Filters:</span>
+                  <span className="font-medium">Booking Filters:</span>
                 </div>
                 
                 <Select value={bookingFilters.callStatus} onValueChange={(value) => setBookingFilters({...bookingFilters, callStatus: value})}>
@@ -455,6 +653,40 @@ const CloserPanel = () => {
               </CardContent>
             </Card>
           )}
+
+          {/* Add Time Slot Modal */}
+          <Dialog open={showAddSlot} onOpenChange={setShowAddSlot}>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>Add New Time Slot</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <Input 
+                  type="date" 
+                  placeholder="Date"
+                  value={newSlot.date}
+                  onChange={(e) => setNewSlot({...newSlot, date: e.target.value})}
+                />
+                
+                <Input 
+                  type="time" 
+                  placeholder="Time"
+                  value={newSlot.time}
+                  onChange={(e) => setNewSlot({...newSlot, time: e.target.value})}
+                />
+                
+                <div className="flex space-x-2">
+                  <Button onClick={addTimeSlot} className="flex-1 bg-green-600 hover:bg-green-700">
+                    <Plus size={16} className="mr-2" />
+                    Add Slot
+                  </Button>
+                  <Button variant="outline" onClick={() => setShowAddSlot(false)} className="flex-1">
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
 
           {/* Detail Modal */}
           {selectedBooking && (

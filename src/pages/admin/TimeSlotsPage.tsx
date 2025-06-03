@@ -134,6 +134,8 @@ const TimeSlotsPage = () => {
   };
 
   const deleteTimeSlot = async (slotId: string) => {
+    if (!confirm('Are you sure you want to delete this time slot?')) return;
+    
     try {
       await timeSlotService.delete(slotId);
       setTimeSlots(prev => prev.filter(slot => slot.id !== slotId));
@@ -161,7 +163,7 @@ const TimeSlotsPage = () => {
     if (filters.dateFrom && slot.date < filters.dateFrom) return false;
     if (filters.dateTo && slot.date > filters.dateTo) return false;
     if (filters.month) {
-      const slotMonth = slot.date.substring(0, 7); // YYYY-MM format
+      const slotMonth = slot.date.substring(0, 7);
       if (slotMonth !== filters.month) return false;
     }
     return true;
@@ -424,7 +426,7 @@ const TimeSlotsPage = () => {
             <CardContent className="p-12 text-center">
               <Calendar size={48} className="mx-auto text-gray-400 mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">No Time Slots Found</h3>
-              <p className="text-gray-600">No time slots match the current filters. Try adjusting your filter criteria or add new time slots.</p>
+              <p className="text-gray-600">No time slots match the current filters or add new time slots.</p>
             </CardContent>
           </Card>
         )}

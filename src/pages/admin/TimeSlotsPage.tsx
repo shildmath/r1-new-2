@@ -6,14 +6,14 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { storage } from '@/utils/localStorage';
-import { TimeSlot, User } from '@/types/admin';
+import { timeSlotService, userService } from '@/services/supabase';
+import type { TimeSlot } from '@/services/supabase';
 import { Calendar, Clock, Filter, X, Plus, Edit, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const TimeSlotsPage = () => {
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<any[]>([]);
   const [filters, setFilters] = useState({
     closerId: 'all',
     status: 'all',
@@ -22,24 +22,39 @@ const TimeSlotsPage = () => {
     month: ''
   });
   const [newSlot, setNewSlot] = useState({
-    closerId: '',
+    closer_id: '',
     date: '',
     time: ''
   });
   const [editingSlot, setEditingSlot] = useState<TimeSlot | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
     loadData();
   }, []);
 
-  const loadData = () => {
-    const slotsData = storage.getTimeSlots();
-    const usersData = storage.getUsers();
-    setTimeSlots(slotsData);
-    setUsers(usersData);
-    console.log('Loaded time slots:', slotsData);
-    console.log('Loaded users:', usersData);
+  const loadData = async () => {
+    try {
+      setIsLoading(true);
+      const [slotsData, usersData] = await Promise.all([
+        timeSlotService.getAll(),
+        userService.getClosers()
+      ]);
+      setTimeSlots(slotsData);
+      setUsers(usersData);
+      console.log('Loaded time slots:', slotsData);
+      console.log('Loaded users:', usersData);
+    } catch (error) {
+      console.error('Error loading data:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load data. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const clearFilters = () => {
@@ -56,8 +71,8 @@ const TimeSlotsPage = () => {
     });
   };
 
-  const addTimeSlot = () => {
-    if (!newSlot.closerId || !newSlot.date || !newSlot.time) {
+  const addTimeSlot = async () => {
+    if (!newSlot.closer_id || !newSlot.date || !newSlot.time) {
       toast({
         title: "Missing Information",
         description: "Please fill in all fields to add a time slot.",
@@ -66,56 +81,82 @@ const TimeSlotsPage = () => {
       return;
     }
 
-    const slot: TimeSlot = {
-      id: Date.now().toString(),
-      closerId: newSlot.closerId,
-      date: newSlot.date,
-      time: newSlot.time,
-      isBooked: false,
-      clientId: undefined
-    };
+    try {
+      const slot = await timeSlotService.create({
+        closer_id: newSlot.closer_id,
+        date: newSlot.date,
+        time: newSlot.time,
+        is_booked: false
+      });
 
-    const updatedSlots = [...timeSlots, slot];
-    storage.setTimeSlots(updatedSlots);
-    setTimeSlots(updatedSlots);
-    setNewSlot({ closerId: '', date: '', time: '' });
+      setTimeSlots(prev => [...prev, slot]);
+      setNewSlot({ closer_id: '', date: '', time: '' });
 
-    toast({
-      title: "Time Slot Added",
-      description: "New time slot has been successfully added.",
-    });
+      toast({
+        title: "Time Slot Added",
+        description: "New time slot has been successfully added.",
+      });
+    } catch (error) {
+      console.error('Error adding time slot:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add time slot. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const updateTimeSlot = (updatedSlot: TimeSlot) => {
-    const updatedSlots = timeSlots.map(slot => 
-      slot.id === updatedSlot.id ? updatedSlot : slot
-    );
-    storage.setTimeSlots(updatedSlots);
-    setTimeSlots(updatedSlots);
-    setEditingSlot(null);
+  const updateTimeSlot = async (updatedSlot: TimeSlot) => {
+    try {
+      const updated = await timeSlotService.update(updatedSlot.id, {
+        closer_id: updatedSlot.closer_id,
+        date: updatedSlot.date,
+        time: updatedSlot.time
+      });
 
-    toast({
-      title: "Time Slot Updated",
-      description: "Time slot has been successfully updated.",
-    });
+      setTimeSlots(prev => prev.map(slot => 
+        slot.id === updated.id ? updated : slot
+      ));
+      setEditingSlot(null);
+
+      toast({
+        title: "Time Slot Updated",
+        description: "Time slot has been successfully updated.",
+      });
+    } catch (error) {
+      console.error('Error updating time slot:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update time slot. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const deleteTimeSlot = (slotId: string) => {
-    const updatedSlots = timeSlots.filter(slot => slot.id !== slotId);
-    storage.setTimeSlots(updatedSlots);
-    setTimeSlots(updatedSlots);
+  const deleteTimeSlot = async (slotId: string) => {
+    try {
+      await timeSlotService.delete(slotId);
+      setTimeSlots(prev => prev.filter(slot => slot.id !== slotId));
 
-    toast({
-      title: "Time Slot Deleted",
-      description: "Time slot has been successfully deleted.",
-    });
+      toast({
+        title: "Time Slot Deleted",
+        description: "Time slot has been successfully deleted.",
+      });
+    } catch (error) {
+      console.error('Error deleting time slot:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete time slot. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const filteredTimeSlots = timeSlots.filter(slot => {
-    if (filters.closerId !== 'all' && slot.closerId !== filters.closerId) return false;
+    if (filters.closerId !== 'all' && slot.closer_id !== filters.closerId) return false;
     if (filters.status !== 'all') {
-      if (filters.status === 'available' && slot.isBooked) return false;
-      if (filters.status === 'booked' && !slot.isBooked) return false;
+      if (filters.status === 'available' && slot.is_booked) return false;
+      if (filters.status === 'booked' && !slot.is_booked) return false;
     }
     if (filters.dateFrom && slot.date < filters.dateFrom) return false;
     if (filters.dateTo && slot.date > filters.dateTo) return false;
@@ -127,13 +168,23 @@ const TimeSlotsPage = () => {
   });
 
   const getCloserName = (closerId: string) => {
-    const closer = users.find(user => user.id === closerId && user.role === 'closer');
+    const closer = users.find(user => user.id === closerId);
     return closer ? closer.name : 'Unknown';
   };
 
-  const availableSlots = filteredTimeSlots.filter(slot => !slot.isBooked);
-  const bookedSlots = filteredTimeSlots.filter(slot => slot.isBooked);
-  const closers = users.filter(user => user.role === 'closer');
+  const availableSlots = filteredTimeSlots.filter(slot => !slot.is_booked);
+  const bookedSlots = filteredTimeSlots.filter(slot => slot.is_booked);
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="text-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-2 border-primary border-t-transparent mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading time slots...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -212,12 +263,12 @@ const TimeSlotsPage = () => {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <Select value={newSlot.closerId} onValueChange={(value) => setNewSlot({...newSlot, closerId: value})}>
+              <Select value={newSlot.closer_id} onValueChange={(value) => setNewSlot({...newSlot, closer_id: value})}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select Closer" />
                 </SelectTrigger>
                 <SelectContent>
-                  {closers.map((closer) => (
+                  {users.map((closer) => (
                     <SelectItem key={closer.id} value={closer.id}>
                       {closer.name}
                     </SelectItem>
@@ -262,7 +313,7 @@ const TimeSlotsPage = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Closers</SelectItem>
-                  {closers.map((closer) => (
+                  {users.map((closer) => (
                     <SelectItem key={closer.id} value={closer.id}>
                       {closer.name}
                     </SelectItem>
@@ -317,17 +368,17 @@ const TimeSlotsPage = () => {
         {filteredTimeSlots.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredTimeSlots.map((slot) => (
-              <Card key={slot.id} className={`${slot.isBooked ? 'bg-red-50 border-red-200' : 'bg-green-50 border-green-200'} hover:shadow-lg transition-shadow duration-300`}>
+              <Card key={slot.id} className={`${slot.is_booked ? 'bg-red-50 border-red-200' : 'bg-green-50 border-green-200'} hover:shadow-lg transition-shadow duration-300`}>
                 <CardContent className="p-6">
                   <div className="space-y-3">
                     <div className="flex justify-between items-start">
                       <div>
-                        <h3 className="font-semibold text-lg">{getCloserName(slot.closerId)}</h3>
+                        <h3 className="font-semibold text-lg">{getCloserName(slot.closer_id)}</h3>
                         <p className="text-sm text-gray-600">Closer</p>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Badge className={slot.isBooked ? 'bg-red-500' : 'bg-green-500'}>
-                          {slot.isBooked ? 'Booked' : 'Available'}
+                        <Badge className={slot.is_booked ? 'bg-red-500' : 'bg-green-500'}>
+                          {slot.is_booked ? 'Booked' : 'Available'}
                         </Badge>
                         <Button
                           variant="outline"
@@ -358,9 +409,9 @@ const TimeSlotsPage = () => {
                       </div>
                     </div>
                     
-                    {slot.clientId && (
+                    {slot.client_id && (
                       <div className="pt-2 border-t">
-                        <p className="text-xs text-gray-500">Client ID: {slot.clientId}</p>
+                        <p className="text-xs text-gray-500">Client ID: {slot.client_id}</p>
                       </div>
                     )}
                   </div>
@@ -386,12 +437,12 @@ const TimeSlotsPage = () => {
                 <CardTitle>Edit Time Slot</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <Select value={editingSlot.closerId} onValueChange={(value) => setEditingSlot({...editingSlot, closerId: value})}>
+                <Select value={editingSlot.closer_id} onValueChange={(value) => setEditingSlot({...editingSlot, closer_id: value})}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select Closer" />
                   </SelectTrigger>
                   <SelectContent>
-                    {closers.map((closer) => (
+                    {users.map((closer) => (
                       <SelectItem key={closer.id} value={closer.id}>
                         {closer.name}
                       </SelectItem>

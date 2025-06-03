@@ -1,4 +1,5 @@
-import { useState } from 'react';
+
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -7,32 +8,63 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { storage } from '@/utils/localStorage';
-import { ContactSubmission } from '@/types/admin';
-import { exportContactSubmissionsToCSV } from '@/utils/csvExport';
+import { contactService } from '@/services/supabase';
+import type { ContactSubmission } from '@/services/supabase';
+import { exportToCSV } from '@/utils/csvExport';
 import { MessageSquare, Mail, Filter, Eye, X, Download, Users, Calendar } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const ContactSubmissionsPage = () => {
-  const [submissions, setSubmissions] = useState<ContactSubmission[]>(storage.getContactSubmissions());
+  const [submissions, setSubmissions] = useState<ContactSubmission[]>([]);
   const [sourceFilter, setSourceFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [selectedSubmission, setSelectedSubmission] = useState<ContactSubmission | null>(null);
   const [showDetails, setShowDetails] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
-  const handleStatusChange = (submissionId: string, status: 'new' | 'contacted' | 'closed') => {
-    const updatedSubmissions = submissions.map(submission => 
-      submission.id === submissionId ? { ...submission, status } : submission
-    );
-    setSubmissions(updatedSubmissions);
-    storage.setContactSubmissions(updatedSubmissions);
-    toast({
-      title: "Status Updated",
-      description: "Contact submission status has been updated successfully.",
-    });
+  useEffect(() => {
+    loadSubmissions();
+  }, []);
+
+  const loadSubmissions = async () => {
+    try {
+      setIsLoading(true);
+      const data = await contactService.getAll();
+      setSubmissions(data);
+      console.log('Loaded contact submissions:', data);
+    } catch (error) {
+      console.error('Error loading contact submissions:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load contact submissions. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleStatusChange = async (submissionId: string, status: 'new' | 'contacted' | 'closed') => {
+    try {
+      const updated = await contactService.update(submissionId, { status });
+      setSubmissions(prev => prev.map(submission => 
+        submission.id === submissionId ? updated : submission
+      ));
+      toast({
+        title: "Status Updated",
+        description: "Contact submission status has been updated successfully.",
+      });
+    } catch (error) {
+      console.error('Error updating status:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update status. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const clearFilters = () => {
@@ -47,7 +79,17 @@ const ContactSubmissionsPage = () => {
   };
 
   const handleExportCSV = () => {
-    exportContactSubmissionsToCSV(filteredSubmissions);
+    const csvData = filteredSubmissions.map(submission => ({
+      'Name': submission.name,
+      'Email': submission.email,
+      'Phone': submission.phone || 'N/A',
+      'Message': submission.message,
+      'Source': submission.source,
+      'Status': submission.status,
+      'Created': new Date(submission.created_at || '').toLocaleDateString()
+    }));
+
+    exportToCSV(csvData, 'contact-submissions');
     toast({
       title: "CSV Exported",
       description: "Contact submissions have been exported to CSV file.",
@@ -57,8 +99,8 @@ const ContactSubmissionsPage = () => {
   const filteredSubmissions = submissions.filter(submission => {
     if (sourceFilter !== 'all' && submission.source !== sourceFilter) return false;
     if (statusFilter !== 'all' && submission.status !== statusFilter) return false;
-    if (dateFrom && submission.createdAt < dateFrom) return false;
-    if (dateTo && submission.createdAt > dateTo) return false;
+    if (dateFrom && submission.created_at && submission.created_at < dateFrom) return false;
+    if (dateTo && submission.created_at && submission.created_at > dateTo) return false;
     return true;
   });
 
@@ -79,6 +121,17 @@ const ContactSubmissionsPage = () => {
   const newSubmissions = submissions.filter(s => s.status === 'new').length;
   const contactedSubmissions = submissions.filter(s => s.status === 'contacted').length;
   const closedSubmissions = submissions.filter(s => s.status === 'closed').length;
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="text-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-2 border-primary border-t-transparent mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading contact submissions...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -282,8 +335,8 @@ const ContactSubmissionsPage = () => {
                           </Select>
                         </TableCell>
                         <TableCell>
-                          <p className="text-sm font-medium">{new Date(submission.createdAt).toLocaleDateString()}</p>
-                          <p className="text-xs text-gray-500">{new Date(submission.createdAt).toLocaleTimeString()}</p>
+                          <p className="text-sm font-medium">{new Date(submission.created_at || '').toLocaleDateString()}</p>
+                          <p className="text-xs text-gray-500">{new Date(submission.created_at || '').toLocaleTimeString()}</p>
                         </TableCell>
                         <TableCell>
                           <Dialog open={showDetails && selectedSubmission?.id === submission.id} onOpenChange={setShowDetails}>
@@ -335,7 +388,7 @@ const ContactSubmissionsPage = () => {
                                     </div>
                                     <div className="p-4 bg-gray-50 rounded-lg">
                                       <label className="text-sm font-medium text-gray-600">Submitted</label>
-                                      <p className="font-medium">{new Date(selectedSubmission.createdAt).toLocaleString()}</p>
+                                      <p className="font-medium">{new Date(selectedSubmission.created_at || '').toLocaleString()}</p>
                                     </div>
                                   </div>
                                   

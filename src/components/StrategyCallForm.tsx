@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,8 +7,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { storage } from '@/utils/localStorage';
-import { Booking, TimeSlot, User } from '@/types/admin';
+import { timeSlotService, bookingService, userService } from '@/services/supabase';
+import type { TimeSlot } from '@/services/supabase';
 import { Calendar, Clock, User as UserIcon, Phone, Mail } from 'lucide-react';
 
 const StrategyCallForm = () => {
@@ -23,16 +23,34 @@ const StrategyCallForm = () => {
     additionalInfo: ''
   });
   const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
-  const [closers, setClosers] = useState<User[]>([]);
+  const [closers, setClosers] = useState<any[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  useState(() => {
-    // Load available time slots and closers
-    const timeSlots = storage.getTimeSlots().filter(slot => !slot.isBooked);
-    const users = storage.getUsers().filter(user => user.role === 'closer');
-    setAvailableSlots(timeSlots);
-    setClosers(users);
-  });
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    try {
+      setIsLoading(true);
+      const [slotsData, closersData] = await Promise.all([
+        timeSlotService.getAvailable(),
+        userService.getClosers()
+      ]);
+      setAvailableSlots(slotsData);
+      setClosers(closersData);
+    } catch (error) {
+      console.error('Error loading data:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load available time slots. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const getAvailableDates = () => {
     const dates = [...new Set(availableSlots.map(slot => slot.date))];
@@ -67,37 +85,28 @@ const StrategyCallForm = () => {
       }
 
       // Create new booking
-      const newBooking: Booking = {
-        id: Date.now().toString(),
-        firstName: formData.firstName,
-        lastName: formData.lastName,
+      const newBooking = await bookingService.create({
+        first_name: formData.firstName,
+        last_name: formData.lastName,
         email: formData.email,
         phone: formData.phone,
-        preferredDate: formData.preferredDate,
-        preferredTime: formData.preferredTime,
-        additionalInfo: formData.additionalInfo,
-        closerId: selectedSlot.closerId,
-        timeSlotId: selectedSlot.id,
-        callStatus: 'confirmed',
-        dealStatus: 'follow-up',
-        paymentLinkSent: false,
-        contractLinkSent: false,
-        offerMade: false,
-        createdAt: new Date().toISOString()
-      };
-
-      // Save booking
-      const existingBookings = storage.getBookings();
-      storage.setBookings([...existingBookings, newBooking]);
+        preferred_date: formData.preferredDate,
+        preferred_time: formData.preferredTime,
+        additional_info: formData.additionalInfo,
+        closer_id: selectedSlot.closer_id,
+        time_slot_id: selectedSlot.id,
+        call_status: 'confirmed',
+        deal_status: 'follow-up',
+        payment_link_sent: false,
+        contract_link_sent: false,
+        offer_made: false
+      });
 
       // Mark time slot as booked
-      const allTimeSlots = storage.getTimeSlots();
-      const updatedTimeSlots = allTimeSlots.map(slot => 
-        slot.id === selectedSlot.id 
-          ? { ...slot, isBooked: true, clientId: newBooking.id }
-          : slot
-      );
-      storage.setTimeSlots(updatedTimeSlots);
+      await timeSlotService.update(selectedSlot.id, {
+        is_booked: true,
+        client_id: newBooking.id
+      });
 
       // Update available slots state
       setAvailableSlots(prev => prev.filter(slot => slot.id !== selectedSlot.id));
@@ -141,6 +150,23 @@ const StrategyCallForm = () => {
 
   const availableDates = getAvailableDates();
   const availableTimes = formData.preferredDate ? getAvailableTimesForDate(formData.preferredDate) : [];
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary/5 via-white to-accent/5 py-20">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-12">
+              <h1 className="text-4xl md:text-5xl font-bold text-primary mb-6">
+                Loading Available Times...
+              </h1>
+              <div className="animate-spin rounded-full h-12 w-12 border-2 border-primary border-t-transparent mx-auto"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-white to-accent/5 py-20">
@@ -250,7 +276,7 @@ const StrategyCallForm = () => {
                           <SelectContent>
                             {availableDates.map((date) => (
                               <SelectItem key={date} value={date}>
-                                {new Date(date).toLocaleDateString('en-US', { 
+                                {new Date(date + 'T00:00:00').toLocaleDateString('en-US', { 
                                   weekday: 'long', 
                                   year: 'numeric', 
                                   month: 'long', 

@@ -9,6 +9,131 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      bookings: {
+        Row: {
+          ad_spend: string | null
+          additional_info: string | null
+          call_status: string
+          closed_date: string | null
+          closer_id: string
+          contract_link_sent: boolean
+          country: string | null
+          created_at: string
+          deal_status: string
+          email: string
+          first_name: string
+          follow_up_date: string | null
+          id: string
+          last_name: string
+          note: string | null
+          offer_made: boolean
+          payment_link_sent: boolean
+          phone: string
+          preferred_date: string
+          preferred_time: string
+          recording_link: string | null
+          time_slot_id: string
+          updated_at: string
+          zip_code: string | null
+        }
+        Insert: {
+          ad_spend?: string | null
+          additional_info?: string | null
+          call_status?: string
+          closed_date?: string | null
+          closer_id: string
+          contract_link_sent?: boolean
+          country?: string | null
+          created_at?: string
+          deal_status?: string
+          email: string
+          first_name: string
+          follow_up_date?: string | null
+          id?: string
+          last_name: string
+          note?: string | null
+          offer_made?: boolean
+          payment_link_sent?: boolean
+          phone: string
+          preferred_date: string
+          preferred_time: string
+          recording_link?: string | null
+          time_slot_id: string
+          updated_at?: string
+          zip_code?: string | null
+        }
+        Update: {
+          ad_spend?: string | null
+          additional_info?: string | null
+          call_status?: string
+          closed_date?: string | null
+          closer_id?: string
+          contract_link_sent?: boolean
+          country?: string | null
+          created_at?: string
+          deal_status?: string
+          email?: string
+          first_name?: string
+          follow_up_date?: string | null
+          id?: string
+          last_name?: string
+          note?: string | null
+          offer_made?: boolean
+          payment_link_sent?: boolean
+          phone?: string
+          preferred_date?: string
+          preferred_time?: string
+          recording_link?: string | null
+          time_slot_id?: string
+          updated_at?: string
+          zip_code?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_time_slot_id_fkey"
+            columns: ["time_slot_id"]
+            isOneToOne: false
+            referencedRelation: "time_slots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contact_submissions: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          message: string
+          name: string
+          phone: string | null
+          source: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          message: string
+          name: string
+          phone?: string | null
+          source?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string
+          name?: string
+          phone?: string | null
+          source?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -33,6 +158,39 @@ export type Database = {
           full_name?: string | null
           id?: string
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      time_slots: {
+        Row: {
+          client_id: string | null
+          closer_id: string
+          created_at: string
+          date: string
+          id: string
+          is_booked: boolean
+          time: string
+          updated_at: string
+        }
+        Insert: {
+          client_id?: string | null
+          closer_id: string
+          created_at?: string
+          date: string
+          id?: string
+          is_booked?: boolean
+          time: string
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string | null
+          closer_id?: string
+          created_at?: string
+          date?: string
+          id?: string
+          is_booked?: boolean
+          time?: string
+          updated_at?: string
         }
         Relationships: []
       }

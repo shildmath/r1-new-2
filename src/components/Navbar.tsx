@@ -2,206 +2,127 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { useSupabaseAuth } from '@/hooks/useSupabaseAuth';
-import { Menu, X, User, LogOut, Crown, Users, Settings } from 'lucide-react';
+import { Menu, X, Calendar, Phone, Mail } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
-  const { user, userRole, logout } = useSupabaseAuth();
+
+  const isActive = (path: string) => {
+    return location.pathname === path;
+  };
 
   const navItems = [
     { name: 'Home', path: '/' },
-    { name: 'Services', path: '/services' },
-    { name: 'Results', path: '/testimonials' },
-    { name: 'About', path: '/about' },
-    { name: 'Contact', path: '/contact' },
+    { name: 'About', path: '/#about' },
+    { name: 'Services', path: '/#services' },
+    { name: 'Contact', path: '/contact' }
   ];
 
-  const isActive = (path: string) => location.pathname === path;
-
-  const handleLogout = async () => {
-    await logout();
-  };
-
-  const getRoleIcon = (role: string | null) => {
-    switch (role) {
-      case 'admin':
-        return <Crown size={16} className="text-yellow-600" />;
-      case 'closer':
-        return <Users size={16} className="text-blue-600" />;
-      default:
-        return <User size={16} />;
-    }
-  };
-
-  const getRoleDisplayName = (role: string | null) => {
-    if (!role) return 'User';
-    return role.charAt(0).toUpperCase() + role.slice(1);
-  };
-
   return (
-    <nav className="bg-white shadow-lg fixed w-full top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          <div className="flex items-center">
-            <Link to="/" className="flex items-center space-x-2">
-              <span className="font-bold text-2xl">
-                <span className="text-primary">AI</span>
-                <span className="text-accent">AdMaxify</span>
-              </span>
-            </Link>
-          </div>
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-lg border-b border-gray-200 shadow-lg">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="flex justify-between items-center h-20">
+          {/* Logo */}
+          <Link to="/" className="flex-shrink-0">
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent"
+            >
+              AIAdMaxify
+            </motion.div>
+          </Link>
 
-          {/* Desktop Menu */}
+          {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
             {navItems.map((item) => (
               <Link
                 key={item.name}
                 to={item.path}
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                  isActive(item.path)
-                    ? 'text-accent bg-accent-light'
-                    : 'text-gray-700 hover:text-accent hover:bg-accent-light'
+                className={`text-sm font-medium transition-colors hover:text-primary ${
+                  isActive(item.path) ? 'text-primary' : 'text-gray-700'
                 }`}
               >
                 {item.name}
               </Link>
             ))}
+          </div>
+
+          {/* Desktop CTA Buttons */}
+          <div className="hidden md:flex items-center space-x-4">
             <Link to="/strategy-call">
-              <Button className="agency-btn">Book Strategy Call</Button>
+              <Button 
+                variant="outline" 
+                className="border-primary text-primary hover:bg-primary hover:text-white transition-all duration-300"
+              >
+                <Calendar size={16} className="mr-2" />
+                Book Call
+              </Button>
             </Link>
-            
-            {/* User menu */}
-            {user ? (
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-2 text-sm text-gray-600">
-                  {getRoleIcon(userRole)}
-                  <span>Welcome {getRoleDisplayName(userRole)}!</span>
-                </div>
-                
-                {/* Role-based navigation */}
-                {userRole === 'admin' && (
-                  <Link to="/admin">
-                    <Button variant="outline" size="sm" className="flex items-center space-x-1">
-                      <Settings size={16} />
-                      <span>Admin Panel</span>
-                    </Button>
-                  </Link>
-                )}
-                
-                {userRole === 'closer' && (
-                  <Link to="/closer-panel">
-                    <Button variant="outline" size="sm" className="flex items-center space-x-1">
-                      <Users size={16} />
-                      <span>Closer Panel</span>
-                    </Button>
-                  </Link>
-                )}
-                
-                <Button
-                  onClick={handleLogout}
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center space-x-1"
-                >
-                  <LogOut size={16} />
-                  <span>Logout</span>
-                </Button>
-              </div>
-            ) : (
-              <Link to="/login">
-                <Button variant="outline" size="sm">
-                  Login
-                </Button>
-              </Link>
-            )}
+            <Link to="/contact">
+              <Button className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-white shadow-lg">
+                <Mail size={16} className="mr-2" />
+                Get Started
+              </Button>
+            </Link>
           </div>
 
           {/* Mobile menu button */}
-          <div className="md:hidden flex items-center">
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              className="text-gray-700 hover:text-accent"
-            >
-              {isOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
-          </div>
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+          >
+            {isOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
         </div>
 
-        {/* Mobile Menu */}
-        {isOpen && (
-          <div className="md:hidden">
-            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t">
-              {navItems.map((item) => (
-                <Link
-                  key={item.name}
-                  to={item.path}
-                  className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
-                    isActive(item.path)
-                      ? 'text-accent bg-accent-light'
-                      : 'text-gray-700 hover:text-accent hover:bg-accent-light'
-                  }`}
-                  onClick={() => setIsOpen(false)}
-                >
-                  {item.name}
-                </Link>
-              ))}
-              <div className="px-3 py-2">
-                <Link to="/strategy-call" onClick={() => setIsOpen(false)}>
-                  <Button className="agency-btn w-full">Book Strategy Call</Button>
-                </Link>
-              </div>
-              
-              {/* Mobile user menu */}
-              {user ? (
-                <div className="px-3 py-2 border-t mt-2 space-y-2">
-                  <div className="flex items-center space-x-2 text-sm text-gray-600">
-                    {getRoleIcon(userRole)}
-                    <span>Welcome {getRoleDisplayName(userRole)}!</span>
-                  </div>
-                  
-                  {/* Role-based navigation */}
-                  {userRole === 'admin' && (
-                    <Link to="/admin" onClick={() => setIsOpen(false)}>
-                      <Button variant="outline" size="sm" className="w-full flex items-center justify-center space-x-1">
-                        <Settings size={16} />
-                        <span>Admin Panel</span>
-                      </Button>
-                    </Link>
-                  )}
-                  
-                  {userRole === 'closer' && (
-                    <Link to="/closer-panel" onClick={() => setIsOpen(false)}>
-                      <Button variant="outline" size="sm" className="w-full flex items-center justify-center space-x-1">
-                        <Users size={16} />
-                        <span>Closer Panel</span>
-                      </Button>
-                    </Link>
-                  )}
-                  
-                  <Button
-                    onClick={handleLogout}
-                    variant="outline"
-                    size="sm"
-                    className="w-full flex items-center justify-center space-x-1"
+        {/* Mobile Navigation */}
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="md:hidden py-4 border-t border-gray-200"
+            >
+              <div className="flex flex-col space-y-4">
+                {navItems.map((item) => (
+                  <Link
+                    key={item.name}
+                    to={item.path}
+                    onClick={() => setIsOpen(false)}
+                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                      isActive(item.path) 
+                        ? 'text-primary bg-primary/10' 
+                        : 'text-gray-700 hover:text-primary hover:bg-gray-50'
+                    }`}
                   >
-                    <LogOut size={16} />
-                    <span>Logout</span>
-                  </Button>
-                </div>
-              ) : (
-                <div className="px-3 py-2 border-t mt-2">
-                  <Link to="/login" onClick={() => setIsOpen(false)}>
-                    <Button variant="outline" size="sm" className="w-full">
-                      Login
+                    {item.name}
+                  </Link>
+                ))}
+                
+                <div className="flex flex-col space-y-3 px-4 pt-4 border-t border-gray-200">
+                  <Link to="/strategy-call" onClick={() => setIsOpen(false)}>
+                    <Button 
+                      variant="outline" 
+                      className="w-full border-primary text-primary hover:bg-primary hover:text-white"
+                    >
+                      <Calendar size={16} className="mr-2" />
+                      Book Strategy Call
+                    </Button>
+                  </Link>
+                  <Link to="/contact" onClick={() => setIsOpen(false)}>
+                    <Button className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-white">
+                      <Mail size={16} className="mr-2" />
+                      Get Started
                     </Button>
                   </Link>
                 </div>
-              )}
-            </div>
-          </div>
-        )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </nav>
   );

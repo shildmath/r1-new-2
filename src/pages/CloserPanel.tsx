@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -10,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/hooks/useAuth';
+import { useSupabaseAuth } from '@/hooks/useSupabaseAuth';
 import { storage } from '@/utils/localStorage';
 import { exportBookingsToCSV } from '@/utils/csvExport';
 import { TimeSlot, Booking } from '@/types/admin';
@@ -18,7 +17,7 @@ import { Calendar, Clock, Plus, Trash2, User, LogOut, Eye, Filter, X, Download }
 import { useNavigate } from 'react-router-dom';
 
 const CloserPanel = () => {
-  const { user, logout } = useAuth();
+  const { user, logout } = useSupabaseAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
@@ -59,7 +58,7 @@ const CloserPanel = () => {
 
   const handleLogout = () => {
     logout();
-    navigate('/auth');
+    navigate('/');
   };
 
   const clearBookingFilters = () => {
@@ -262,7 +261,7 @@ const CloserPanel = () => {
             </div>
             <div>
               <h1 className="text-3xl font-bold text-gray-800">Closer Panel</h1>
-              <p className="text-gray-600">Welcome back, {user?.name}</p>
+              <p className="text-gray-600">Welcome back, {user?.email}</p>
             </div>
           </div>
           <div className="flex items-center space-x-4">

@@ -1,9 +1,8 @@
-
 import { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/hooks/useAuth';
+import { useSupabaseAuth } from '@/hooks/useSupabaseAuth';
 import { 
   LayoutDashboard, 
   Users, 
@@ -25,14 +24,14 @@ import {
 } from 'lucide-react';
 
 const AdminLayout = () => {
-  const { user, logout } = useAuth();
+  const { user, logout } = useSupabaseAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
-    navigate('/auth');
+    navigate('/');
   };
 
   const menuItems = [
@@ -86,9 +85,9 @@ const AdminLayout = () => {
           <div className="px-6 mb-4">
             <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
               <p className="text-sm font-medium text-blue-800">Welcome back!</p>
-              <p className="text-lg font-bold text-blue-900">{user?.name}</p>
+              <p className="text-lg font-bold text-blue-900">{user?.email || 'Admin'}</p>
               <p className="text-xs text-blue-600 capitalize bg-blue-100 px-2 py-1 rounded-full inline-block mt-1">
-                {user?.role}
+                Admin
               </p>
             </div>
           </div>

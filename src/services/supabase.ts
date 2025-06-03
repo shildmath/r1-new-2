@@ -118,7 +118,7 @@ export const bookingService = {
       .order('created_at', { ascending: false });
     
     if (error) throw error;
-    return data || [];
+    return (data || []) as Booking[];
   },
 
   async getByCloser(closerId: string): Promise<Booking[]> {
@@ -129,7 +129,7 @@ export const bookingService = {
       .order('created_at', { ascending: false });
     
     if (error) throw error;
-    return data || [];
+    return (data || []) as Booking[];
   },
 
   async create(booking: Omit<Booking, 'id' | 'created_at' | 'updated_at'>): Promise<Booking> {
@@ -140,7 +140,7 @@ export const bookingService = {
       .single();
     
     if (error) throw error;
-    return data;
+    return data as Booking;
   },
 
   async update(id: string, updates: Partial<Booking>): Promise<Booking> {
@@ -152,7 +152,7 @@ export const bookingService = {
       .single();
     
     if (error) throw error;
-    return data;
+    return data as Booking;
   },
 
   async delete(id: string): Promise<void> {
@@ -174,7 +174,7 @@ export const contactService = {
       .order('created_at', { ascending: false });
     
     if (error) throw error;
-    return data || [];
+    return (data || []) as ContactSubmission[];
   },
 
   async getBySource(source: 'home' | 'contact'): Promise<ContactSubmission[]> {
@@ -185,7 +185,7 @@ export const contactService = {
       .order('created_at', { ascending: false });
     
     if (error) throw error;
-    return data || [];
+    return (data || []) as ContactSubmission[];
   },
 
   async create(submission: Omit<ContactSubmission, 'id' | 'created_at' | 'updated_at'>): Promise<ContactSubmission> {
@@ -196,7 +196,7 @@ export const contactService = {
       .single();
     
     if (error) throw error;
-    return data;
+    return data as ContactSubmission;
   },
 
   async update(id: string, updates: Partial<ContactSubmission>): Promise<ContactSubmission> {
@@ -208,7 +208,7 @@ export const contactService = {
       .single();
     
     if (error) throw error;
-    return data;
+    return data as ContactSubmission;
   },
 
   async delete(id: string): Promise<void> {
@@ -229,7 +229,7 @@ export const userService = {
       .select(`
         user_id,
         role,
-        profiles!inner(
+        profiles!user_roles_user_id_fkey(
           id,
           full_name,
           email
@@ -240,8 +240,8 @@ export const userService = {
     if (error) throw error;
     return data?.map(item => ({
       id: item.user_id,
-      name: item.profiles.full_name || item.profiles.email,
-      email: item.profiles.email,
+      name: (item.profiles as any)?.full_name || (item.profiles as any)?.email || 'Unknown',
+      email: (item.profiles as any)?.email || '',
       role: item.role
     })) || [];
   }

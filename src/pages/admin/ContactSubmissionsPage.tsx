@@ -6,28 +6,34 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { contactService } from '@/services/supabase';
 import type { ContactSubmission } from '@/services/supabase';
 import { exportToCSV } from '@/utils/csvExport';
-import { MessageSquare, Mail, Filter, Eye, X, Download, Users, Calendar } from 'lucide-react';
+import ContactSubmissionModal from '@/components/ContactSubmissionModal';
+import { MessageSquare, Mail, Filter, Eye, X, Download, Users, Calendar, Search } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const ContactSubmissionsPage = () => {
   const [submissions, setSubmissions] = useState<ContactSubmission[]>([]);
+  const [filteredSubmissions, setFilteredSubmissions] = useState<ContactSubmission[]>([]);
   const [sourceFilter, setSourceFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
   const [selectedSubmission, setSelectedSubmission] = useState<ContactSubmission | null>(null);
-  const [showDetails, setShowDetails] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
     loadSubmissions();
   }, []);
+
+  useEffect(() => {
+    applyFilters();
+  }, [submissions, sourceFilter, statusFilter, dateFrom, dateTo, searchTerm]);
 
   const loadSubmissions = async () => {
     try {
@@ -47,12 +53,29 @@ const ContactSubmissionsPage = () => {
     }
   };
 
+  const applyFilters = () => {
+    let filtered = submissions.filter(submission => {
+      if (sourceFilter !== 'all' && submission.source !== sourceFilter) return false;
+      if (statusFilter !== 'all' && submission.status !== statusFilter) return false;
+      if (dateFrom && submission.created_at && submission.created_at < dateFrom) return false;
+      if (dateTo && submission.created_at && submission.created_at > dateTo) return false;
+      if (searchTerm && !submission.name.toLowerCase().includes(searchTerm.toLowerCase()) && 
+          !submission.email.toLowerCase().includes(searchTerm.toLowerCase()) &&
+          !submission.message.toLowerCase().includes(searchTerm.toLowerCase())) return false;
+      return true;
+    });
+    setFilteredSubmissions(filtered);
+  };
+
   const handleStatusChange = async (submissionId: string, status: 'new' | 'contacted' | 'closed') => {
     try {
       const updated = await contactService.update(submissionId, { status });
       setSubmissions(prev => prev.map(submission => 
         submission.id === submissionId ? updated : submission
       ));
+      if (selectedSubmission?.id === submissionId) {
+        setSelectedSubmission(updated);
+      }
       toast({
         title: "Status Updated",
         description: "Contact submission status has been updated successfully.",
@@ -72,6 +95,7 @@ const ContactSubmissionsPage = () => {
     setStatusFilter('all');
     setDateFrom('');
     setDateTo('');
+    setSearchTerm('');
     toast({
       title: "Filters Cleared",
       description: "All filters have been reset.",
@@ -96,25 +120,22 @@ const ContactSubmissionsPage = () => {
     });
   };
 
-  const filteredSubmissions = submissions.filter(submission => {
-    if (sourceFilter !== 'all' && submission.source !== sourceFilter) return false;
-    if (statusFilter !== 'all' && submission.status !== statusFilter) return false;
-    if (dateFrom && submission.created_at && submission.created_at < dateFrom) return false;
-    if (dateTo && submission.created_at && submission.created_at > dateTo) return false;
-    return true;
-  });
+  const handleViewDetails = (submission: ContactSubmission) => {
+    setSelectedSubmission(submission);
+    setShowModal(true);
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'new': return 'bg-orange-500';
-      case 'contacted': return 'bg-blue-500';
-      case 'closed': return 'bg-green-500';
-      default: return 'bg-gray-500';
+      case 'new': return 'bg-orange-500 text-white';
+      case 'contacted': return 'bg-blue-500 text-white';
+      case 'closed': return 'bg-green-500 text-white';
+      default: return 'bg-gray-500 text-white';
     }
   };
 
   const getSourceColor = (source: string) => {
-    return source === 'home' ? 'bg-blue-500' : 'bg-purple-500';
+    return source === 'home' ? 'bg-blue-500 text-white' : 'bg-purple-500 text-white';
   };
 
   const totalSubmissions = submissions.length;
@@ -156,12 +177,12 @@ const ContactSubmissionsPage = () => {
             </Button>
             <div className="flex items-center space-x-2 bg-blue-50 px-4 py-2 rounded-xl border border-blue-200">
               <MessageSquare size={20} className="text-blue-600" />
-              <Badge variant="secondary" className="bg-blue-100 text-blue-800">{totalSubmissions}</Badge>
+              <Badge variant="secondary" className="bg-blue-100 text-blue-800">{filteredSubmissions.length}</Badge>
             </div>
           </div>
         </div>
 
-        {/* Enhanced Stats Cards */}
+        {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-xl">
             <CardContent className="p-6">
@@ -227,15 +248,31 @@ const ContactSubmissionsPage = () => {
         {/* Enhanced Filters */}
         <Card className="mb-6 shadow-lg border border-gray-200">
           <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4 flex-wrap gap-4">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                   <Filter size={20} className="text-blue-600" />
-                  <span className="text-sm font-medium text-gray-700">Filters:</span>
+                  <span className="text-sm font-medium text-gray-700">Filters & Search:</span>
+                </div>
+                <Button variant="outline" onClick={clearFilters} className="border-red-200 text-red-600 hover:bg-red-50">
+                  <X size={16} className="mr-2" />
+                  Clear All
+                </Button>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+                <div className="relative">
+                  <Search size={16} className="absolute left-3 top-3 text-gray-400" />
+                  <Input
+                    placeholder="Search name, email, message..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 border-gray-200 focus:border-blue-500"
+                  />
                 </div>
                 
                 <Select value={sourceFilter} onValueChange={setSourceFilter}>
-                  <SelectTrigger className="w-32 border-blue-200 focus:border-blue-500">
+                  <SelectTrigger className="border-blue-200 focus:border-blue-500">
                     <SelectValue placeholder="Source" />
                   </SelectTrigger>
                   <SelectContent>
@@ -246,7 +283,7 @@ const ContactSubmissionsPage = () => {
                 </Select>
                 
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-32 border-green-200 focus:border-green-500">
+                  <SelectTrigger className="border-green-200 focus:border-green-500">
                     <SelectValue placeholder="Status" />
                   </SelectTrigger>
                   <SelectContent>
@@ -262,7 +299,7 @@ const ContactSubmissionsPage = () => {
                   placeholder="From Date"
                   value={dateFrom}
                   onChange={(e) => setDateFrom(e.target.value)}
-                  className="w-36 border-gray-200 focus:border-blue-500"
+                  className="border-gray-200 focus:border-blue-500"
                 />
                 
                 <Input 
@@ -270,14 +307,13 @@ const ContactSubmissionsPage = () => {
                   placeholder="To Date"
                   value={dateTo}
                   onChange={(e) => setDateTo(e.target.value)}
-                  className="w-36 border-gray-200 focus:border-blue-500"
+                  className="border-gray-200 focus:border-blue-500"
                 />
+                
+                <div className="text-sm text-gray-600 flex items-center">
+                  Showing {filteredSubmissions.length} of {totalSubmissions}
+                </div>
               </div>
-              
-              <Button variant="outline" onClick={clearFilters} className="border-red-200 text-red-600 hover:bg-red-50">
-                <X size={16} className="mr-2" />
-                Clear Filters
-              </Button>
             </div>
           </CardContent>
         </Card>
@@ -289,8 +325,8 @@ const ContactSubmissionsPage = () => {
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-gradient-to-r from-gray-50 to-gray-100">
-                      <TableHead className="font-semibold text-gray-700">Name</TableHead>
                       <TableHead className="font-semibold text-gray-700">Contact</TableHead>
+                      <TableHead className="font-semibold text-gray-700">Message Preview</TableHead>
                       <TableHead className="font-semibold text-gray-700">Source</TableHead>
                       <TableHead className="font-semibold text-gray-700">Status</TableHead>
                       <TableHead className="font-semibold text-gray-700">Date</TableHead>
@@ -301,117 +337,50 @@ const ContactSubmissionsPage = () => {
                     {filteredSubmissions.map((submission) => (
                       <TableRow key={submission.id} className="hover:bg-blue-50/50 transition-colors">
                         <TableCell>
-                          <div>
+                          <div className="space-y-2">
                             <p className="font-semibold text-gray-800">{submission.name}</p>
-                            <p className="text-sm text-gray-500">ID: {submission.id}</p>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="space-y-1">
-                            <p className="text-sm">{submission.email}</p>
+                            <p className="text-sm text-blue-600">{submission.email}</p>
                             {submission.phone && (
                               <p className="text-sm text-gray-600">{submission.phone}</p>
                             )}
                           </div>
                         </TableCell>
                         <TableCell>
-                          <Badge className={`${getSourceColor(submission.source)} text-white`}>
+                          <div className="max-w-xs">
+                            <p className="text-sm text-gray-700 line-clamp-2">
+                              {submission.message.length > 100 
+                                ? `${submission.message.substring(0, 100)}...` 
+                                : submission.message}
+                            </p>
+                            <p className="text-xs text-gray-500 mt-1">
+                              {submission.message.length} characters
+                            </p>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge className={getSourceColor(submission.source)}>
                             {submission.source === 'home' ? 'Home Page' : 'Contact Page'}
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          <Select 
-                            value={submission.status} 
-                            onValueChange={(value: 'new' | 'contacted' | 'closed') => handleStatusChange(submission.id, value)}
-                          >
-                            <SelectTrigger className="w-28">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="new">New</SelectItem>
-                              <SelectItem value="contacted">Contacted</SelectItem>
-                              <SelectItem value="closed">Closed</SelectItem>
-                            </SelectContent>
-                          </Select>
+                          <Badge className={getStatusColor(submission.status)}>
+                            {submission.status.toUpperCase()}
+                          </Badge>
                         </TableCell>
                         <TableCell>
                           <p className="text-sm font-medium">{new Date(submission.created_at || '').toLocaleDateString()}</p>
                           <p className="text-xs text-gray-500">{new Date(submission.created_at || '').toLocaleTimeString()}</p>
                         </TableCell>
                         <TableCell>
-                          <Dialog open={showDetails && selectedSubmission?.id === submission.id} onOpenChange={setShowDetails}>
-                            <DialogTrigger asChild>
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                onClick={() => setSelectedSubmission(submission)}
-                                className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
-                              >
-                                <Eye size={14} className="mr-1" />
-                                View
-                              </Button>
-                            </DialogTrigger>
-                            <DialogContent className="max-w-2xl">
-                              <DialogHeader>
-                                <DialogTitle className="text-xl text-blue-800">
-                                  Contact Submission Details
-                                </DialogTitle>
-                              </DialogHeader>
-                              {selectedSubmission && (
-                                <div className="space-y-6">
-                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div className="p-4 bg-gray-50 rounded-lg">
-                                      <label className="text-sm font-medium text-gray-600">Name</label>
-                                      <p className="font-medium text-lg">{selectedSubmission.name}</p>
-                                    </div>
-                                    <div className="p-4 bg-gray-50 rounded-lg">
-                                      <label className="text-sm font-medium text-gray-600">Email</label>
-                                      <p className="font-medium">{selectedSubmission.email}</p>
-                                    </div>
-                                    {selectedSubmission.phone && (
-                                      <div className="p-4 bg-gray-50 rounded-lg">
-                                        <label className="text-sm font-medium text-gray-600">Phone</label>
-                                        <p className="font-medium">{selectedSubmission.phone}</p>
-                                      </div>
-                                    )}
-                                    <div className="p-4 bg-gray-50 rounded-lg">
-                                      <label className="text-sm font-medium text-gray-600">Source</label>
-                                      <Badge className={`mt-1 ${getSourceColor(selectedSubmission.source)} text-white`}>
-                                        {selectedSubmission.source === 'home' ? 'Home Page' : 'Contact Page'}
-                                      </Badge>
-                                    </div>
-                                    <div className="p-4 bg-gray-50 rounded-lg">
-                                      <label className="text-sm font-medium text-gray-600">Status</label>
-                                      <Badge className={`mt-1 ${getStatusColor(selectedSubmission.status)} text-white`}>
-                                        {selectedSubmission.status.toUpperCase()}
-                                      </Badge>
-                                    </div>
-                                    <div className="p-4 bg-gray-50 rounded-lg">
-                                      <label className="text-sm font-medium text-gray-600">Submitted</label>
-                                      <p className="font-medium">{new Date(selectedSubmission.created_at || '').toLocaleString()}</p>
-                                    </div>
-                                  </div>
-                                  
-                                  <div>
-                                    <label className="text-sm font-medium text-gray-600">Message</label>
-                                    <div className="mt-2 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                                      <p className="whitespace-pre-wrap">{selectedSubmission.message}</p>
-                                    </div>
-                                  </div>
-
-                                  <div className="flex justify-end space-x-3">
-                                    <Button
-                                      variant="outline"
-                                      onClick={() => handleStatusChange(selectedSubmission.id, selectedSubmission.status === 'new' ? 'contacted' : selectedSubmission.status === 'contacted' ? 'closed' : 'new')}
-                                      className={selectedSubmission.status === 'new' ? 'border-blue-200 text-blue-600 hover:bg-blue-50' : selectedSubmission.status === 'contacted' ? 'border-green-200 text-green-600 hover:bg-green-50' : 'border-orange-200 text-orange-600 hover:bg-orange-50'}
-                                    >
-                                      Mark as {selectedSubmission.status === 'new' ? 'Contacted' : selectedSubmission.status === 'contacted' ? 'Closed' : 'New'}
-                                    </Button>
-                                  </div>
-                                </div>
-                              )}
-                            </DialogContent>
-                          </Dialog>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleViewDetails(submission)}
+                            className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
+                          >
+                            <Eye size={14} className="mr-1" />
+                            View Details
+                          </Button>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -425,13 +394,27 @@ const ContactSubmissionsPage = () => {
             <CardContent className="p-12 text-center">
               <MessageSquare size={64} className="mx-auto text-gray-400 mb-6" />
               <h3 className="text-xl font-semibold text-gray-900 mb-3">No Submissions Found</h3>
-              <p className="text-gray-600 mb-6">No contact submissions match the current filters. Try adjusting your filter criteria.</p>
-              <Button variant="outline" onClick={clearFilters} className="border-blue-200 text-blue-600 hover:bg-blue-50">
-                Clear All Filters
-              </Button>
+              <p className="text-gray-600 mb-6">
+                {searchTerm || sourceFilter !== 'all' || statusFilter !== 'all' || dateFrom || dateTo
+                  ? 'No contact submissions match the current filters. Try adjusting your search criteria.'
+                  : 'No contact submissions have been received yet.'}
+              </p>
+              {(searchTerm || sourceFilter !== 'all' || statusFilter !== 'all' || dateFrom || dateTo) && (
+                <Button variant="outline" onClick={clearFilters} className="border-blue-200 text-blue-600 hover:bg-blue-50">
+                  Clear All Filters
+                </Button>
+              )}
             </CardContent>
           </Card>
         )}
+
+        {/* Contact Submission Modal */}
+        <ContactSubmissionModal
+          submission={selectedSubmission}
+          isOpen={showModal}
+          onClose={() => setShowModal(false)}
+          onStatusChange={handleStatusChange}
+        />
       </motion.div>
     </div>
   );

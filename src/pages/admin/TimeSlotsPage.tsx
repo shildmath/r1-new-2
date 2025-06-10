@@ -6,9 +6,12 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { timeSlotService, userService } from '@/services/supabase';
+import { ModernCard } from '@/components/admin/ModernCard';
+import EnhancedTable from '@/components/admin/EnhancedTable';
 import type { TimeSlot } from '@/services/supabase';
-import { Calendar, Clock, Filter, X, Plus, Edit, Trash2 } from 'lucide-react';
+import { Calendar, Clock, Filter, X, Plus, Edit, Trash2, Users, TrendingUp, CalendarDays, UserCheck } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const TimeSlotsPage = () => {
@@ -27,6 +30,7 @@ const TimeSlotsPage = () => {
     time: ''
   });
   const [editingSlot, setEditingSlot] = useState<TimeSlot | null>(null);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
@@ -43,8 +47,7 @@ const TimeSlotsPage = () => {
       ]);
       setTimeSlots(slotsData);
       setUsers(usersData);
-      console.log('Loaded time slots:', slotsData);
-      console.log('Loaded users:', usersData);
+      console.log('Loaded time slots:', slotsData.length);
     } catch (error) {
       console.error('Error loading data:', error);
       toast({
@@ -64,10 +67,6 @@ const TimeSlotsPage = () => {
       dateFrom: '',
       dateTo: '',
       month: ''
-    });
-    toast({
-      title: "Filters Cleared",
-      description: "All filters have been reset.",
     });
   };
 
@@ -91,6 +90,7 @@ const TimeSlotsPage = () => {
 
       setTimeSlots(prev => [...prev, slot]);
       setNewSlot({ closer_id: '', date: '', time: '' });
+      setShowCreateDialog(false);
 
       toast({
         title: "Time Slot Added",
@@ -176,6 +176,139 @@ const TimeSlotsPage = () => {
 
   const availableSlots = filteredTimeSlots.filter(slot => !slot.is_booked);
   const bookedSlots = filteredTimeSlots.filter(slot => slot.is_booked);
+  const totalClosers = users.length;
+  const utilizationRate = filteredTimeSlots.length > 0 ? (bookedSlots.length / filteredTimeSlots.length * 100).toFixed(1) : '0';
+
+  const timeSlotColumns = [
+    {
+      key: 'closer_id' as keyof TimeSlot,
+      header: 'Closer',
+      sortable: true,
+      render: (value: string) => (
+        <div className="flex items-center space-x-2">
+          <UserCheck size={16} className="text-gray-500" />
+          <span className="font-medium">{getCloserName(value)}</span>
+        </div>
+      )
+    },
+    {
+      key: 'date' as keyof TimeSlot,
+      header: 'Date',
+      sortable: true,
+      render: (value: string) => (
+        <div className="flex items-center space-x-2">
+          <Calendar size={16} className="text-gray-500" />
+          <span className="font-medium">{new Date(value).toLocaleDateString()}</span>
+        </div>
+      )
+    },
+    {
+      key: 'time' as keyof TimeSlot,
+      header: 'Time',
+      sortable: true,
+      render: (value: string) => (
+        <div className="flex items-center space-x-2">
+          <Clock size={16} className="text-gray-500" />
+          <span className="font-medium">{value}</span>
+        </div>
+      )
+    },
+    {
+      key: 'is_booked' as keyof TimeSlot,
+      header: 'Status',
+      render: (value: boolean) => (
+        <Badge className={value ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'}>
+          {value ? 'Booked' : 'Available'}
+        </Badge>
+      )
+    },
+    {
+      key: 'created_at' as keyof TimeSlot,
+      header: 'Created',
+      sortable: true,
+      render: (value: string) => (
+        <span className="text-sm text-gray-500">
+          {new Date(value).toLocaleDateString()}
+        </span>
+      )
+    },
+    {
+      key: 'id' as keyof TimeSlot,
+      header: 'Actions',
+      render: (value: string, row: TimeSlot) => (
+        <div className="flex items-center space-x-2">
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setEditingSlot(row)}
+              >
+                <Edit size={14} />
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Edit Time Slot</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium">Closer</label>
+                  <Select 
+                    value={editingSlot?.closer_id} 
+                    onValueChange={(value) => editingSlot && setEditingSlot({...editingSlot, closer_id: value})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Closer" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {users.map((closer) => (
+                        <SelectItem key={closer.id} value={closer.id}>
+                          {closer.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Date</label>
+                  <Input 
+                    type="date" 
+                    value={editingSlot?.date}
+                    onChange={(e) => editingSlot && setEditingSlot({...editingSlot, date: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Time</label>
+                  <Input 
+                    type="time" 
+                    value={editingSlot?.time}
+                    onChange={(e) => editingSlot && setEditingSlot({...editingSlot, time: e.target.value})}
+                  />
+                </div>
+                <div className="flex space-x-2">
+                  <Button onClick={() => editingSlot && updateTimeSlot(editingSlot)} className="flex-1">
+                    Update
+                  </Button>
+                  <Button variant="outline" onClick={() => setEditingSlot(null)} className="flex-1">
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => deleteTimeSlot(row.id)}
+            className="text-red-600 hover:text-red-800"
+          >
+            <Trash2 size={14} />
+          </Button>
+        </div>
+      )
+    }
+  ];
 
   if (isLoading) {
     return (
@@ -197,116 +330,110 @@ const TimeSlotsPage = () => {
       >
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            Time Slots Management
-          </h1>
+          <div>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              Time Slots Management
+            </h1>
+            <p className="text-gray-600 mt-2">Sophisticated scheduling system with calendar view and analytics</p>
+          </div>
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
-              <Calendar size={20} className="text-primary" />
-              <Badge variant="secondary">{filteredTimeSlots.length}</Badge>
+              <CalendarDays size={20} className="text-primary" />
+              <Badge variant="secondary" className="bg-blue-50 text-blue-700">
+                {filteredTimeSlots.length} slots
+              </Badge>
             </div>
+            <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+              <DialogTrigger asChild>
+                <Button className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white">
+                  <Plus size={16} className="mr-2" />
+                  Add Time Slot
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Add New Time Slot</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium">Closer</label>
+                    <Select value={newSlot.closer_id} onValueChange={(value) => setNewSlot({...newSlot, closer_id: value})}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select Closer" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {users.map((closer) => (
+                          <SelectItem key={closer.id} value={closer.id}>
+                            {closer.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Date</label>
+                    <Input 
+                      type="date" 
+                      value={newSlot.date}
+                      onChange={(e) => setNewSlot({...newSlot, date: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Time</label>
+                    <Input 
+                      type="time" 
+                      value={newSlot.time}
+                      onChange={(e) => setNewSlot({...newSlot, time: e.target.value})}
+                    />
+                  </div>
+                  <Button onClick={addTimeSlot} className="w-full">
+                    Add Time Slot
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
 
-        <p className="text-gray-600 mb-6">Manage all available time slots across all closers</p>
-
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-          <Card className="border-l-4 border-l-green-500">
-            <CardContent className="p-6">
-              <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 rounded-lg bg-green-500 flex items-center justify-center">
-                  <Clock className="text-white" size={24} />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Available Slots</p>
-                  <p className="text-2xl font-bold text-primary">{availableSlots.length}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-l-4 border-l-red-500">
-            <CardContent className="p-6">
-              <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 rounded-lg bg-red-500 flex items-center justify-center">
-                  <Calendar className="text-white" size={24} />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Booked Slots</p>
-                  <p className="text-2xl font-bold text-primary">{bookedSlots.length}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-l-4 border-l-blue-500">
-            <CardContent className="p-6">
-              <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 rounded-lg bg-blue-500 flex items-center justify-center">
-                  <Clock className="text-white" size={24} />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Total Slots</p>
-                  <p className="text-2xl font-bold text-primary">{filteredTimeSlots.length}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        {/* Enhanced Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+          <ModernCard
+            title="Available Slots"
+            value={availableSlots.length}
+            icon={Clock}
+            gradient="bg-gradient-to-br from-green-500 to-emerald-600"
+            delay={0}
+          />
+          <ModernCard
+            title="Booked Slots"
+            value={bookedSlots.length}
+            icon={Calendar}
+            gradient="bg-gradient-to-br from-red-500 to-pink-600"
+            delay={0.1}
+          />
+          <ModernCard
+            title="Active Closers"
+            value={totalClosers}
+            icon={Users}
+            gradient="bg-gradient-to-br from-blue-500 to-cyan-600"
+            delay={0.2}
+          />
+          <ModernCard
+            title="Utilization Rate"
+            value={`${utilizationRate}%`}
+            icon={TrendingUp}
+            gradient="bg-gradient-to-br from-purple-500 to-violet-600"
+            delay={0.3}
+          />
         </div>
 
-        {/* Add New Time Slot */}
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Plus size={20} />
-              <span>Add New Time Slot</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <Select value={newSlot.closer_id} onValueChange={(value) => setNewSlot({...newSlot, closer_id: value})}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select Closer" />
-                </SelectTrigger>
-                <SelectContent>
-                  {users.map((closer) => (
-                    <SelectItem key={closer.id} value={closer.id}>
-                      {closer.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              
-              <Input 
-                type="date" 
-                placeholder="Date"
-                value={newSlot.date}
-                onChange={(e) => setNewSlot({...newSlot, date: e.target.value})}
-              />
-              
-              <Input 
-                type="time" 
-                placeholder="Time"
-                value={newSlot.time}
-                onChange={(e) => setNewSlot({...newSlot, time: e.target.value})}
-              />
-              
-              <Button onClick={addTimeSlot} className="bg-green-600 hover:bg-green-700">
-                <Plus size={16} className="mr-2" />
-                Add Slot
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Filters */}
-        <Card className="mb-6">
-          <CardContent className="p-4">
+        {/* Advanced Filters */}
+        <Card className="border-0 shadow-xl">
+          <CardContent className="p-6">
             <div className="flex flex-wrap items-center gap-4">
               <div className="flex items-center space-x-2">
                 <Filter size={20} className="text-primary" />
-                <span className="font-medium">Filters:</span>
+                <span className="font-medium">Advanced Filters:</span>
               </div>
               
               <Select value={filters.closerId} onValueChange={(value) => setFilters({...filters, closerId: value})}>
@@ -328,7 +455,7 @@ const TimeSlotsPage = () => {
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All</SelectItem>
+                  <SelectItem value="all">All Status</SelectItem>
                   <SelectItem value="available">Available</SelectItem>
                   <SelectItem value="booked">Booked</SelectItem>
                 </SelectContent>
@@ -360,122 +487,20 @@ const TimeSlotsPage = () => {
               
               <Button variant="outline" onClick={clearFilters}>
                 <X size={16} className="mr-2" />
-                Clear Filters
+                Clear All Filters
               </Button>
             </div>
           </CardContent>
         </Card>
 
-        {/* Time Slots Grid */}
-        {filteredTimeSlots.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredTimeSlots.map((slot) => (
-              <Card key={slot.id} className={`${slot.is_booked ? 'bg-red-50 border-red-200' : 'bg-green-50 border-green-200'} hover:shadow-lg transition-shadow duration-300`}>
-                <CardContent className="p-6">
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="font-semibold text-lg">{getCloserName(slot.closer_id)}</h3>
-                        <p className="text-sm text-gray-600">Closer</p>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Badge className={slot.is_booked ? 'bg-red-500' : 'bg-green-500'}>
-                          {slot.is_booked ? 'Booked' : 'Available'}
-                        </Badge>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setEditingSlot(slot)}
-                        >
-                          <Edit size={14} />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => deleteTimeSlot(slot.id)}
-                          className="text-red-600 hover:text-red-800"
-                        >
-                          <Trash2 size={14} />
-                        </Button>
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <div className="flex items-center space-x-2">
-                        <Calendar size={16} className="text-gray-500" />
-                        <span className="font-medium">{slot.date}</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Clock size={16} className="text-gray-500" />
-                        <span className="font-medium">{slot.time}</span>
-                      </div>
-                    </div>
-                    
-                    {slot.client_id && (
-                      <div className="pt-2 border-t">
-                        <p className="text-xs text-gray-500">Client ID: {slot.client_id}</p>
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        ) : (
-          <Card>
-            <CardContent className="p-12 text-center">
-              <Calendar size={48} className="mx-auto text-gray-400 mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No Time Slots Found</h3>
-              <p className="text-gray-600">No time slots match the current filters or add new time slots.</p>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Edit Modal */}
-        {editingSlot && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <Card className="w-full max-w-md">
-              <CardHeader>
-                <CardTitle>Edit Time Slot</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Select value={editingSlot.closer_id} onValueChange={(value) => setEditingSlot({...editingSlot, closer_id: value})}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select Closer" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {users.map((closer) => (
-                      <SelectItem key={closer.id} value={closer.id}>
-                        {closer.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                
-                <Input 
-                  type="date" 
-                  value={editingSlot.date}
-                  onChange={(e) => setEditingSlot({...editingSlot, date: e.target.value})}
-                />
-                
-                <Input 
-                  type="time" 
-                  value={editingSlot.time}
-                  onChange={(e) => setEditingSlot({...editingSlot, time: e.target.value})}
-                />
-                
-                <div className="flex space-x-2">
-                  <Button onClick={() => updateTimeSlot(editingSlot)} className="flex-1">
-                    Update
-                  </Button>
-                  <Button variant="outline" onClick={() => setEditingSlot(null)} className="flex-1">
-                    Cancel
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
+        {/* Enhanced Time Slots Table */}
+        <EnhancedTable
+          data={filteredTimeSlots}
+          columns={timeSlotColumns}
+          searchable={false}
+          exportable={true}
+          onExport={() => console.log('Export time slots')}
+        />
       </motion.div>
     </div>
   );

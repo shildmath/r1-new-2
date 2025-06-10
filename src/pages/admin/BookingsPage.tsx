@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,9 +8,11 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { bookingService, userService } from '@/services/supabase';
+import { ModernCard } from '@/components/admin/ModernCard';
+import EnhancedTable from '@/components/admin/EnhancedTable';
 import type { Booking } from '@/services/supabase';
 import { exportToCSV } from '@/utils/csvExport';
-import { Calendar, Clock, User, Phone, Mail, Filter, X, Download, Eye, Edit, MessageSquare, CheckCircle, AlertCircle, XCircle } from 'lucide-react';
+import { Calendar, Clock, User, Phone, Mail, Filter, X, Download, Eye, Edit, TrendingUp, CheckCircle, AlertCircle, XCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const BookingsPage = () => {
@@ -45,7 +46,7 @@ const BookingsPage = () => {
       ]);
       setBookings(bookingsData);
       setUsers(usersData);
-      console.log('Loaded bookings:', bookingsData);
+      console.log('Loaded bookings:', bookingsData.length);
     } catch (error) {
       console.error('Error loading data:', error);
       toast({
@@ -96,10 +97,6 @@ const BookingsPage = () => {
       dateFrom: '',
       dateTo: '',
       search: ''
-    });
-    toast({
-      title: "Filters Cleared",
-      description: "All filters have been reset.",
     });
   };
 
@@ -163,24 +160,263 @@ const BookingsPage = () => {
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'confirmed': return 'bg-green-500';
-      case 'completed': return 'bg-blue-500';
-      case 'no-show': return 'bg-red-500';
-      case 'reschedule': return 'bg-yellow-500';
-      case 'not-attended': return 'bg-gray-500';
-      case 'closed': return 'bg-green-600';
-      case 'follow-up': return 'bg-blue-500';
-      case 'client-loss': return 'bg-red-500';
-      case 'unqualified': return 'bg-orange-500';
-      default: return 'bg-gray-500';
-    }
-  };
-
   const confirmedBookings = filteredBookings.filter(b => b.call_status === 'confirmed');
   const completedBookings = filteredBookings.filter(b => b.call_status === 'completed');
   const closedDeals = filteredBookings.filter(b => b.deal_status === 'closed');
+  const conversionRate = filteredBookings.length > 0 ? (closedDeals.length / filteredBookings.length * 100).toFixed(1) : '0';
+
+  const bookingColumns = [
+    {
+      key: 'first_name' as keyof Booking,
+      header: 'Client',
+      sortable: true,
+      render: (value: string, row: Booking) => (
+        <div>
+          <div className="font-medium">{row.first_name} {row.last_name}</div>
+          <div className="text-sm text-gray-500">{row.email}</div>
+        </div>
+      )
+    },
+    {
+      key: 'preferred_date' as keyof Booking,
+      header: 'Date & Time',
+      sortable: true,
+      render: (value: string, row: Booking) => (
+        <div className="space-y-1">
+          <div className="flex items-center space-x-2">
+            <Calendar size={14} className="text-gray-500" />
+            <span className="text-sm">{value}</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Clock size={14} className="text-gray-500" />
+            <span className="text-sm">{row.preferred_time}</span>
+          </div>
+        </div>
+      )
+    },
+    {
+      key: 'closer_id' as keyof Booking,
+      header: 'Closer',
+      render: (value: string) => (
+        <div className="flex items-center space-x-2">
+          <User size={14} className="text-gray-500" />
+          <span className="text-sm">{getCloserName(value)}</span>
+        </div>
+      )
+    },
+    {
+      key: 'call_status' as keyof Booking,
+      header: 'Call Status',
+      render: (value: string) => (
+        <Badge variant="secondary" className="flex items-center space-x-1">
+          {getStatusIcon(value)}
+          <span>{value}</span>
+        </Badge>
+      )
+    },
+    {
+      key: 'deal_status' as keyof Booking,
+      header: 'Deal Status',
+      render: (value: string) => (
+        <Badge variant="outline" className="flex items-center space-x-1">
+          {getStatusIcon(value)}
+          <span>{value}</span>
+        </Badge>
+      )
+    },
+    {
+      key: 'id' as keyof Booking,
+      header: 'Actions',
+      render: (value: string, row: Booking) => (
+        <div className="flex items-center space-x-2">
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setSelectedBooking(row)}
+              >
+                <Eye size={14} />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle className="flex items-center space-x-2">
+                  <User size={24} />
+                  <span>Booking Details - {row.first_name} {row.last_name}</span>
+                </DialogTitle>
+              </DialogHeader>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium text-gray-600">Contact Information</label>
+                    <div className="mt-2 space-y-2">
+                      <div className="flex items-center space-x-2">
+                        <Mail size={16} className="text-gray-500" />
+                        <span>{row.email}</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Phone size={16} className="text-gray-500" />
+                        <span>{row.phone}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium text-gray-600">Appointment Details</label>
+                    <div className="mt-2 space-y-2">
+                      <div className="flex items-center space-x-2">
+                        <Calendar size={16} className="text-gray-500" />
+                        <span>{row.preferred_date}</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Clock size={16} className="text-gray-500" />
+                        <span>{row.preferred_time}</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <User size={16} className="text-gray-500" />
+                        <span>{getCloserName(row.closer_id)}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {row.additional_info && (
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Additional Information</label>
+                      <p className="mt-2 text-sm bg-gray-50 p-3 rounded-lg">{row.additional_info}</p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium text-gray-600">Status</label>
+                    <div className="mt-2 space-y-2">
+                      <Badge className={`${getStatusColor(row.call_status)} text-white`}>
+                        {row.call_status}
+                      </Badge>
+                      <Badge className={`${getStatusColor(row.deal_status)} text-white ml-2`}>
+                        {row.deal_status}
+                      </Badge>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium text-gray-600">Progress Tracking</label>
+                    <div className="mt-2 space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-sm">Payment Link Sent:</span>
+                        <span className={row.payment_link_sent ? 'text-green-600' : 'text-red-600'}>
+                          {row.payment_link_sent ? 'Yes' : 'No'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm">Contract Link Sent:</span>
+                        <span className={row.contract_link_sent ? 'text-green-600' : 'text-red-600'}>
+                          {row.contract_link_sent ? 'Yes' : 'No'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm">Offer Made:</span>
+                        <span className={row.offer_made ? 'text-green-600' : 'text-red-600'}>
+                          {row.offer_made ? 'Yes' : 'No'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {row.note && (
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Notes</label>
+                      <p className="mt-2 text-sm bg-gray-50 p-3 rounded-lg">{row.note}</p>
+                    </div>
+                  )}
+
+                  <div>
+                    <label className="text-sm font-medium text-gray-600">Created</label>
+                    <p className="text-sm text-gray-500">{new Date(row.created_at || '').toLocaleString()}</p>
+                  </div>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setEditingBooking(row)}
+              >
+                <Edit size={14} />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>Edit Booking</DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleEditSubmit} className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium">Call Status</label>
+                    <Select 
+                      value={row.call_status} 
+                      onValueChange={(value: any) => setEditingBooking({...row, call_status: value})}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="confirmed">Confirmed</SelectItem>
+                        <SelectItem value="completed">Completed</SelectItem>
+                        <SelectItem value="no-show">No Show</SelectItem>
+                        <SelectItem value="reschedule">Reschedule</SelectItem>
+                        <SelectItem value="not-attended">Not Attended</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium">Deal Status</label>
+                    <Select 
+                      value={row.deal_status} 
+                      onValueChange={(value: any) => setEditingBooking({...row, deal_status: value})}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="closed">Closed</SelectItem>
+                        <SelectItem value="follow-up">Follow-up</SelectItem>
+                        <SelectItem value="client-loss">Client Loss</SelectItem>
+                        <SelectItem value="unqualified">Unqualified</SelectItem>
+                        <SelectItem value="not-started">Not Started</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium">Notes</label>
+                  <Textarea
+                    value={row.note || ''}
+                    onChange={(e) => setEditingBooking({...row, note: e.target.value})}
+                    rows={3}
+                  />
+                </div>
+
+                <div className="flex space-x-2">
+                  <Button type="submit" className="flex-1">Update Booking</Button>
+                  <Button type="button" variant="outline" onClick={() => setShowEdit(false)} className="flex-1">
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
+      )
+    }
+  ];
 
   if (isLoading) {
     return (
@@ -202,89 +438,65 @@ const BookingsPage = () => {
       >
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            Bookings Management
-          </h1>
+          <div>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              Bookings Management
+            </h1>
+            <p className="text-gray-600 mt-2">Comprehensive booking system with deal tracking and analytics</p>
+          </div>
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
               <Calendar size={20} className="text-primary" />
-              <Badge variant="secondary">{filteredBookings.length}</Badge>
+              <Badge variant="secondary" className="bg-blue-50 text-blue-700">
+                {filteredBookings.length} bookings
+              </Badge>
             </div>
-            <Button onClick={exportCSV} className="bg-green-600 hover:bg-green-700">
+            <Button onClick={exportCSV} className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white">
               <Download size={16} className="mr-2" />
               Export CSV
             </Button>
           </div>
         </div>
 
-        <p className="text-gray-600 mb-6">Manage all strategy call bookings and track deal progress</p>
-
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-          <Card className="border-l-4 border-l-blue-500">
-            <CardContent className="p-6">
-              <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 rounded-lg bg-blue-500 flex items-center justify-center">
-                  <Calendar className="text-white" size={24} />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Total Bookings</p>
-                  <p className="text-2xl font-bold text-primary">{filteredBookings.length}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-l-4 border-l-green-500">
-            <CardContent className="p-6">
-              <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 rounded-lg bg-green-500 flex items-center justify-center">
-                  <CheckCircle className="text-white" size={24} />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Confirmed</p>
-                  <p className="text-2xl font-bold text-primary">{confirmedBookings.length}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-l-4 border-l-purple-500">
-            <CardContent className="p-6">
-              <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 rounded-lg bg-purple-500 flex items-center justify-center">
-                  <Clock className="text-white" size={24} />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Completed</p>
-                  <p className="text-2xl font-bold text-primary">{completedBookings.length}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-l-4 border-l-orange-500">
-            <CardContent className="p-6">
-              <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 rounded-lg bg-orange-500 flex items-center justify-center">
-                  <User className="text-white" size={24} />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Closed Deals</p>
-                  <p className="text-2xl font-bold text-primary">{closedDeals.length}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <ModernCard
+            title="Total Bookings"
+            value={filteredBookings.length}
+            icon={Calendar}
+            gradient="bg-gradient-to-br from-blue-500 to-cyan-600"
+            delay={0}
+          />
+          <ModernCard
+            title="Confirmed"
+            value={confirmedBookings.length}
+            icon={CheckCircle}
+            gradient="bg-gradient-to-br from-green-500 to-emerald-600"
+            delay={0.1}
+          />
+          <ModernCard
+            title="Completed"
+            value={completedBookings.length}
+            icon={Clock}
+            gradient="bg-gradient-to-br from-purple-500 to-violet-600"
+            delay={0.2}
+          />
+          <ModernCard
+            title="Conversion Rate"
+            value={`${conversionRate}%`}
+            icon={TrendingUp}
+            gradient="bg-gradient-to-br from-orange-500 to-red-600"
+            delay={0.3}
+          />
         </div>
 
         {/* Filters */}
-        <Card className="mb-6">
-          <CardContent className="p-4">
+        <Card className="border-0 shadow-xl">
+          <CardContent className="p-6">
             <div className="flex flex-wrap items-center gap-4">
               <div className="flex items-center space-x-2">
                 <Filter size={20} className="text-primary" />
-                <span className="font-medium">Filters:</span>
+                <span className="font-medium">Advanced Filters:</span>
               </div>
               
               <Select value={filters.closerId} onValueChange={(value) => setFilters({...filters, closerId: value})}>
@@ -354,264 +566,20 @@ const BookingsPage = () => {
               
               <Button variant="outline" onClick={clearFilters}>
                 <X size={16} className="mr-2" />
-                Clear Filters
+                Clear All Filters
               </Button>
             </div>
           </CardContent>
         </Card>
 
-        {/* Bookings Grid */}
-        {filteredBookings.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredBookings.map((booking) => (
-              <Card key={booking.id} className="hover:shadow-lg transition-shadow duration-300">
-                <CardContent className="p-6">
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="font-semibold text-lg">{booking.first_name} {booking.last_name}</h3>
-                        <p className="text-sm text-gray-600">{booking.email}</p>
-                        <p className="text-sm text-gray-600">{booking.phone}</p>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Dialog open={showDetails && selectedBooking?.id === booking.id} onOpenChange={setShowDetails}>
-                          <DialogTrigger asChild>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => setSelectedBooking(booking)}
-                            >
-                              <Eye size={14} />
-                            </Button>
-                          </DialogTrigger>
-                        </Dialog>
-                        <Dialog open={showEdit && editingBooking?.id === booking.id} onOpenChange={setShowEdit}>
-                          <DialogTrigger asChild>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => setEditingBooking(booking)}
-                            >
-                              <Edit size={14} />
-                            </Button>
-                          </DialogTrigger>
-                        </Dialog>
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <div className="flex items-center space-x-2">
-                        <Calendar size={16} className="text-gray-500" />
-                        <span className="text-sm">{booking.preferred_date}</span>
-                        <Clock size={16} className="text-gray-500 ml-2" />
-                        <span className="text-sm">{booking.preferred_time}</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <User size={16} className="text-gray-500" />
-                        <span className="text-sm">{getCloserName(booking.closer_id)}</span>
-                      </div>
-                    </div>
-
-                    <div className="flex flex-wrap gap-2">
-                      <Badge className={`${getStatusColor(booking.call_status)} text-white text-xs`}>
-                        {getStatusIcon(booking.call_status)}
-                        <span className="ml-1">{booking.call_status}</span>
-                      </Badge>
-                      <Badge className={`${getStatusColor(booking.deal_status)} text-white text-xs`}>
-                        {getStatusIcon(booking.deal_status)}
-                        <span className="ml-1">{booking.deal_status}</span>
-                      </Badge>
-                    </div>
-
-                    <div className="flex justify-between text-xs text-gray-500">
-                      <span>Payment: {booking.payment_link_sent ? '✓' : '✗'}</span>
-                      <span>Contract: {booking.contract_link_sent ? '✓' : '✗'}</span>
-                      <span>Offer: {booking.offer_made ? '✓' : '✗'}</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        ) : (
-          <Card>
-            <CardContent className="p-12 text-center">
-              <Calendar size={48} className="mx-auto text-gray-400 mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No Bookings Found</h3>
-              <p className="text-gray-600">No bookings match the current filters. Try adjusting your filter criteria.</p>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Detail Modal */}
-        {selectedBooking && (
-          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="flex items-center space-x-2">
-                <User size={24} />
-                <span>Booking Details - {selectedBooking.first_name} {selectedBooking.last_name}</span>
-              </DialogTitle>
-            </DialogHeader>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium text-gray-600">Contact Information</label>
-                  <div className="mt-2 space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <Mail size={16} className="text-gray-500" />
-                      <span>{selectedBooking.email}</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Phone size={16} className="text-gray-500" />
-                      <span>{selectedBooking.phone}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium text-gray-600">Appointment Details</label>
-                  <div className="mt-2 space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <Calendar size={16} className="text-gray-500" />
-                      <span>{selectedBooking.preferred_date}</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Clock size={16} className="text-gray-500" />
-                      <span>{selectedBooking.preferred_time}</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <User size={16} className="text-gray-500" />
-                      <span>{getCloserName(selectedBooking.closer_id)}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {selectedBooking.additional_info && (
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">Additional Information</label>
-                    <p className="mt-2 text-sm bg-gray-50 p-3 rounded-lg">{selectedBooking.additional_info}</p>
-                  </div>
-                )}
-              </div>
-
-              <div className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium text-gray-600">Status</label>
-                  <div className="mt-2 space-y-2">
-                    <Badge className={`${getStatusColor(selectedBooking.call_status)} text-white`}>
-                      {selectedBooking.call_status}
-                    </Badge>
-                    <Badge className={`${getStatusColor(selectedBooking.deal_status)} text-white ml-2`}>
-                      {selectedBooking.deal_status}
-                    </Badge>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium text-gray-600">Progress Tracking</label>
-                  <div className="mt-2 space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-sm">Payment Link Sent:</span>
-                      <span className={selectedBooking.payment_link_sent ? 'text-green-600' : 'text-red-600'}>
-                        {selectedBooking.payment_link_sent ? 'Yes' : 'No'}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm">Contract Link Sent:</span>
-                      <span className={selectedBooking.contract_link_sent ? 'text-green-600' : 'text-red-600'}>
-                        {selectedBooking.contract_link_sent ? 'Yes' : 'No'}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm">Offer Made:</span>
-                      <span className={selectedBooking.offer_made ? 'text-green-600' : 'text-red-600'}>
-                        {selectedBooking.offer_made ? 'Yes' : 'No'}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {selectedBooking.note && (
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">Notes</label>
-                    <p className="mt-2 text-sm bg-gray-50 p-3 rounded-lg">{selectedBooking.note}</p>
-                  </div>
-                )}
-
-                <div>
-                  <label className="text-sm font-medium text-gray-600">Created</label>
-                  <p className="text-sm text-gray-500">{new Date(selectedBooking.created_at || '').toLocaleString()}</p>
-                </div>
-              </div>
-            </div>
-          </DialogContent>
-        )}
-
-        {/* Edit Modal */}
-        {editingBooking && (
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Edit Booking</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleEditSubmit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium">Call Status</label>
-                  <Select 
-                    value={editingBooking.call_status} 
-                    onValueChange={(value: any) => setEditingBooking({...editingBooking, call_status: value})}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="confirmed">Confirmed</SelectItem>
-                      <SelectItem value="completed">Completed</SelectItem>
-                      <SelectItem value="no-show">No Show</SelectItem>
-                      <SelectItem value="reschedule">Reschedule</SelectItem>
-                      <SelectItem value="not-attended">Not Attended</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium">Deal Status</label>
-                  <Select 
-                    value={editingBooking.deal_status} 
-                    onValueChange={(value: any) => setEditingBooking({...editingBooking, deal_status: value})}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="closed">Closed</SelectItem>
-                      <SelectItem value="follow-up">Follow-up</SelectItem>
-                      <SelectItem value="client-loss">Client Loss</SelectItem>
-                      <SelectItem value="unqualified">Unqualified</SelectItem>
-                      <SelectItem value="not-started">Not Started</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div>
-                <label className="text-sm font-medium">Notes</label>
-                <Textarea
-                  value={editingBooking.note || ''}
-                  onChange={(e) => setEditingBooking({...editingBooking, note: e.target.value})}
-                  rows={3}
-                />
-              </div>
-
-              <div className="flex space-x-2">
-                <Button type="submit" className="flex-1">Update Booking</Button>
-                <Button type="button" variant="outline" onClick={() => setShowEdit(false)} className="flex-1">
-                  Cancel
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        )}
+        {/* Enhanced Bookings Table */}
+        <EnhancedTable
+          data={filteredBookings}
+          columns={bookingColumns}
+          searchable={false}
+          exportable={true}
+          onExport={exportCSV}
+        />
       </motion.div>
     </div>
   );

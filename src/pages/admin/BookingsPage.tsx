@@ -160,6 +160,21 @@ const BookingsPage = () => {
     }
   };
 
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'confirmed': return 'bg-green-500';
+      case 'completed': return 'bg-blue-500';
+      case 'no-show': return 'bg-red-500';
+      case 'reschedule': return 'bg-yellow-500';
+      case 'not-attended': return 'bg-gray-500';
+      case 'closed': return 'bg-green-600';
+      case 'follow-up': return 'bg-blue-500';
+      case 'client-loss': return 'bg-red-500';
+      case 'unqualified': return 'bg-orange-500';
+      default: return 'bg-gray-500';
+    }
+  };
+
   const confirmedBookings = filteredBookings.filter(b => b.call_status === 'confirmed');
   const completedBookings = filteredBookings.filter(b => b.call_status === 'completed');
   const closedDeals = filteredBookings.filter(b => b.deal_status === 'closed');

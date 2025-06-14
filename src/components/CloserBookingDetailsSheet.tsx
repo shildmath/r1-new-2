@@ -6,6 +6,8 @@ import { useCloserBookings } from "@/hooks/useCloserBookings";
 import CloserBookingStatusFields from "./CloserBookingStatusFields";
 import CloserBookingLinksFields from "./CloserBookingLinksFields";
 import CloserBookingOtherFields from "./CloserBookingOtherFields";
+import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog";
+import { Trash2 } from "lucide-react";
 
 type Props = {
   booking: any;
@@ -28,8 +30,9 @@ const DEAL_STATUS_OPTIONS = [
 ];
 
 export default function CloserBookingDetailsSheet({ booking, onClose }: Props) {
-  const { updateBooking } = useCloserBookings();
+  const { updateBooking, deleteBooking } = useCloserBookings();
   const [form, setForm] = useState<any>(booking);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   useEffect(() => {
     setForm(booking);
@@ -87,6 +90,17 @@ export default function CloserBookingDetailsSheet({ booking, onClose }: Props) {
     }
   };
 
+  const handleDelete = async () => {
+    const ok = await deleteBooking(booking.id);
+    if (ok) {
+      toast.success("Booking deleted.");
+      setShowDeleteDialog(false);
+      onClose();
+    } else {
+      toast.error("Booking could not be deleted.");
+    }
+  };
+
   return (
     <Sheet open={!!booking} onOpenChange={onClose}>
       <SheetContent
@@ -134,6 +148,34 @@ export default function CloserBookingDetailsSheet({ booking, onClose }: Props) {
           >
             Save
           </Button>
+          <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="destructive"
+                className="w-full"
+                onClick={() => setShowDeleteDialog(true)}
+              >
+                <Trash2 className="mr-2" /> Delete
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete Booking?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to permanently delete this booking? This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  variant="destructive"
+                  onClick={handleDelete}
+                >
+                  Yes, delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </SheetFooter>
       </SheetContent>
     </Sheet>

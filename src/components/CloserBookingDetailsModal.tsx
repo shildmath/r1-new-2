@@ -12,7 +12,8 @@ import { useCloserBookings } from "@/hooks/useCloserBookings";
 import CloserBookingStatusFields from "./CloserBookingStatusFields";
 import CloserBookingLinksFields from "./CloserBookingLinksFields";
 import CloserBookingOtherFields from "./CloserBookingOtherFields";
-import { BadgeCheck, Link, Info, UserCheck } from "lucide-react";
+import { BadgeCheck, Link, Info, UserCheck, Trash2 } from "lucide-react";
+import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog";
 
 type ModalProps = {
   booking: any;
@@ -35,8 +36,9 @@ const DEAL_STATUS_OPTIONS = [
 ];
 
 export default function CloserBookingDetailsModal({ booking, onClose }: ModalProps) {
-  const { updateBooking } = useCloserBookings();
+  const { updateBooking, deleteBooking } = useCloserBookings();
   const [form, setForm] = useState<any>(booking);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   useEffect(() => {
     setForm(booking);
@@ -94,6 +96,17 @@ export default function CloserBookingDetailsModal({ booking, onClose }: ModalPro
     }
   };
 
+  const handleDelete = async () => {
+    const ok = await deleteBooking(booking.id);
+    if (ok) {
+      toast.success("Booking deleted.");
+      setShowDeleteDialog(false);
+      onClose();
+    } else {
+      toast.error("Booking could not be deleted.");
+    }
+  };
+
   return (
     <Dialog open={!!booking} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl p-0 rounded-xl overflow-hidden animate-scale-in shadow-2xl">
@@ -143,6 +156,34 @@ export default function CloserBookingDetailsModal({ booking, onClose }: ModalPro
           <Button onClick={handleSave} className="w-40 font-semibold">
             Save
           </Button>
+          <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="destructive"
+                className="w-40 font-semibold"
+                onClick={() => setShowDeleteDialog(true)}
+              >
+                <Trash2 className="mr-2" /> Delete
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete Booking?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to permanently delete this booking? This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  variant="destructive"
+                  onClick={handleDelete}
+                >
+                  Yes, delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </DialogFooter>
       </DialogContent>
     </Dialog>

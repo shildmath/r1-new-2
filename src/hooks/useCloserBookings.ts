@@ -83,6 +83,17 @@ export function useCloserBookings() {
     setIsLoading(false);
   }
 
+  async function deleteBooking(id: string) {
+    if (!id) return false;
+    const { error } = await supabase.from("bookings").delete().eq("id", id);
+    if (error) {
+      console.error("[deleteBooking] Error:", error);
+      return false;
+    }
+    await fetchBookings();
+    return true;
+  }
+
   useEffect(() => {
     if (session?.user) fetchBookings();
     // eslint-disable-next-line
@@ -127,5 +138,6 @@ export function useCloserBookings() {
     filter,
     setFilter,
     clearFilter,
+    deleteBooking,
   };
 }

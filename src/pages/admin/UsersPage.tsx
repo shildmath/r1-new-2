@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -43,11 +42,10 @@ const UsersPage = () => {
     loadUsers();
   }, []);
 
+  // Load users from Supabase: fetch user_roles + join profiles for names/emails
   const loadUsers = async () => {
     try {
       setIsLoading(true);
-      
-      // Get users with their roles from user_roles and profiles
       const { data, error } = await supabase
         .from('user_roles')
         .select(`
@@ -72,9 +70,7 @@ const UsersPage = () => {
       })) || [];
 
       setUsers(formattedUsers);
-      console.log('Loaded users:', formattedUsers);
     } catch (error) {
-      console.error('Error loading users:', error);
       toast({
         title: "Error",
         description: "Failed to load users. Please try again.",
@@ -85,13 +81,15 @@ const UsersPage = () => {
     }
   };
 
+  // Add or update user in Supabase
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     try {
       if (editingUser) {
-        // Update existing user role
+        // Update profile (name/email) in profiles, and role in user_roles
+        // 1. Update user_roles
         const { error: roleError } = await supabase
           .from('user_roles')
           .update({ role: formData.role })
@@ -99,12 +97,12 @@ const UsersPage = () => {
 
         if (roleError) throw roleError;
 
-        // Update profile
+        // 2. Update profile
         const { error: profileError } = await supabase
           .from('profiles')
-          .update({ 
+          .update({
             full_name: formData.fullName,
-            email: formData.email 
+            email: formData.email
           })
           .eq('id', editingUser.id);
 
@@ -114,8 +112,10 @@ const UsersPage = () => {
           title: "User Updated",
           description: "User has been updated successfully.",
         });
+
       } else {
-        // Create new user
+        // Create new user account in Supabase Auth
+        // Registration handled in useSupabaseAuth.signup hook, but lets double-check
         const { error } = await signup(
           formData.email,
           formData.password,
@@ -134,7 +134,6 @@ const UsersPage = () => {
       await loadUsers();
       resetForm();
     } catch (error: any) {
-      console.error('Error saving user:', error);
       toast({
         title: "Error",
         description: error.message || "Failed to save user. Please try again.",
@@ -145,7 +144,7 @@ const UsersPage = () => {
     }
   };
 
-  const handleEdit = (user: UserProfile) => {
+  const handleEdit = (user: any) => {
     setFormData({
       email: user.email,
       password: '',
@@ -156,11 +155,11 @@ const UsersPage = () => {
     setShowAddForm(true);
   };
 
+  // Delete: Remove from user_roles (can't delete Supabase auth user directly client-side)
   const handleDelete = async (userId: string) => {
     if (!confirm('Are you sure you want to delete this user?')) return;
-
     try {
-      // Delete user role first
+      // Delete from user_roles disables access
       const { error: roleError } = await supabase
         .from('user_roles')
         .delete()
@@ -168,19 +167,23 @@ const UsersPage = () => {
 
       if (roleError) throw roleError;
 
-      // Note: We can't delete from auth.users via the client
-      // The user will still exist in auth but won't have access to the app
-      
-      await loadUsers();
+      // Optional: Clean up profile row as well
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('id', userId);
+
+      if (profileError) throw profileError;
+
       toast({
         title: "User Deleted",
         description: "User has been removed from the system.",
       });
+      await loadUsers();
     } catch (error: any) {
-      console.error('Error deleting user:', error);
       toast({
         title: "Error",
-        description: "Failed to delete user. Please try again.",
+        description: error.message || "Failed to delete user. Please try again.",
         variant: "destructive",
       });
     }

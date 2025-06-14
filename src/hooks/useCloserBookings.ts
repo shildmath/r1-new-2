@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
@@ -44,13 +43,13 @@ export function useCloserBookings() {
       return;
     }
 
-    // Join slot, client, and closer_profile for closer_email
+    // Remove the unsupported closer_profile join!
     let query = supabase
       .from("bookings")
       .select(
         `
         *,
-        slot:time_slots(id, date, time, closer_id, time_zone, closer_profile:profiles(email)),
+        slot:time_slots(id, date, time, closer_id, time_zone),
         client:profiles(id, full_name, email)
         `
       )
@@ -59,24 +58,20 @@ export function useCloserBookings() {
     if (filter.date) {
       query = query.eq("slot.date", filter.date);
     }
+
     const { data, error } = await query;
     if (error) {
       console.log("Error fetching bookings:", error);
     }
+
     if (data) {
       console.log("Fetched bookings:", data);
       setBookings(
         data.map((b: any) => {
-          // Prefer primary fields on the base booking, fall back to client join if present
           let fullName = b.client?.full_name || `${b.first_name ?? ""} ${b.last_name ?? ""}`.trim();
           let email = b.email || b.client?.email || "";
-          // Get closer_email from slot.closer_profile?.email
-          let closer_email = "";
-          if (b.slot?.closer_profile && Array.isArray(b.slot.closer_profile) && b.slot.closer_profile.length > 0) {
-            closer_email = b.slot.closer_profile[0]?.email ?? "";
-          } else if (b.slot?.closer_profile?.email) {
-            closer_email = b.slot.closer_profile.email;
-          }
+          // Use session.user.email as closer_email
+          let closer_email = session.user.email || "";
           return {
             ...b,
             slot_date: b.slot?.date,
@@ -84,7 +79,7 @@ export function useCloserBookings() {
             first_name: b.first_name ?? (fullName?.split(" ")[0] ?? ""),
             last_name: b.last_name ?? (fullName?.split(" ").slice(1).join(" ") ?? ""),
             email,
-            closer_email: closer_email || "",
+            closer_email,
           };
         })
       );
@@ -104,11 +99,6 @@ export function useCloserBookings() {
     await fetchBookings();
     return true;
   }
-
-  useEffect(() => {
-    if (session?.user) fetchBookings();
-    // eslint-disable-next-line
-  }, [session, filter]);
 
   async function updateBooking(id: string, fields: any) {
     // Whitelist only valid fields according to the bookings table schema
@@ -142,6 +132,11 @@ export function useCloserBookings() {
     setFilter({});
   }
 
+  useEffect(() => {
+    if (session?.user) fetchBookings();
+    // eslint-disable-next-line
+  }, [session, filter]);
+
   return {
     bookings,
     updateBooking,
@@ -152,4 +147,3 @@ export function useCloserBookings() {
     deleteBooking,
   };
 }
-

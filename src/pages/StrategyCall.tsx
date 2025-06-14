@@ -1,4 +1,3 @@
-
 import { motion } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -129,7 +128,7 @@ const StrategyCall = () => {
         </div>
       </section>
 
-      {/* Booking Form Section */}
+      {/* Booking Form Section - Calendly style */}
       <section className="bg-secondary section-padding">
         <div className="max-w-4xl mx-auto">
           <motion.div
@@ -142,10 +141,10 @@ const StrategyCall = () => {
               Book Your <span className="gradient-text">Free Consultation</span>
             </h2>
             <p className="text-xl text-gray-600">
-              Fill out the form below to help us prepare a customized strategy for your business.
+              Choose a time that works for you, then enter your info to reserve your spot.
             </p>
           </motion.div>
-
+          {/* Step-by-step calendly-like booking ux */}
           <StrategyCallForm />
         </div>
       </section>

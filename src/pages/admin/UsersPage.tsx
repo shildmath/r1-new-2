@@ -34,7 +34,7 @@ export default function UsersPage() {
           `
           user_id,
           role,
-          profiles:user_roles_user_id_fkey (
+          profiles (
             id,
             email,
             full_name,

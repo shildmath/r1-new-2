@@ -1,4 +1,3 @@
-
 import React, { useMemo, useState } from "react";
 import CloserSidebar from "@/components/CloserSidebar";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
@@ -7,6 +6,7 @@ import { useCloserBookings } from "@/hooks/useCloserBookings";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import CloserBookingDetailsModal from "@/components/CloserBookingDetailsModal";
+import ExportButtons from "@/components/ExportButtons";
 
 export default function RescheduleCall() {
   const [status, setStatus] = useState("");
@@ -16,7 +16,7 @@ export default function RescheduleCall() {
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
 
   // Filter to only bookings with reschedule_date or follow_up_call_date not null
-  const allReschedules = useMemo(
+  const allReschedules = React.useMemo(
     () =>
       bookings.filter(
         (b) =>
@@ -37,6 +37,66 @@ export default function RescheduleCall() {
     dealsClosed: allReschedules.filter(b => (b.deal_status ?? "").toLowerCase() === "closed").length,
   }), [allReschedules]);
 
+  const exportHeaders = [
+    "ID",
+    "First Name",
+    "Last Name",
+    "Email",
+    "Phone",
+    "Slot Date",
+    "Slot Time",
+    "Call Status",
+    "Deal Status",
+    "Closed Date",
+    "Follow Up Call Date",
+    "Reschedule Date",
+    "Payment Link Sent",
+    "Contract Link Sent",
+    "Invoice Sent",
+    "Invoice Sent Date",
+    "Contract Sent",
+    "Contract Sent Date",
+    "Offer Made",
+    "Ad Spend",
+    "Country Area",
+    "Zip Code",
+    "Recording Link",
+    "Note",
+    "Additional Info",
+    "Created At",
+    "Closer Email"
+  ];
+
+  const exportData = allReschedules.map((b) => ({
+    "ID": b.id,
+    "First Name": b.first_name,
+    "Last Name": b.last_name,
+    "Email": b.email,
+    "Phone": b.phone,
+    "Slot Date": b.slot_date,
+    "Slot Time": b.slot_time,
+    "Call Status": b.call_status,
+    "Deal Status": b.deal_status,
+    "Closed Date": b.closed_date,
+    "Follow Up Call Date": b.follow_up_call_date,
+    "Reschedule Date": b.reschedule_date,
+    "Payment Link Sent": b.payment_link_sent ?? "",
+    "Contract Link Sent": b.contract_link_sent ?? "",
+    "Invoice Sent": b.invoice_sent ?? "",
+    "Invoice Sent Date": b.invoice_sent_date ?? "",
+    "Contract Sent": b.contract_sent ?? "",
+    "Contract Sent Date": b.contract_sent_date ?? "",
+    "Offer Made": b.offer_made ?? "",
+    "Ad Spend": b.ad_spend ?? "",
+    "Country Area": b.country_area ?? "",
+    "Zip Code": b.zip_code ?? "",
+    "Recording Link": b.recording_link ?? "",
+    "Note": b.note ?? "",
+    "Additional Info": b.additional_info ?? "",
+    "Created At": b.created_at,
+    "Closer Email": b.closer_email ?? "",
+  }));
+
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-accent-light to-secondary">
       <CloserSidebar />
@@ -50,6 +110,9 @@ export default function RescheduleCall() {
             </div>
           </CardHeader>
           <CardContent>
+            <div className="flex justify-end">
+              <ExportButtons data={exportData} filename="reschedule-followup-calls" csvHeaders={exportHeaders} />
+            </div>
             {/* Metrics Row */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6 animate-fade-in">
               <div className="flex flex-col items-center p-4 bg-orange-50 rounded-xl border border-orange-200">

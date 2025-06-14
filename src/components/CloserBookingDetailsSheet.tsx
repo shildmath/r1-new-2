@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -90,27 +89,51 @@ export default function CloserBookingDetailsSheet({ booking, onClose }: Props) {
 
   return (
     <Sheet open={!!booking} onOpenChange={onClose}>
-      <SheetContent side="right" className="max-w-lg w-full">
-        <SheetHeader>
+      <SheetContent
+        side="right"
+        className="max-w-lg w-full flex flex-col p-0"
+      >
+        <SheetHeader className="sticky top-0 bg-background z-10 p-6 border-b">
           <SheetTitle>
             Extra Details - {booking.first_name} {booking.last_name}
           </SheetTitle>
         </SheetHeader>
-        <div className="space-y-4 max-h-[75vh] overflow-y-auto py-2 px-1">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="flex-1 overflow-y-auto px-4 py-2 md:px-6 space-y-6 bg-muted/50">
+          <div className="rounded-lg bg-white p-4 shadow-sm">
             <CloserBookingStatusFields
               form={form}
               handleField={handleField}
               CALL_STATUS_OPTIONS={CALL_STATUS_OPTIONS}
               DEAL_STATUS_OPTIONS={DEAL_STATUS_OPTIONS}
             />
-            <CloserBookingLinksFields form={form} handleField={handleField} />
-            <CloserBookingOtherFields form={form} handleField={handleField} />
+          </div>
+          <div className="rounded-lg bg-white p-4 shadow-sm">
+            <CloserBookingLinksFields
+              form={form}
+              handleField={handleField}
+            />
+          </div>
+          <div className="rounded-lg bg-white p-4 shadow-sm">
+            <CloserBookingOtherFields
+              form={form}
+              handleField={handleField}
+            />
           </div>
         </div>
-        <SheetFooter className="pt-3">
-          <Button variant="secondary" onClick={onClose}>Cancel</Button>
-          <Button onClick={handleSave}>Save</Button>
+        <SheetFooter className="sticky bottom-0 bg-background z-10 p-6 border-t flex gap-2">
+          <Button 
+            variant="secondary" 
+            onClick={onClose}
+            className="w-full"
+          >
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleSave}
+            className="w-full"
+          >
+            Save
+          </Button>
         </SheetFooter>
       </SheetContent>
     </Sheet>

@@ -11,6 +11,7 @@ type Props = {
 export default function CloserBookingLinksFields({ form, handleField }: Props) {
   return (
     <>
+      <h3 className="text-accent font-bold text-base mb-3">Links & Offers</h3>
       {/* 6. Invoice Link */}
       <div>
         <label className="font-semibold">Invoice Link</label>

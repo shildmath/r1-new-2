@@ -17,6 +17,7 @@ export default function CloserBookingStatusFields({
 }: Props) {
   return (
     <>
+      <h3 className="text-accent font-bold text-base mb-3">Status & Core Fields</h3>
       {/* 1. Call Status */}
       <div>
         <label className="font-semibold">Call Status</label>

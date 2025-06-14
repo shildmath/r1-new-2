@@ -11,6 +11,7 @@ type Props = {
 export default function CloserBookingOtherFields({ form, handleField }: Props) {
   return (
     <>
+      <h3 className="text-accent font-bold text-base mb-3">Other Info</h3>
       {/* 11. Ad Spend */}
       <div>
         <label className="font-semibold">Ad Spend</label>

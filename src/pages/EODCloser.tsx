@@ -1,4 +1,3 @@
-
 import React, { useMemo } from "react";
 import CloserSidebar from "@/components/CloserSidebar";
 import { useCloserBookings } from "@/hooks/useCloserBookings";
@@ -7,6 +6,7 @@ import { format } from "date-fns";
 import { PhoneCall, Handshake, CalendarClock, UserCheck2, Info, CircleX } from "lucide-react";
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import OptimizedTable from "@/components/OptimizedTable";
+import ExportButtons from "@/components/ExportButtons";
 
 function todayISO() {
   return format(new Date(), "yyyy-MM-dd");
@@ -91,6 +91,17 @@ export default function EODCloser() {
     }
   ];
 
+  // Add export for visible table
+  const csvHeaders = columns.map(col => col.header ?? col.key);
+  const exportTableData = todayBookings.map(row => ({
+    Time: row.slot_time,
+    Client: `${row.first_name} ${row.last_name}`,
+    Email: row.email,
+    Phone: row.phone,
+    "Deal Status": row.deal_status ?? "-",
+    "Call Status": row.call_status ?? "-"
+  }));
+
   return (
     <TooltipProvider>
       <div className="flex min-h-screen bg-gradient-to-br from-accent-light to-secondary">
@@ -99,6 +110,10 @@ export default function EODCloser() {
           <h1 className="text-2xl md:text-3xl font-bold mb-3 animate-fade-in leading-tight">
             <span className="font-extrabold text-primary drop-shadow">End Of The Day Report</span>
           </h1>
+          {/* Add Export Buttons for page */}
+          <div className="flex justify-end">
+            <ExportButtons data={exportTableData} filename="eod-bookings" csvHeaders={csvHeaders} />
+          </div>
           <div className="max-w-7xl mx-auto flex flex-col gap-7 animate-fade-in animate-delay-200">
             {/* Stats summary */}
             <section className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-5 mb-5">

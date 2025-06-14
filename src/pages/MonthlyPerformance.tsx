@@ -1,4 +1,3 @@
-
 import React, { useMemo } from "react";
 import CloserSidebar from "@/components/CloserSidebar";
 import { useCloserBookings } from "@/hooks/useCloserBookings";
@@ -15,6 +14,7 @@ import {
   TableRow
 } from "@/components/ui/table";
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import ExportButtons from "@/components/ExportButtons";
 
 function getMonthName(d: Date) {
   return d.toLocaleString('default', { month: 'long', year: "numeric" });
@@ -55,6 +55,16 @@ export default function MonthlyPerformance() {
     Closed: m.closed,
     Rescheduled: m.rescheduled,
     Completed: m.completed,
+  }));
+
+  // For table export: show same columns as displayed
+  const csvHeaders = ["Month", "Total", "Closed", "Rescheduled", "Completed"];
+  const exportTableData = months.map(m => ({
+    Month: m.name,
+    Total: m.value,
+    Closed: m.closed,
+    Rescheduled: m.rescheduled,
+    Completed: m.completed
   }));
 
   const statBlocks = [
@@ -105,6 +115,10 @@ export default function MonthlyPerformance() {
           <h1 className="text-2xl md:text-3xl font-bold mb-3 animate-fade-in leading-tight">
             <span className="font-extrabold text-primary drop-shadow">Monthly Performance</span>
           </h1>
+          
+          {/* Add Export Buttons at the top */}
+          <div className="flex justify-end"><ExportButtons data={exportTableData} filename="monthly-performance" csvHeaders={csvHeaders} /></div>
+
           <div className="max-w-7xl mx-auto gap-10 flex flex-col animate-fade-in animate-delay-200">
             {/* Dashboard stats blocks */}
             <section className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-5 mb-7">

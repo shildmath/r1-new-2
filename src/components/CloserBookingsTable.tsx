@@ -44,6 +44,7 @@ export default function CloserBookingsTable() {
             <div className="mb-2">
               <div className="text-sm"><span className="font-semibold">Email:</span> {b.email}</div>
               <div className="text-sm"><span className="font-semibold">Phone:</span> {b.phone}</div>
+              <div className="text-sm"><span className="font-semibold">Closer Mail:</span> {b.closer_email ?? "-"}</div>
             </div>
             <Button
               size="sm"
@@ -102,6 +103,7 @@ export default function CloserBookingsTable() {
                 <th className="p-3 text-left">Client</th>
                 <th className="p-3 text-left">Email</th>
                 <th className="p-3 text-left">Phone</th>
+                <th className="p-3 text-left">Closer Mail</th>
                 <th className="p-3 text-left">Extra Details</th>
               </tr>
             </thead>
@@ -113,6 +115,7 @@ export default function CloserBookingsTable() {
                   <td className="p-2">{b.first_name} {b.last_name}</td>
                   <td className="p-2">{b.email}</td>
                   <td className="p-2">{b.phone}</td>
+                  <td className="p-2">{b.closer_email ?? "-"}</td>
                   <td className="p-2">
                     <Button
                       size="sm"

@@ -17,6 +17,7 @@ import CloserBookings from "./pages/CloserBookings";
 import CallStatus from "./pages/CallStatus";
 import DealStatus from "./pages/DealStatus";
 import RescheduleCall from "./pages/RescheduleCall";
+import ClosedClients from "./pages/ClosedClients";
 import { SupabaseAuthProvider } from "@/hooks/useSupabaseAuth";
 
 const App = () => {
@@ -41,6 +42,7 @@ const App = () => {
             <Route path="/call-status" element={<CallStatus />} />
             <Route path="/deal-status" element={<DealStatus />} />
             <Route path="/reschedule-call" element={<RescheduleCall />} />
+            <Route path="/closed-clients" element={<ClosedClients />} />
             {/* Redirect unknown routes to home or show a minimal not-found experience if desired */}
             <Route path="*" element={<Index />} />
           </Routes>

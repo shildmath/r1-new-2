@@ -21,6 +21,9 @@ export default function CloserSidebar() {
         <a className="hover:bg-accent px-3 py-2 rounded transition" href="/deal-status">
           Deal Status
         </a>
+        <a className="hover:bg-accent px-3 py-2 rounded transition" href="/closed-clients">
+          Closed Clients
+        </a>
         <a className="hover:bg-accent px-3 py-2 rounded transition" href="/reschedule-call">
           Reschedule Calls
         </a>

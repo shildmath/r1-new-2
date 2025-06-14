@@ -1,3 +1,4 @@
+
 import React, { useMemo } from "react";
 import CloserSidebar from "@/components/CloserSidebar";
 import { useCloserBookings } from "@/hooks/useCloserBookings";
@@ -6,11 +7,13 @@ import { PhoneCall, Handshake, CalendarClock, UserCheck2, LogOut, User } from "l
 import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { useUserProfileWithRole } from "@/hooks/useUserProfileWithRole";
 
 export default function CloserPanel() {
   const { bookings, isLoading } = useCloserBookings();
   const { user, logout } = useSupabaseAuth();
   const navigate = useNavigate();
+  const { profile, loading: profileLoading } = useUserProfileWithRole();
 
   // Memoize stats for speed
   const stats = useMemo(() => {
@@ -64,11 +67,19 @@ export default function CloserPanel() {
   ];
 
   const displayName =
+    profile?.full_name ||
     user?.user_metadata?.full_name ||
     user?.user_metadata?.name ||
     user?.email ||
     user?.id?.slice(0, 8) ||
     "User";
+
+  const displayRole =
+    profileLoading
+      ? "Loading role..."
+      : (profile?.role
+        ? profile.role.charAt(0).toUpperCase() + profile.role.slice(1)
+        : "Unknown Role");
 
   const handleLogout = async () => {
     await logout();
@@ -83,7 +94,12 @@ export default function CloserPanel() {
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
           <div className="flex items-center gap-3">
             <User className="text-primary" />
-            <h2 className="text-xl font-bold">Welcome, <span className="text-accent">{displayName}</span></h2>
+            <h2 className="text-xl font-bold">
+              Welcome, <span className="text-accent">{displayName}</span>
+              <span className="ml-2 text-base font-normal text-muted-foreground">
+                (Role: {displayRole})
+              </span>
+            </h2>
           </div>
           <Button
             variant="outline"

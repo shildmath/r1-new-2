@@ -1,4 +1,3 @@
-
 import { Send } from "lucide-react";
 import ContactForm from "@/components/ContactForm";
 import Navbar from "@/components/Navbar";
@@ -10,7 +9,7 @@ const Contact = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-100/50 via-white to-purple-100/30 flex flex-col">
       <Navbar />
-      <main className="flex-grow flex flex-col items-center p-2 pt-20 pb-8 md:pb-14">
+      <main className="flex-grow flex flex-col items-center p-2 pt-28 md:pt-32 pb-8 md:pb-14">
         {/* Animated Contact Info Section */}
         <ContactInfo />
 

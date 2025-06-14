@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import CloserSidebar from "@/components/CloserSidebar";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
@@ -6,6 +5,7 @@ import { Filter, CheckCircle, XCircle, UserCheck2 } from "lucide-react";
 import { useCloserBookings } from "@/hooks/useCloserBookings";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import BookingExtraDetailsButton from "@/components/BookingExtraDetailsButton";
 
 export default function ClosedClients() {
   const [search, setSearch] = useState("");
@@ -91,7 +91,7 @@ export default function ClosedClients() {
                           )}
                         </td>
                         <td className="p-2">
-                          <Button variant="outline" size="sm">Extra Details</Button>
+                          <BookingExtraDetailsButton booking={b} />
                         </td>
                       </tr>
                     ))

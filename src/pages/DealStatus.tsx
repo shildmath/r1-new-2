@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import CloserSidebar from "@/components/CloserSidebar";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
@@ -6,6 +5,7 @@ import { Filter, Handshake } from "lucide-react";
 import { useCloserBookings } from "@/hooks/useCloserBookings";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import BookingExtraDetailsButton from "@/components/BookingExtraDetailsButton";
 
 export default function DealStatus() {
   const [status, setStatus] = useState("");
@@ -83,7 +83,9 @@ export default function DealStatus() {
                         <td className="p-2">{b.phone}</td>
                         <td className="p-2">{b.closer_email ?? "-"}</td>
                         <td className="p-2">{b.deal_status ?? "Not Started Yet"}</td>
-                        <td className="p-2"><Button variant="outline" size="sm">Extra Details</Button></td>
+                        <td className="p-2">
+                          <BookingExtraDetailsButton booking={b} />
+                        </td>
                       </tr>
                     ))
                   )}

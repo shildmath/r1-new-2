@@ -1,24 +1,23 @@
-
 import React, { useState } from "react";
 import CloserSidebar from "@/components/CloserSidebar";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
-import { Filter, RefreshCcw } from "lucide-react";
+import { Filter, PhoneCall, CalendarClock } from "lucide-react";
 import { useCloserBookings } from "@/hooks/useCloserBookings";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import BookingExtraDetailsButton from "@/components/BookingExtraDetailsButton";
 
 export default function RescheduleCall() {
+  const [status, setStatus] = useState("");
   const [date, setDate] = useState("");
   const [search, setSearch] = useState("");
-  const [show, setShow] = useState<"reschedule"|"followup">("reschedule");
   const { bookings, isLoading } = useCloserBookings();
 
-  // Bookings with reschedule date / follow up call
-  const filtered = bookings.filter(b =>
-    ((show === "reschedule" && b.reschedule_date) || (show === "followup" && b.follow_up_call_date)) &&
-    (date === "" || (show === "reschedule"
-      ? (b.reschedule_date ?? "").toString().includes(date)
-      : (b.follow_up_call_date ?? "").toString().includes(date))) &&
+  // Filter to only bookings with reschedule_date or follow_up_call_date not null
+  const allReschedules = bookings.filter(b =>
+    (b.reschedule_date || b.follow_up_call_date) &&
+    (status === "" || (b.call_status || "").toLowerCase().includes(status.toLowerCase())) &&
+    (date === "" || (b.slot_date?.toString() ?? "").includes(date)) &&
     (search === "" || [b.first_name, b.last_name, b.email, b.phone].join(" ").toLowerCase().includes(search.toLowerCase()))
   );
 
@@ -28,34 +27,26 @@ export default function RescheduleCall() {
       <div className="flex-1 flex flex-col items-center p-6 gap-3">
         <Card className="w-full max-w-6xl mb-8 shadow-xl border-2 border-accent/10 bg-white/95">
           <CardHeader className="flex flex-row items-center gap-3 pb-1">
-            <RefreshCcw size={32} className="text-accent" />
+            <CalendarClock size={32} className="text-accent" />
             <div>
-              <CardTitle className="text-2xl font-extrabold text-primary">{show === "reschedule" ? "Reschedule Calls" : "Follow Up Calls"}</CardTitle>
-              <div className="text-muted-foreground text-base">
-                View and filter all {show === "reschedule" ? "rescheduled" : "follow up"} calls.
-              </div>
+              <CardTitle className="text-2xl font-extrabold text-primary">Reschedule / Follow Up</CardTitle>
+              <div className="text-muted-foreground text-base">List of all Rescheduled and Follow Up Calls</div>
             </div>
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-3 mb-4 items-center">
-              <Button
-                variant={show === "reschedule" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setShow("reschedule")}
-              >
-                Reschedule Calls
-              </Button>
-              <Button
-                variant={show === "followup" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setShow("followup")}
-              >
-                Follow Up Calls
-              </Button>
               <Filter className="text-accent" size={18} />
               <Input placeholder="Search…" value={search} onChange={e => setSearch(e.target.value)} className="w-40" />
               <Input type="date" value={date} onChange={e => setDate(e.target.value)} className="w-40" />
-              <Button variant="outline" size="sm" onClick={() => { setDate(""); setSearch(""); }}>
+              <select value={status} onChange={e => setStatus(e.target.value)} className="border rounded px-2 py-1 w-40 bg-white">
+                <option value="">All Call Status</option>
+                <option value="Not Started Yet">Not Started Yet</option>
+                <option value="Completed">Completed</option>
+                <option value="No Show Up">No Show Up</option>
+                <option value="Reschedule">Reschedule</option>
+                <option value="Not Attained">Not Attained</option>
+              </select>
+              <Button variant="outline" size="sm" onClick={() => { setStatus(""); setDate(""); setSearch(""); }}>
                 Clear Filters
               </Button>
             </div>
@@ -68,35 +59,43 @@ export default function RescheduleCall() {
                     <th className="p-3 text-left">Client</th>
                     <th className="p-3 text-left">Email</th>
                     <th className="p-3 text-left">Phone</th>
-                    <th className="p-3 text-left">{show === "reschedule" ? "Reschedule Date" : "Follow Up Date"}</th>
                     <th className="p-3 text-left">Closer Mail</th>
+                    <th className="p-3 text-left">Call Status</th>
+                    <th className="p-3 text-left">Deal Status</th>
+                    <th className="p-3 text-left">Reschedule Date</th>
+                    <th className="p-3 text-left">Follow Up Date</th>
                     <th className="p-3 text-left">Extra Details</th>
                   </tr>
                 </thead>
-                <tbody>
-                  {isLoading ? (
-                    <tr>
-                      <td colSpan={8} className="p-8 text-center text-accent animate-pulse">Loading bookings…</td>
-                    </tr>
-                  ) : filtered.length === 0 ? (
-                    <tr>
-                      <td colSpan={8} className="text-red-500 p-6 text-center">No bookings found with these filters.</td>
-                    </tr>
-                  ) : (
-                    filtered.map(b => (
-                      <tr key={b.id} className="border-t transition-colors hover:bg-accent/10">
-                        <td className="p-2 font-medium">{b.slot_date}</td>
-                        <td className="p-2">{b.slot_time}</td>
-                        <td className="p-2">{b.first_name} {b.last_name}</td>
-                        <td className="p-2">{b.email}</td>
-                        <td className="p-2">{b.phone}</td>
-                        <td className="p-2">{show === "reschedule" ? (b.reschedule_date ?? "-") : (b.follow_up_call_date ?? "-")}</td>
-                        <td className="p-2">{b.closer_email ?? "-"}</td>
-                        <td className="p-2"><Button variant="outline" size="sm">Extra Details</Button></td>
+                  <tbody>
+                    {isLoading ? (
+                      <tr>
+                        <td colSpan={11} className="p-8 text-center text-accent animate-pulse">Loading bookings…</td>
                       </tr>
-                    ))
-                  )}
-                </tbody>
+                    ) : allReschedules.length === 0 ? (
+                      <tr>
+                        <td colSpan={11} className="text-red-500 p-6 text-center">No rescheduled or follow up calls found with these filters.</td>
+                      </tr>
+                    ) : (
+                      allReschedules.map(b => (
+                        <tr key={b.id} className="border-t transition-colors hover:bg-accent/10">
+                          <td className="p-2 font-medium">{b.slot_date}</td>
+                          <td className="p-2">{b.slot_time}</td>
+                          <td className="p-2">{b.first_name} {b.last_name}</td>
+                          <td className="p-2">{b.email}</td>
+                          <td className="p-2">{b.phone}</td>
+                          <td className="p-2">{b.closer_email ?? "-"}</td>
+                          <td className="p-2">{b.call_status ?? "-"}</td>
+                          <td className="p-2">{b.deal_status ?? "-"}</td>
+                          <td className="p-2">{b.reschedule_date ?? "-"}</td>
+                          <td className="p-2">{b.follow_up_call_date ?? "-"}</td>
+                          <td className="p-2">
+                            <BookingExtraDetailsButton booking={b} />
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
               </table>
             </div>
           </CardContent>

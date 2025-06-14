@@ -137,6 +137,7 @@ export type Database = {
           id: string
           is_available: boolean
           time: string
+          time_zone: string
         }
         Insert: {
           closer_id: string
@@ -145,6 +146,7 @@ export type Database = {
           id?: string
           is_available?: boolean
           time: string
+          time_zone?: string
         }
         Update: {
           closer_id?: string
@@ -153,6 +155,7 @@ export type Database = {
           id?: string
           is_available?: boolean
           time?: string
+          time_zone?: string
         }
         Relationships: []
       }

@@ -4,6 +4,8 @@ import { useCloserSlots } from "@/hooks/useCloserSlots";
 import { CalendarDays, Filter, LayoutPanelLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+// Add import for the list of IANA time zones
+import { IANA_TIME_ZONES } from "@/utils/timezones";
 
 export default function CloserSlotManager() {
   const {
@@ -16,20 +18,20 @@ export default function CloserSlotManager() {
     setFilter,
     clearFilter,
   } = useCloserSlots();
-  const [form, setForm] = useState({ date: "", time: "" });
+  const [form, setForm] = useState({ date: "", time: "", time_zone: "UTC" });
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
   }
 
   async function handleAddSlot(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.date || !form.time) {
-      toast.error("Please provide both date and time.");
+    if (!form.date || !form.time || !form.time_zone) {
+      toast.error("Please provide date, time, and time zone.");
       return;
     }
-    const ok = await addSlot(form.date, form.time);
-    if (ok) setForm({ date: "", time: "" });
+    const ok = await addSlot(form.date, form.time, form.time_zone);
+    if (ok) setForm({ date: "", time: "", time_zone: "UTC" });
   }
 
   // Mobile slot card UI
@@ -49,6 +51,9 @@ export default function CloserSlotManager() {
             </div>
             <div className="mb-2 text-sm font-medium">
               <strong>Time:</strong> {slot.time}
+            </div>
+            <div className="mb-2 text-xs">
+              <strong>Time Zone:</strong> {slot.time_zone}
             </div>
             <div className="flex flex-row gap-1 mt-1">
               <Button
@@ -90,6 +95,17 @@ export default function CloserSlotManager() {
               className="border rounded p-2 w-24"
               required
             />
+            <select
+              name="time_zone"
+              value={form.time_zone}
+              onChange={handleChange}
+              className="border rounded p-2 w-40"
+              required
+            >
+              {IANA_TIME_ZONES.map((tz) => (
+                <option value={tz} key={tz}>{tz}</option>
+              ))}
+            </select>
             <Button type="submit" className="bg-primary text-white">
               Add
             </Button>
@@ -120,6 +136,17 @@ export default function CloserSlotManager() {
             className="border rounded p-2"
             required
           />
+          <select
+            name="time_zone"
+            value={form.time_zone}
+            onChange={handleChange}
+            className="border rounded p-2"
+            required
+          >
+            {IANA_TIME_ZONES.map((tz) => (
+              <option value={tz} key={tz}>{tz}</option>
+            ))}
+          </select>
           <Button type="submit" className="bg-primary text-white">
             Add Slot
           </Button>
@@ -148,6 +175,7 @@ export default function CloserSlotManager() {
               <tr className="bg-gradient-to-r from-accent-light to-accent font-semibold text-accent-foreground">
                 <th className="p-3 text-left">Date</th>
                 <th className="p-3 text-left">Time</th>
+                <th className="p-3 text-left">Time Zone</th>
                 <th className="p-3 text-left">Status</th>
                 <th className="p-3 text-left">Actions</th>
               </tr>
@@ -155,7 +183,7 @@ export default function CloserSlotManager() {
             <tbody>
               {slots.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="text-center py-6">
+                  <td colSpan={5} className="text-center py-6">
                     No slots found.
                   </td>
                 </tr>
@@ -169,6 +197,7 @@ export default function CloserSlotManager() {
                       </span>
                     </td>
                     <td className="p-2">{slot.time}</td>
+                    <td className="p-2 text-xs">{slot.time_zone}</td>
                     <td className="p-2">
                       {slot.is_available ? (
                         <span className="text-green-700 font-medium bg-green-100 rounded px-2 py-1">Available</span>
@@ -203,3 +232,5 @@ export default function CloserSlotManager() {
     </div>
   );
 }
+
+// The file is now getting quite long. Consider refactoring it into smaller, focused components for better maintainability!

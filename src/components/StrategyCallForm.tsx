@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import BookingStep1DateTime from './BookingStep1DateTime';
 import BookingStep2InfoForm from './BookingStep2InfoForm';
@@ -24,7 +25,7 @@ export default function StrategyCallForm() {
   // Map slotId => closer
   const [closers, setClosers] = useState<{ [closerId: string]: string }>({});
 
-  // Fetch available slots
+  // Fetch available slots (include time_zone)
   useEffect(() => {
     supabase
       .from("time_slots")
@@ -51,8 +52,9 @@ export default function StrategyCallForm() {
       });
   }, []);
 
-  // Given selected slot, find closer id and name
+  // Given selected slot, find closer id and name + time zone
   let selectedCloserName = "N/A";
+  let selectedTimeZone = "";
   if (selectedDate && selectedTime && availableSlots.length) {
     const slot = availableSlots.find(
       (s) =>
@@ -61,8 +63,11 @@ export default function StrategyCallForm() {
         s.date === selectedDate.toISOString().split("T")[0] &&
         s.time === selectedTime
     );
-    if (slot && slot.closer_id && closers[slot.closer_id]) {
-      selectedCloserName = closers[slot.closer_id];
+    if (slot) {
+      selectedTimeZone = slot.time_zone;
+      if (slot.closer_id && closers[slot.closer_id]) {
+        selectedCloserName = closers[slot.closer_id];
+      }
     }
   }
 
@@ -124,6 +129,7 @@ export default function StrategyCallForm() {
         selectedDate={selectedDate}
         selectedTime={selectedTime}
         closerName={selectedCloserName}
+        timeZone={selectedTimeZone}
       />
     );
   }
@@ -137,6 +143,7 @@ export default function StrategyCallForm() {
         setSelectedTime={setSelectedTime}
         onContinue={handleContinue}
         availableSlots={availableSlots}
+        showTimeZone // Pass to BookingStep1DateTime for display if needed
       />
     );
   }
@@ -152,6 +159,7 @@ export default function StrategyCallForm() {
       onSubmit={handleSubmit}
       isSubmitting={isSubmitting || isBooking}
       closerName={selectedCloserName}
+      timeZone={selectedTimeZone}
     />
   );
 }

@@ -30,7 +30,7 @@ export function useCloserSlots() {
     // eslint-disable-next-line
   }, [session, filter]);
 
-  async function addSlot(date: string, time: string) {
+  async function addSlot(date: string, time: string, time_zone: string) {
     if (!session?.user) return false;
     const { data, error } = await supabase
       .from("time_slots")
@@ -38,6 +38,7 @@ export function useCloserSlots() {
         closer_id: session.user.id,
         date,
         time,
+        time_zone,
         is_available: true,
       });
     if (!error) fetchSlots();

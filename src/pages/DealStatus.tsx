@@ -81,6 +81,12 @@ export default function DealStatus() {
       "Closer Email": b.closer_email ?? "",
     }));
 
+  const dealsWithStatus = bookings.filter(b =>
+    (status === "" || (b.deal_status || "").toLowerCase().includes(status.toLowerCase())) &&
+    (date === "" || (b.slot_date?.toString() ?? "").includes(date)) &&
+    (search === "" || [b.first_name, b.last_name, b.email, b.phone].join(" ").toLowerCase().includes(search.toLowerCase()))
+  );
+
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-accent-light to-secondary">
       <CloserSidebar />

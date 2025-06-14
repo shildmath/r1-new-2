@@ -1,24 +1,45 @@
 
-import { useState, useEffect } from 'react';
+// This frontend-only version fakes available slots, disables Supabase logic, and works fully offline.
+// Dummy slots will be rendered and can be "booked" (just shows a confirmation).
+
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useToast } from '@/hooks/use-toast';
-import { timeSlotService, bookingService, userService } from '@/services/supabase';
-import type { TimeSlot } from '@/services/supabase';
 import { Calendar, Clock, User, CheckCircle } from 'lucide-react';
 
+const dummyClosers = [
+  { id: '1', name: 'John Smith' },
+  { id: '2', name: 'Alice Johnson' },
+];
+
+const dummySlots = [
+  {
+    id: 'slot-1',
+    date: '2025-06-17',
+    time: '10:00 AM',
+    closer_id: '1',
+  },
+  {
+    id: 'slot-2',
+    date: '2025-06-18',
+    time: '02:00 PM',
+    closer_id: '2',
+  },
+  {
+    id: 'slot-3',
+    date: '2025-06-20',
+    time: '04:30 PM',
+    closer_id: '1',
+  },
+];
+
 const StrategyCallForm = () => {
-  const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
-  const [closers, setClosers] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
+  const [selectedSlot, setSelectedSlot] = useState<any | null>(null);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -31,35 +52,12 @@ const StrategyCallForm = () => {
     timeSlotId: ''
   });
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
-    try {
-      setIsLoading(true);
-      const [slotsData, closersData] = await Promise.all([
-        timeSlotService.getAvailable(),
-        userService.getClosers()
-      ]);
-      
-      setTimeSlots(slotsData);
-      setClosers(closersData);
-      console.log('Loaded available slots:', slotsData);
-      console.log('Loaded closers:', closersData);
-    } catch (error) {
-      console.error('Error loading data:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load available time slots. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
+  const getCloserName = (closerId: string) => {
+    const closer = dummyClosers.find(c => c.id === closerId);
+    return closer ? closer.name : 'Unknown';
   };
 
-  const handleSlotSelect = (slot: TimeSlot) => {
+  const handleSlotSelect = (slot: typeof dummySlots[number]) => {
     setSelectedSlot(slot);
     setFormData({
       ...formData,
@@ -70,66 +68,17 @@ const StrategyCallForm = () => {
     });
   };
 
-  const getCloserName = (closerId: string) => {
-    const closer = closers.find(c => c.id === closerId);
-    return closer ? closer.name : 'Unknown';
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!selectedSlot) {
-      toast({
-        title: "Please select a time slot",
-        description: "You must select an available time slot to book your strategy call.",
-        variant: "destructive",
-      });
+      alert("Please select a time slot before booking your call.");
       return;
     }
-
     setIsSubmitting(true);
-
-    try {
-      // Create the booking
-      await bookingService.create({
-        first_name: formData.firstName,
-        last_name: formData.lastName,
-        email: formData.email,
-        phone: formData.phone,
-        preferred_date: formData.preferredDate,
-        preferred_time: formData.preferredTime,
-        additional_info: formData.additionalInfo,
-        closer_id: formData.closerId,
-        time_slot_id: formData.timeSlotId,
-        call_status: 'confirmed',
-        deal_status: 'not-started',
-        payment_link_sent: false,
-        contract_link_sent: false,
-        offer_made: false
-      });
-
-      // Mark the time slot as booked
-      await timeSlotService.update(selectedSlot.id, {
-        is_booked: true,
-        client_id: formData.email // Using email as client identifier for now
-      });
-
+    setTimeout(() => {
       setIsSubmitted(true);
-      toast({
-        title: "Strategy Call Booked!",
-        description: "Your strategy call has been successfully scheduled. We'll send you a confirmation email shortly.",
-      });
-
-    } catch (error) {
-      console.error('Error submitting form:', error);
-      toast({
-        title: "Booking Failed",
-        description: "There was an error booking your strategy call. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
       setIsSubmitting(false);
-    }
+    }, 1200);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -139,19 +88,6 @@ const StrategyCallForm = () => {
       [name]: value
     }));
   };
-
-  if (isLoading) {
-    return (
-      <div className="max-w-2xl mx-auto">
-        <Card>
-          <CardContent className="p-8 text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-2 border-primary border-t-transparent mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading available time slots...</p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
 
   if (isSubmitted) {
     return (
@@ -166,7 +102,7 @@ const StrategyCallForm = () => {
               with <strong>{getCloserName(formData.closerId)}</strong>.
             </p>
             <p className="text-sm text-gray-500">
-              You'll receive a confirmation email with all the details shortly.
+              We'll send you a confirmation email with all the details shortly.
             </p>
           </CardContent>
         </Card>
@@ -185,9 +121,9 @@ const StrategyCallForm = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {timeSlots.length > 0 ? (
+          {dummySlots.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {timeSlots.map((slot) => (
+              {dummySlots.map((slot) => (
                 <Card 
                   key={slot.id} 
                   className={`cursor-pointer transition-all duration-200 ${

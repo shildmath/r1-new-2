@@ -1,13 +1,25 @@
 
+// Presentational component only, no backend or types. Assume this modal shows dummy submission info for demo purposes.
+
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import type { ContactSubmission } from '@/services/supabase';
-import { Calendar, Mail, MessageSquare, Phone, User, MapPin, Globe } from 'lucide-react';
+import { Calendar, Mail, MessageSquare, Phone, User, Globe } from 'lucide-react';
+
+interface DummyContactSubmission {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  message: string;
+  created_at?: string;
+  status: 'new' | 'contacted' | 'closed';
+  source: 'home' | 'contact';
+}
 
 interface ContactSubmissionModalProps {
-  submission: ContactSubmission | null;
+  submission: DummyContactSubmission | null;
   isOpen: boolean;
   onClose: () => void;
   onStatusChange: (submissionId: string, status: 'new' | 'contacted' | 'closed') => void;
@@ -129,10 +141,10 @@ const ContactSubmissionModal = ({ submission, isOpen, onClose, onStatusChange }:
                   <label className="text-sm font-medium text-gray-600">Submission Date</label>
                 </div>
                 <p className="text-lg font-semibold text-gray-800">
-                  {new Date(submission.created_at || '').toLocaleDateString()}
+                  {submission.created_at ? new Date(submission.created_at).toLocaleDateString() : 'N/A'}
                 </p>
                 <p className="text-sm text-gray-500 mt-1">
-                  {new Date(submission.created_at || '').toLocaleTimeString()}
+                  {submission.created_at ? new Date(submission.created_at).toLocaleTimeString() : ''}
                 </p>
               </div>
             </div>

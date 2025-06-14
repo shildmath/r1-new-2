@@ -6,7 +6,6 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { contactService } from '@/services/supabase';
 import { Mail, Phone, MessageSquare, Send } from 'lucide-react';
 
 interface ContactFormProps {
@@ -27,39 +26,20 @@ const ContactForm = ({ source = 'contact' }: ContactFormProps) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    try {
-      await contactService.create({
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone || undefined,
-        message: formData.message,
-        source,
-        status: 'new'
-      });
-
-      // Reset form
+    // Instead of backend, just wait a moment then show toast
+    setTimeout(() => {
       setFormData({
         name: '',
         email: '',
         phone: '',
         message: ''
       });
-
       toast({
         title: "Message Sent!",
         description: "Thank you for your message. We'll get back to you within 24 hours.",
       });
-
-    } catch (error) {
-      console.error('Contact form submission error:', error);
-      toast({
-        title: "Failed to Send",
-        description: "There was an error sending your message. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
       setIsSubmitting(false);
-    }
+    }, 1000);
   };
 
   const handleChange = (field: string, value: string) => {

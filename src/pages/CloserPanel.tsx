@@ -3,10 +3,15 @@ import React, { useMemo } from "react";
 import CloserSidebar from "@/components/CloserSidebar";
 import { useCloserBookings } from "@/hooks/useCloserBookings";
 import { Card } from "@/components/ui/card";
-import { PhoneCall, Handshake, CalendarClock, UserCheck2 } from "lucide-react";
+import { PhoneCall, Handshake, CalendarClock, UserCheck2, LogOut, User } from "lucide-react";
+import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 export default function CloserPanel() {
   const { bookings, isLoading } = useCloserBookings();
+  const { user, logout } = useSupabaseAuth();
+  const navigate = useNavigate();
 
   // Memoize stats for speed
   const stats = useMemo(() => {
@@ -59,10 +64,37 @@ export default function CloserPanel() {
     },
   ];
 
+  const displayName =
+    user?.user_metadata?.full_name ||
+    user?.user_metadata?.name ||
+    user?.email ||
+    user?.id?.slice(0, 8) ||
+    "User";
+
+  const handleLogout = async () => {
+    await logout();
+    navigate("/auth");
+  };
+
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-accent-light to-secondary">
       <CloserSidebar />
       <div className="flex-1 p-8">
+        {/* Header: Welcome & Logout */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
+          <div className="flex items-center gap-3">
+            <User className="text-primary" />
+            <h2 className="text-xl font-bold">Welcome, <span className="text-accent">{displayName}</span></h2>
+          </div>
+          <Button
+            variant="outline"
+            className="flex items-center gap-2 border-destructive text-destructive hover:bg-destructive hover:text-white transition"
+            onClick={handleLogout}
+          >
+            <LogOut size={18} />
+            Logout
+          </Button>
+        </div>
         <h1 className="text-3xl font-bold mb-6 animate-fade-in">Closer Dashboard</h1>
         <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 mb-10 animate-fade-in">
           {statCards.map((s, i) => (

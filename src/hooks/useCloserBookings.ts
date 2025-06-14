@@ -1,7 +1,9 @@
+
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 
+// Utility to get slot IDs for the closer
 export function useCloserBookings() {
   const { session } = useSupabaseAuth();
   const [bookings, setBookings] = useState<any[]>([]);
@@ -42,12 +44,13 @@ export function useCloserBookings() {
       return;
     }
 
+    // Join slot, client, and closer_profile for closer_email
     let query = supabase
       .from("bookings")
       .select(
         `
         *,
-        slot:time_slots(id, date, time),
+        slot:time_slots(id, date, time, closer_id, time_zone, closer_profile:profiles(email)),
         client:profiles(id, full_name, email)
         `
       )
@@ -67,6 +70,13 @@ export function useCloserBookings() {
           // Prefer primary fields on the base booking, fall back to client join if present
           let fullName = b.client?.full_name || `${b.first_name ?? ""} ${b.last_name ?? ""}`.trim();
           let email = b.email || b.client?.email || "";
+          // Get closer_email from slot.closer_profile?.email
+          let closer_email = "";
+          if (b.slot?.closer_profile && Array.isArray(b.slot.closer_profile) && b.slot.closer_profile.length > 0) {
+            closer_email = b.slot.closer_profile[0]?.email ?? "";
+          } else if (b.slot?.closer_profile?.email) {
+            closer_email = b.slot.closer_profile.email;
+          }
           return {
             ...b,
             slot_date: b.slot?.date,
@@ -74,6 +84,7 @@ export function useCloserBookings() {
             first_name: b.first_name ?? (fullName?.split(" ")[0] ?? ""),
             last_name: b.last_name ?? (fullName?.split(" ").slice(1).join(" ") ?? ""),
             email,
+            closer_email: closer_email || "",
           };
         })
       );
@@ -141,3 +152,4 @@ export function useCloserBookings() {
     deleteBooking,
   };
 }
+

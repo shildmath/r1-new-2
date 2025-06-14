@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -21,6 +20,7 @@ import RescheduleCall from "./pages/RescheduleCall";
 import ClosedClients from "./pages/ClosedClients";
 import MonthlyPerformance from "./pages/MonthlyPerformance";
 import EODCloser from "./pages/EODCloser";
+import ExportAll from "./pages/ExportAll";
 import { SupabaseAuthProvider } from "@/hooks/useSupabaseAuth";
 
 const App = () => {
@@ -48,6 +48,7 @@ const App = () => {
             <Route path="/closed-clients" element={<ClosedClients />} />
             <Route path="/monthly-performance" element={<MonthlyPerformance />} />
             <Route path="/eod-closer" element={<EODCloser />} />
+            <Route path="/export-all" element={<ExportAll />} />
             {/* Redirect unknown routes to home or show a minimal not-found experience if desired */}
             <Route path="*" element={<Index />} />
           </Routes>
@@ -58,4 +59,3 @@ const App = () => {
 };
 
 export default App;
-

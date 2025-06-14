@@ -33,6 +33,9 @@ export default function CloserSidebar() {
         <a className="hover:bg-accent px-3 py-2 rounded transition" href="/eod-closer">
           EOD Closer
         </a>
+        <a className="hover:bg-accent px-3 py-2 rounded transition font-bold text-blue-800 bg-blue-100 border border-blue-200" href="/export-all">
+          Export All
+        </a>
       </nav>
     </aside>
   );

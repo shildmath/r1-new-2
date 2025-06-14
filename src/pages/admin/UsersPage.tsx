@@ -42,16 +42,17 @@ const UsersPage = () => {
     loadUsers();
   }, []);
 
-  // Load users from Supabase: fetch user_roles + join profiles for names/emails
+  // Fetch and map users from Supabase (user_roles + profile join)
   const loadUsers = async () => {
     try {
       setIsLoading(true);
+      // Make sure columns and join keys match your schema!
       const { data, error } = await supabase
         .from('user_roles')
         .select(`
           user_id,
           role,
-          profiles!user_roles_user_id_fkey (
+          profiles:profiles!user_roles_user_id_fkey (
             id,
             email,
             full_name,
@@ -59,21 +60,30 @@ const UsersPage = () => {
           )
         `);
 
-      if (error) throw error;
+      if (error) {
+        // For debugging: surface error details
+        toast({
+          title: "Error loading users (debug)",
+          description: error.message || String(error),
+          variant: "destructive",
+        });
+        throw error;
+      }
 
-      const formattedUsers = data?.map(item => ({
+      // Defensive mapping
+      const formattedUsers: UserProfile[] = (data || []).map((item: any) => ({
         id: item.user_id,
-        email: (item.profiles as any)?.email || '',
-        full_name: (item.profiles as any)?.full_name || 'Unknown',
+        email: (item.profiles && item.profiles.email) ? item.profiles.email : '',
+        full_name: (item.profiles && item.profiles.full_name) ? item.profiles.full_name : 'Unknown',
         role: item.role as 'admin' | 'closer',
-        created_at: (item.profiles as any)?.created_at || ''
-      })) || [];
+        created_at: (item.profiles && item.profiles.created_at) ? item.profiles.created_at : ''
+      }));
 
       setUsers(formattedUsers);
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to load users. Please try again.",
+        description: error.message || "Failed to load users. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -88,8 +98,7 @@ const UsersPage = () => {
 
     try {
       if (editingUser) {
-        // Update profile (name/email) in profiles, and role in user_roles
-        // 1. Update user_roles
+        // Update user_roles
         const { error: roleError } = await supabase
           .from('user_roles')
           .update({ role: formData.role })
@@ -97,7 +106,7 @@ const UsersPage = () => {
 
         if (roleError) throw roleError;
 
-        // 2. Update profile
+        // Update profiles
         const { error: profileError } = await supabase
           .from('profiles')
           .update({
@@ -114,8 +123,7 @@ const UsersPage = () => {
         });
 
       } else {
-        // Create new user account in Supabase Auth
-        // Registration handled in useSupabaseAuth.signup hook, but lets double-check
+        // Create new user using Supabase Auth
         const { error } = await signup(
           formData.email,
           formData.password,
@@ -123,7 +131,15 @@ const UsersPage = () => {
           formData.role
         );
 
-        if (error) throw error;
+        if (error) {
+          // Show error for debugging
+          toast({
+            title: "Signup Error (debug)",
+            description: error.message || String(error),
+            variant: "destructive",
+          });
+          throw error;
+        }
 
         toast({
           title: "User Added",
@@ -144,7 +160,7 @@ const UsersPage = () => {
     }
   };
 
-  const handleEdit = (user: any) => {
+  const handleEdit = (user: UserProfile) => {
     setFormData({
       email: user.email,
       password: '',
@@ -155,11 +171,11 @@ const UsersPage = () => {
     setShowAddForm(true);
   };
 
-  // Delete: Remove from user_roles (can't delete Supabase auth user directly client-side)
+  // Delete (removes from user_roles and profile, cannot remove Auth user directly)
   const handleDelete = async (userId: string) => {
     if (!confirm('Are you sure you want to delete this user?')) return;
     try {
-      // Delete from user_roles disables access
+      // Remove user_roles for access
       const { error: roleError } = await supabase
         .from('user_roles')
         .delete()
@@ -167,7 +183,7 @@ const UsersPage = () => {
 
       if (roleError) throw roleError;
 
-      // Optional: Clean up profile row as well
+      // Remove profile row for cleanup
       const { error: profileError } = await supabase
         .from('profiles')
         .delete()

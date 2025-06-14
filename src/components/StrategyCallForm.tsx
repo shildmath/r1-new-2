@@ -1,11 +1,10 @@
-
 import { useState, useEffect } from 'react';
 import BookingStep1DateTime from './BookingStep1DateTime';
 import BookingStep2InfoForm from './BookingStep2InfoForm';
 import BookingStep3Confirmation from './BookingStep3Confirmation';
 import { useBookStrategyCall } from '@/hooks/useBookStrategyCall';
 import { toast } from 'sonner';
-import { supabase } from "@/integrations/supabase/client';
+import { supabase } from "@/integrations/supabase/client";
 
 export default function StrategyCallForm() {
   const [step, setStep] = useState<1 | 2 | 3>(1);

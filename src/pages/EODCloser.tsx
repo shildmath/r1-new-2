@@ -15,18 +15,21 @@ function todayISO() {
 }
 
 export default function EODCloser() {
-  const { bookings, isLoading, filter, setFilter, clearFilter } = useCloserBookings();
+  const { bookings, isLoading, filter, setFilter } = useCloserBookings();
   const [showFilter, setShowFilter] = useState(false);
   const isMobile = useIsMobile();
   const [dateInput, setDateInput] = useState(filter.date ?? todayISO());
 
-  // Show bookings for selected/filtered date or all if no filter
+  // Use the filtered date, or today if not set
   const filteredDate = filter.date ?? todayISO();
-  const todayBookings = filter.date
-    ? bookings.filter(b => b.slot_date === filteredDate)
-    : bookings.filter(b => b.slot_date === todayISO());
 
-  // Show stats for visible/filtered bookings
+  // Always filter bookings strictly by slot_date matching the filteredDate
+  const todayBookings = useMemo(() => 
+    bookings.filter(b => b.slot_date === filteredDate), 
+    [bookings, filteredDate]
+  );
+
+  // Calculate stats based only on filtered bookings
   const stats = useMemo(() => ({
     total: todayBookings.length,
     completed: todayBookings.filter(b => b.call_status === "Completed").length,

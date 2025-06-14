@@ -29,7 +29,6 @@ const DEAL_STATUS_OPTIONS = [
 
 export default function CloserBookingDetailsModal({ booking, onClose }: ModalProps) {
   const { updateBooking } = useCloserBookings();
-
   const [form, setForm] = useState<any>(booking);
 
   // Sync on open
@@ -39,15 +38,20 @@ export default function CloserBookingDetailsModal({ booking, onClose }: ModalPro
 
   if (!booking) return null;
 
+  // FIX: Only use .checked for checkboxes
   function handleField(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
-    const { name, value, type, checked } = e.target;
-    setForm((f: any) => ({
-      ...f,
-      [name]:
-        type === "checkbox"
-          ? checked
-          : value
-    }));
+    const { name, type, value } = e.target;
+    if (type === "checkbox" && e.target instanceof HTMLInputElement) {
+      setForm((f: any) => ({
+        ...f,
+        [name]: e.target.checked,
+      }));
+    } else {
+      setForm((f: any) => ({
+        ...f,
+        [name]: value,
+      }));
+    }
   }
 
   const handleSave = async () => {

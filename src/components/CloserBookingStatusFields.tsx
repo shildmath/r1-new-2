@@ -16,8 +16,7 @@ export default function CloserBookingStatusFields({
   DEAL_STATUS_OPTIONS,
 }: Props) {
   return (
-    <>
-      <h3 className="text-accent font-bold text-base mb-3">Status & Core Fields</h3>
+    <div className="space-y-2">
       {/* 1. Call Status */}
       <div>
         <label className="font-semibold">Call Status</label>
@@ -81,6 +80,7 @@ export default function CloserBookingStatusFields({
         <label className="font-semibold">Reschedule Date</label>
         <Input type="date" name="reschedule_date" value={form?.reschedule_date || ""} onChange={handleField} />
       </div>
-    </>
+    </div>
   );
 }
+

@@ -1,12 +1,19 @@
 
 import React, { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useCloserBookings } from "@/hooks/useCloserBookings";
 import CloserBookingStatusFields from "./CloserBookingStatusFields";
 import CloserBookingLinksFields from "./CloserBookingLinksFields";
 import CloserBookingOtherFields from "./CloserBookingOtherFields";
+import { BadgeCheck, Link, Info, UserCheck } from "lucide-react";
 
 type ModalProps = {
   booking: any;
@@ -42,7 +49,6 @@ export default function CloserBookingDetailsModal({ booking, onClose }: ModalPro
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) {
     const { name } = e.target;
-    // Fix: Only check 'checked' for checkboxes with a type assertion
     if (
       e.target instanceof HTMLInputElement &&
       e.target.type === "checkbox"
@@ -91,29 +97,56 @@ export default function CloserBookingDetailsModal({ booking, onClose }: ModalPro
 
   return (
     <Dialog open={!!booking} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
-          <DialogTitle>
-            Booking Detail - {booking.first_name} {booking.last_name}
+      <DialogContent className="max-w-2xl p-0 rounded-xl overflow-hidden animate-scale-in shadow-2xl">
+        {/* Modal Header */}
+        <DialogHeader className="bg-gradient-to-r from-blue-50 to-blue-100 px-7 py-5 border-b">
+          <DialogTitle className="flex gap-2 items-center text-xl font-bold text-blue-700">
+            <UserCheck className="text-blue-700" size={24} />
+            Extra Details — {booking.first_name} {booking.last_name}
           </DialogTitle>
         </DialogHeader>
-        <div className="space-y-4 max-h-[60vh] overflow-y-auto px-1">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <CloserBookingStatusFields
-              form={form}
-              handleField={handleField}
-              CALL_STATUS_OPTIONS={CALL_STATUS_OPTIONS}
-              DEAL_STATUS_OPTIONS={DEAL_STATUS_OPTIONS}
-            />
-            <CloserBookingLinksFields form={form} handleField={handleField} />
-            <CloserBookingOtherFields form={form} handleField={handleField} />
+        {/* Modal Main Content */}
+        <div className="p-0 flex flex-col max-h-[70vh] overflow-y-auto bg-gradient-to-tr from-white to-slate-50">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 px-7 pt-7 pb-3">
+            <div className="rounded-xl bg-white/90 p-5 shadow-sm border mb-2">
+              <div className="flex items-center gap-2 mb-3">
+                <BadgeCheck className="text-violet-600" size={18} />
+                <span className="text-base font-semibold text-violet-700">Status & Core Fields</span>
+              </div>
+              <CloserBookingStatusFields
+                form={form}
+                handleField={handleField}
+                CALL_STATUS_OPTIONS={CALL_STATUS_OPTIONS}
+                DEAL_STATUS_OPTIONS={DEAL_STATUS_OPTIONS}
+              />
+            </div>
+            <div className="rounded-xl bg-white/90 p-5 shadow-sm border mb-2">
+              <div className="flex items-center gap-2 mb-3">
+                <Link className="text-emerald-600" size={18} />
+                <span className="text-base font-semibold text-emerald-700">Links & Offers</span>
+              </div>
+              <CloserBookingLinksFields form={form} handleField={handleField} />
+            </div>
+            <div className="md:col-span-2 rounded-xl bg-white/90 p-5 shadow-sm border mb-2">
+              <div className="flex items-center gap-2 mb-3">
+                <Info className="text-sky-600" size={18} />
+                <span className="text-base font-semibold text-sky-700">Other Info</span>
+              </div>
+              <CloserBookingOtherFields form={form} handleField={handleField} />
+            </div>
           </div>
         </div>
-        <DialogFooter className="pt-3">
-          <Button variant="secondary" onClick={onClose}>Cancel</Button>
-          <Button onClick={handleSave}>Save</Button>
+        {/* Modal Footer */}
+        <DialogFooter className="sticky bottom-0 z-10 bg-gradient-to-r from-blue-50 to-blue-100 px-7 py-5 border-t flex gap-3">
+          <Button variant="secondary" onClick={onClose} className="w-40 font-semibold">
+            Cancel
+          </Button>
+          <Button onClick={handleSave} className="w-40 font-semibold">
+            Save
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
+

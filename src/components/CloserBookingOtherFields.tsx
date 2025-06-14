@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -10,8 +9,7 @@ type Props = {
 
 export default function CloserBookingOtherFields({ form, handleField }: Props) {
   return (
-    <>
-      <h3 className="text-accent font-bold text-base mb-3">Other Info</h3>
+    <div className="space-y-2">
       {/* 11. Ad Spend */}
       <div>
         <label className="font-semibold">Ad Spend</label>
@@ -28,10 +26,10 @@ export default function CloserBookingOtherFields({ form, handleField }: Props) {
         <Input name="zip_code" value={form?.zip_code || ""} onChange={handleField} />
       </div>
       {/* 14. Note */}
-      <div className="md:col-span-2">
+      <div>
         <label className="font-semibold">Note</label>
         <Textarea name="note" value={form?.note || ""} onChange={handleField} />
       </div>
-    </>
+    </div>
   );
 }

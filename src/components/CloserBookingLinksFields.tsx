@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -10,8 +9,7 @@ type Props = {
 
 export default function CloserBookingLinksFields({ form, handleField }: Props) {
   return (
-    <>
-      <h3 className="text-accent font-bold text-base mb-3">Links & Offers</h3>
+    <div className="space-y-2">
       {/* 6. Invoice Link */}
       <div>
         <label className="font-semibold">Invoice Link</label>
@@ -23,7 +21,7 @@ export default function CloserBookingLinksFields({ form, handleField }: Props) {
         <Input name="contract_link" value={form?.contract_link || ""} onChange={handleField} />
       </div>
       {/* 10. What Offer Made */}
-      <div className="md:col-span-2">
+      <div>
         <label className="font-semibold">What Offer Made</label>
         <Textarea name="offer_made" value={form?.offer_made || ""} onChange={handleField} />
       </div>
@@ -32,6 +30,6 @@ export default function CloserBookingLinksFields({ form, handleField }: Props) {
         <label className="font-semibold">Recording Link</label>
         <Input name="recording_link" value={form?.recording_link || ""} onChange={handleField} />
       </div>
-    </>
+    </div>
   );
 }

@@ -1,10 +1,9 @@
-
 import React, { useState, useEffect } from "react";
 import { useCloserBookings } from "@/hooks/useCloserBookings";
 import { Button } from "@/components/ui/button";
 import { Filter } from "lucide-react";
 import { toast } from "sonner";
-import CloserBookingDetailsSheet from "./CloserBookingDetailsSheet";
+import CloserBookingDetailsModal from "./CloserBookingDetailsModal";
 
 export default function CloserBookingsTable() {
   const {
@@ -87,7 +86,7 @@ export default function CloserBookingsTable() {
           </table>
         )}
       </div>
-      <CloserBookingDetailsSheet
+      <CloserBookingDetailsModal
         booking={selectedBooking}
         onClose={() => setSelectedBooking(null)}
       />

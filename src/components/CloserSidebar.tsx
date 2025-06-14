@@ -27,6 +27,12 @@ export default function CloserSidebar() {
         <a className="hover:bg-accent px-3 py-2 rounded transition" href="/reschedule-call">
           Reschedule Calls
         </a>
+        <a className="hover:bg-accent px-3 py-2 rounded transition" href="/monthly-performance">
+          Monthly Performance
+        </a>
+        <a className="hover:bg-accent px-3 py-2 rounded transition" href="/eod-closer">
+          EOD Closer
+        </a>
       </nav>
     </aside>
   );

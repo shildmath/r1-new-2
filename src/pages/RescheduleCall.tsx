@@ -1,8 +1,8 @@
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import CloserSidebar from "@/components/CloserSidebar";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
-import { Filter, PhoneCall, CalendarClock } from "lucide-react";
+import { CalendarClock, Filter } from "lucide-react";
 import { useCloserBookings } from "@/hooks/useCloserBookings";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -16,26 +16,60 @@ export default function RescheduleCall() {
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
 
   // Filter to only bookings with reschedule_date or follow_up_call_date not null
-  const allReschedules = bookings.filter(b =>
-    (b.reschedule_date || b.follow_up_call_date) &&
-    (status === "" || (b.call_status || "").toLowerCase().includes(status.toLowerCase())) &&
-    (date === "" || (b.slot_date?.toString() ?? "").includes(date)) &&
-    (search === "" || [b.first_name, b.last_name, b.email, b.phone].join(" ").toLowerCase().includes(search.toLowerCase()))
+  const allReschedules = useMemo(
+    () =>
+      bookings.filter(
+        (b) =>
+          (b.reschedule_date || b.follow_up_call_date) &&
+          (status === "" || (b.call_status || "").toLowerCase().includes(status.toLowerCase())) &&
+          (date === "" || (b.slot_date?.toString() ?? "").includes(date)) &&
+          (search === "" ||
+            [b.first_name, b.last_name, b.email, b.phone].join(" ").toLowerCase().includes(search.toLowerCase()))
+      ),
+    [bookings, status, date, search]
   );
+
+  // Some headline numbers for this page
+  const stats = useMemo(() => ({
+    total: allReschedules.length,
+    completed: allReschedules.filter(b => b.call_status === "Completed").length,
+    pending: allReschedules.filter(b => (b.call_status ?? "Not Started Yet") === "Not Started Yet").length,
+    dealsClosed: allReschedules.filter(b => (b.deal_status ?? "").toLowerCase() === "closed").length,
+  }), [allReschedules]);
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-accent-light to-secondary">
       <CloserSidebar />
       <div className="flex-1 flex flex-col items-center p-6 gap-3">
         <Card className="w-full max-w-6xl mb-8 shadow-xl border-2 border-accent/10 bg-white/95">
-          <CardHeader className="flex flex-row items-center gap-3 pb-1">
-            <CalendarClock size={32} className="text-accent" />
+          <CardHeader className="flex flex-row items-center gap-3 pb-3">
+            <CalendarClock size={32} className="text-accent animate-fade-in" />
             <div>
-              <CardTitle className="text-2xl font-extrabold text-primary">Reschedule / Follow Up</CardTitle>
-              <div className="text-muted-foreground text-base">List of all Rescheduled and Follow Up Calls</div>
+              <CardTitle className="text-2xl font-extrabold text-primary">Reschedule / Follow Up Calls</CardTitle>
+              <div className="text-muted-foreground text-base">All Rescheduled and Follow Up Calls</div>
             </div>
           </CardHeader>
           <CardContent>
+            {/* Metrics Row */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6 animate-fade-in">
+              <div className="flex flex-col items-center p-4 bg-orange-50 rounded-xl border border-orange-200">
+                <span className="text-2xl font-bold">{isLoading ? "…" : stats.total}</span>
+                <span className="text-xs text-gray-500">Total</span>
+              </div>
+              <div className="flex flex-col items-center p-4 bg-green-50 rounded-xl border border-green-200">
+                <span className="text-2xl font-bold">{isLoading ? "…" : stats.completed}</span>
+                <span className="text-xs text-gray-500">Completed</span>
+              </div>
+              <div className="flex flex-col items-center p-4 bg-blue-50 rounded-xl border border-blue-200">
+                <span className="text-2xl font-bold">{isLoading ? "…" : stats.pending}</span>
+                <span className="text-xs text-gray-500">Pending</span>
+              </div>
+              <div className="flex flex-col items-center p-4 bg-purple-50 rounded-xl border border-purple-200">
+                <span className="text-2xl font-bold">{isLoading ? "…" : stats.dealsClosed}</span>
+                <span className="text-xs text-gray-500">Deals Closed</span>
+              </div>
+            </div>
+            {/* Filters */}
             <div className="flex flex-wrap gap-3 mb-4 items-center">
               <Filter className="text-accent" size={18} />
               <Input placeholder="Search…" value={search} onChange={e => setSearch(e.target.value)} className="w-40" />
@@ -52,7 +86,8 @@ export default function RescheduleCall() {
                 Clear Filters
               </Button>
             </div>
-            <div className="overflow-x-auto rounded-xl shadow border border-accent/10 bg-white">
+            {/* Table */}
+            <div className="overflow-x-auto rounded-xl shadow border border-accent/10 bg-white animate-fade-in">
               <table className="w-full table-auto">
                 <thead>
                   <tr className="bg-gradient-to-r from-accent-light to-accent font-semibold text-accent-foreground">

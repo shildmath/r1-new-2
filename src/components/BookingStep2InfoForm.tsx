@@ -1,4 +1,3 @@
-
 import { motion } from "framer-motion";
 import { User } from "lucide-react";
 import { format } from "date-fns";
@@ -17,6 +16,7 @@ type BookingStep2InfoFormProps = {
   onSubmit: (e: React.FormEvent) => void;
   isSubmitting: boolean;
   closerName: string;
+  timeZone?: string;
 };
 
 export default function BookingStep2InfoForm({
@@ -27,7 +27,8 @@ export default function BookingStep2InfoForm({
   onBack,
   onSubmit,
   isSubmitting,
-  closerName
+  closerName,
+  timeZone,
 }: BookingStep2InfoFormProps) {
   function handleFieldChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
     const { name, value } = e.target;
@@ -50,6 +51,7 @@ export default function BookingStep2InfoForm({
             <div className="flex flex-wrap gap-6 text-blue-800 text-sm">
               <div><b>Date:</b> {selectedDate ? format(selectedDate, "PPP") : ""}</div>
               <div><b>Time:</b> {selectedTime}</div>
+              <div><b>TimeZone:</b> <span className="font-mono">{timeZone ?? "UTC"}</span></div>
               <div><b>With:</b> {closerName}</div>
             </div>
           </div>

@@ -1,4 +1,3 @@
-
 import { motion } from "framer-motion";
 import { Calendar, Clock } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -9,6 +8,7 @@ type TimeSlot = {
   id: string;
   date: string; // ISO date string e.g., "2025-06-15"
   time: string; // e.g., "10:00 AM"
+  time_zone?: string; // add optional time_zone field
 }
 
 type BookingStep1DateTimeProps = {
@@ -18,6 +18,8 @@ type BookingStep1DateTimeProps = {
   setSelectedTime: (time: string) => void;
   onContinue: () => void;
   availableSlots: TimeSlot[];
+  showTimeZone?: boolean;
+  timeZoneForSelectedDate?: string; // picked up for currently selected slot
 };
 
 export default function BookingStep1DateTime({
@@ -26,23 +28,28 @@ export default function BookingStep1DateTime({
   selectedTime,
   setSelectedTime,
   onContinue,
-  availableSlots
+  availableSlots,
+  showTimeZone,
+  timeZoneForSelectedDate,
 }: BookingStep1DateTimeProps) {
   // Format selected date to YYYY-MM-DD for comparison
   const selectedDateStr = selectedDate
     ? selectedDate.toISOString().split("T")[0]
     : undefined;
 
-  // Show only times for the selected date
-  const timesForSelectedDate =
+  // Show only times for the selected date -- pick up slot object for time zones
+  const slotsForSelectedDate =
     selectedDateStr
-      ? availableSlots
-          .filter((slot) => slot.date === selectedDateStr)
-          .map((slot) => slot.time)
+      ? availableSlots.filter((slot) => slot.date === selectedDateStr)
       : [];
 
-  // Make times unique for display in case there are duplicates (defensive)
-  const shownTimes = Array.from(new Set(timesForSelectedDate));
+  // Create map of time => time_zone for quick lookup
+  const timeZoneMap = Object.fromEntries(
+    slotsForSelectedDate.map((slot) => [slot.time, slot.time_zone ?? "UTC"])
+  );
+
+  // Make times unique for display in case there are duplicates
+  const shownTimes = Array.from(new Set(slotsForSelectedDate.map(slot => slot.time)));
 
   return (
     <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col md:flex-row gap-8 max-w-3xl mx-auto">
@@ -101,10 +108,20 @@ export default function BookingStep1DateTime({
                   onClick={() => setSelectedTime(time)}
                 >
                   {time}
+                  {showTimeZone && timeZoneMap[time] ? (
+                    <span className="block text-xs text-muted-foreground ml-2">
+                      {timeZoneMap[time]}
+                    </span>
+                  ) : null}
                 </Button>
               ))}
             </div>
           )}
+          {showTimeZone && selectedTime && timeZoneMap[selectedTime] ? (
+            <div className="mt-2 text-xs text-blue-600">
+              <b>Selected time zone:</b> {timeZoneMap[selectedTime]}
+            </div>
+          ) : null}
           <div className="mt-5">
             <Button
               type="button"

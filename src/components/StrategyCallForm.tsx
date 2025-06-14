@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import BookingStep1DateTime from './BookingStep1DateTime';
 import BookingStep2InfoForm from './BookingStep2InfoForm';
@@ -64,7 +63,7 @@ export default function StrategyCallForm() {
         s.time === selectedTime
     );
     if (slot) {
-      selectedTimeZone = slot.time_zone;
+      selectedTimeZone = slot.time_zone || "UTC";
       if (slot.closer_id && closers[slot.closer_id]) {
         selectedCloserName = closers[slot.closer_id];
       }
@@ -143,7 +142,7 @@ export default function StrategyCallForm() {
         setSelectedTime={setSelectedTime}
         onContinue={handleContinue}
         availableSlots={availableSlots}
-        showTimeZone // Pass to BookingStep1DateTime for display if needed
+        showTimeZone={true}
       />
     );
   }

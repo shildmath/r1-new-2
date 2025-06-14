@@ -9,6 +9,19 @@ export function useCloserBookings() {
   const [isLoading, setIsLoading] = useState(false);
   const [filter, setFilter] = useState<{ date?: string }>({});
 
+  // Helper: get slot ids for this closer
+  async function getSlotIds(closer_id: string) {
+    const { data, error } = await supabase
+      .from("time_slots")
+      .select("id")
+      .eq("closer_id", closer_id);
+    if (error) {
+      console.log("Error fetching time slots:", error);
+    }
+    console.log("getSlotIds result for closer_id", closer_id, ":", data);
+    return data ? data.map((s) => s.id) : [];
+  }
+
   async function fetchBookings() {
     if (!session?.user) {
       console.log("No active session or user.");
@@ -36,7 +49,7 @@ export function useCloserBookings() {
         `
         *,
         slot:time_slots(id, date, time),
-        client:profiles!bookings_client_id_fkey(id, full_name)
+        client:profiles(id, full_name, email)
         `
       )
       .in("slot_id", slotIds);
@@ -51,29 +64,24 @@ export function useCloserBookings() {
     if (data) {
       console.log("Fetched bookings:", data);
       setBookings(
-        data.map((b: any) => ({
-          ...b,
-          slot_date: b.slot?.date,
-          slot_time: b.slot?.time,
-        }))
+        data.map((b: any) => {
+          // Prefer primary fields on the base booking, fall back to client join if present
+          let fullName = b.client?.full_name || `${b.first_name ?? ""} ${b.last_name ?? ""}`.trim();
+          let email = b.email || b.client?.email || "";
+          return {
+            ...b,
+            slot_date: b.slot?.date,
+            slot_time: b.slot?.time,
+            first_name: b.first_name ?? (fullName?.split(" ")[0] ?? ""),
+            last_name: b.last_name ?? (fullName?.split(" ").slice(1).join(" ") ?? ""),
+            email,
+          };
+        })
       );
     } else {
       setBookings([]);
     }
     setIsLoading(false);
-  }
-
-  // Helper: get slot ids for this closer
-  async function getSlotIds(closer_id: string) {
-    const { data, error } = await supabase
-      .from("time_slots")
-      .select("id")
-      .eq("closer_id", closer_id);
-    if (error) {
-      console.log("Error fetching time slots:", error);
-    }
-    console.log("getSlotIds result for closer_id", closer_id, ":", data);
-    return data ? data.map((s) => s.id) : [];
   }
 
   useEffect(() => {

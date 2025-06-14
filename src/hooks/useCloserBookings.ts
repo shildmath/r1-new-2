@@ -116,6 +116,17 @@ export function useCloserBookings() {
     return !error;
   }
 
+  async function deleteBooking(id: string) {
+    if (!id) return false;
+    const { error } = await supabase.from("bookings").delete().eq("id", id);
+    if (error) {
+      console.error("[deleteBooking] Error details:", error);
+      return false;
+    }
+    fetchBookings();
+    return true;
+  }
+
   function clearFilter() {
     setFilter({});
   }
@@ -127,5 +138,6 @@ export function useCloserBookings() {
     filter,
     setFilter,
     clearFilter,
+    deleteBooking,
   };
 }

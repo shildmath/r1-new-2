@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -6,6 +7,17 @@ import { useCloserBookings } from "@/hooks/useCloserBookings";
 import CloserBookingStatusFields from "./CloserBookingStatusFields";
 import CloserBookingLinksFields from "./CloserBookingLinksFields";
 import CloserBookingOtherFields from "./CloserBookingOtherFields";
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
 
 type Props = {
   booking: any;
@@ -28,8 +40,10 @@ const DEAL_STATUS_OPTIONS = [
 ];
 
 export default function CloserBookingDetailsSheet({ booking, onClose }: Props) {
-  const { updateBooking } = useCloserBookings();
+  const { updateBooking, deleteBooking } = useCloserBookings();
   const [form, setForm] = useState<any>(booking);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     setForm(booking);
@@ -87,6 +101,19 @@ export default function CloserBookingDetailsSheet({ booking, onClose }: Props) {
     }
   };
 
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    const delOk = await deleteBooking(booking.id);
+    setIsDeleting(false);
+    if (delOk) {
+      toast.success("Booking deleted.");
+      setIsDeleteOpen(false);
+      onClose();
+    } else {
+      toast.error("Could not delete booking. Please try again.");
+    }
+  };
+
   return (
     <Sheet open={!!booking} onOpenChange={onClose}>
       <SheetContent
@@ -134,6 +161,34 @@ export default function CloserBookingDetailsSheet({ booking, onClose }: Props) {
           >
             Save
           </Button>
+          <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+            <AlertDialogTrigger asChild>
+              <Button 
+                variant="destructive"
+                className="w-full"
+                onClick={() => setIsDeleteOpen(true)}
+              >
+                Delete
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>
+                  Confirm Deletion
+                </AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to delete this booking? This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleDelete}
+                  disabled={isDeleting}
+                >{isDeleting ? "Deleting..." : "Delete Booking"}</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </SheetFooter>
       </SheetContent>
     </Sheet>

@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useCloserSlots } from "@/hooks/useCloserSlots";
 import { CalendarDays, Filter, LayoutPanelLeft } from "lucide-react";
@@ -6,6 +5,16 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 // Add import for the list of IANA time zones
 import { IANA_TIME_ZONES } from "@/utils/timezones";
+
+// Add favorite zones at top of dropdown (label + IANA value)
+const FAVORITE_TIME_ZONES = [
+  { label: "Greenwich Mean Time (GMT)", value: "Etc/GMT" },
+  { label: "British Summer Time (BST)", value: "Europe/London" },
+  { label: "Eastern Time (ET)", value: "America/New_York" },
+  { label: "Central Time (CT)", value: "America/Chicago" },
+  { label: "Mountain Time (MT)", value: "America/Denver" },
+  { label: "Pacific Time (PT)", value: "America/Los_Angeles" },
+];
 
 export default function CloserSlotManager() {
   const {
@@ -32,6 +41,28 @@ export default function CloserSlotManager() {
     }
     const ok = await addSlot(form.date, form.time, form.time_zone);
     if (ok) setForm({ date: "", time: "", time_zone: "UTC" });
+  }
+
+  // Function to get dropdown options
+  function renderTimeZoneOptions() {
+    // Filter out favorites from the IANA list to avoid duplicates
+    const favoriteValues = new Set(FAVORITE_TIME_ZONES.map(fav => fav.value));
+    const filteredIanaZones = IANA_TIME_ZONES.filter(tz => !favoriteValues.has(tz));
+    return (
+      <>
+        {FAVORITE_TIME_ZONES.map((tz) => (
+          <option value={tz.value} key={tz.value + "-fav"}>
+            {tz.label}
+          </option>
+        ))}
+        <option disabled>──────────</option>
+        {filteredIanaZones.map((tz) => (
+          <option value={tz} key={tz}>
+            {tz}
+          </option>
+        ))}
+      </>
+    );
   }
 
   // Mobile slot card UI
@@ -102,9 +133,7 @@ export default function CloserSlotManager() {
               className="border rounded p-2 w-40"
               required
             >
-              {IANA_TIME_ZONES.map((tz) => (
-                <option value={tz} key={tz}>{tz}</option>
-              ))}
+              {renderTimeZoneOptions()}
             </select>
             <Button type="submit" className="bg-primary text-white">
               Add
@@ -143,9 +172,7 @@ export default function CloserSlotManager() {
             className="border rounded p-2"
             required
           >
-            {IANA_TIME_ZONES.map((tz) => (
-              <option value={tz} key={tz}>{tz}</option>
-            ))}
+            {renderTimeZoneOptions()}
           </select>
           <Button type="submit" className="bg-primary text-white">
             Add Slot

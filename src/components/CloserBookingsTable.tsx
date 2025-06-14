@@ -6,7 +6,8 @@ import { Filter, LayoutList } from "lucide-react";
 import { toast } from "sonner";
 import CloserBookingDetailsModal from "./CloserBookingDetailsModal";
 
-export default function CloserBookingsTable() {
+// Accept prop for conditional rendering of Time Zone column
+export default function CloserBookingsTable({ showTimeZoneColumn = false }: { showTimeZoneColumn?: boolean }) {
   const {
     bookings,
     isLoading,
@@ -24,7 +25,7 @@ export default function CloserBookingsTable() {
 
   let infoMessage = '';
   if (!isLoading && bookings.length === 0) {
-    infoMessage = "No bookings found for your slots. " + "Make sure that you (the closer) have time slots with bookings " + "and that your user is authenticated correctly. " + "If this issue persists, check slot and booking data in Supabase.";
+    infoMessage = "No bookings found for your slots. Make sure that you (the closer) have time slots with bookings and that your user is authenticated correctly. If this issue persists, check slot and booking data in Supabase.";
   }
 
   // Mobile card view
@@ -45,6 +46,7 @@ export default function CloserBookingsTable() {
               <div className="text-sm"><span className="font-semibold">Email:</span> {b.email}</div>
               <div className="text-sm"><span className="font-semibold">Phone:</span> {b.phone}</div>
               <div className="text-sm"><span className="font-semibold">Closer Mail:</span> {b.closer_email ?? "-"}</div>
+              <div className="text-sm"><span className="font-semibold">Time Zone:</span> {b.slot?.time_zone ?? "UTC"}</div>
             </div>
             <Button
               size="sm"
@@ -100,6 +102,7 @@ export default function CloserBookingsTable() {
               <tr className="bg-gradient-to-r from-accent-light to-accent font-semibold text-accent-foreground">
                 <th className="p-3 text-left">Date</th>
                 <th className="p-3 text-left">Time</th>
+                {showTimeZoneColumn && <th className="p-3 text-left">Time Zone</th>}
                 <th className="p-3 text-left">Client</th>
                 <th className="p-3 text-left">Email</th>
                 <th className="p-3 text-left">Phone</th>
@@ -112,6 +115,9 @@ export default function CloserBookingsTable() {
                 <tr key={b.id} className="border-t transition-colors hover:bg-accent/10">
                   <td className="p-2 font-medium">{b.slot_date}</td>
                   <td className="p-2">{b.slot_time}</td>
+                  {showTimeZoneColumn && (
+                    <td className="p-2">{b.slot?.time_zone ?? "UTC"}</td>
+                  )}
                   <td className="p-2">{b.first_name} {b.last_name}</td>
                   <td className="p-2">{b.email}</td>
                   <td className="p-2">{b.phone}</td>

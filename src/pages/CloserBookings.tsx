@@ -10,7 +10,7 @@ import { useCloserBookings } from "@/hooks/useCloserBookings";
 export default function CloserBookings() {
   const { bookings, isLoading } = useCloserBookings();
 
-  // Here we take all possible booking fields for "Extra Details" export:
+  // Export headers now include Time Zone
   const exportHeaders = [
     "ID",
     "First Name",
@@ -19,6 +19,7 @@ export default function CloserBookings() {
     "Phone",
     "Slot Date",
     "Slot Time",
+    "Time Zone",
     "Call Status",
     "Deal Status",
     "Closed Date",
@@ -49,6 +50,7 @@ export default function CloserBookings() {
     "Phone": b.phone,
     "Slot Date": b.slot_date,
     "Slot Time": b.slot_time,
+    "Time Zone": b.slot?.time_zone ?? "UTC",
     "Call Status": b.call_status,
     "Deal Status": b.deal_status,
     "Closed Date": b.closed_date,
@@ -89,7 +91,7 @@ export default function CloserBookings() {
             <div className="flex justify-end">
               <ExportButtons data={exportData} filename="all-closer-bookings" csvHeaders={exportHeaders} />
             </div>
-            <CloserBookingsTable />
+            <CloserBookingsTable showTimeZoneColumn />
           </CardContent>
         </Card>
       </div>

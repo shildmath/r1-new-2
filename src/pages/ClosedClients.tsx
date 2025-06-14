@@ -30,6 +30,7 @@ export default function ClosedClients() {
     "Phone",
     "Slot Date",
     "Slot Time",
+    "Time Zone",
     "Call Status",
     "Deal Status",
     "Closed Date",
@@ -60,6 +61,7 @@ export default function ClosedClients() {
     "Phone": b.phone,
     "Slot Date": b.slot_date,
     "Slot Time": b.slot_time,
+    "Time Zone": b.slot?.time_zone ?? "UTC",
     "Call Status": b.call_status,
     "Deal Status": b.deal_status,
     "Closed Date": b.closed_date,
@@ -112,6 +114,7 @@ export default function ClosedClients() {
                   <tr className="bg-gradient-to-r from-accent-light to-accent font-semibold text-accent-foreground">
                     <th className="p-3 text-left">Date</th>
                     <th className="p-3 text-left">Time</th>
+                    <th className="p-3 text-left">Time Zone</th>
                     <th className="p-3 text-left">Client</th>
                     <th className="p-3 text-left">Email</th>
                     <th className="p-3 text-left">Phone</th>
@@ -125,17 +128,18 @@ export default function ClosedClients() {
                 <tbody>
                   {isLoading ? (
                     <tr>
-                      <td colSpan={10} className="p-8 text-center text-accent animate-pulse">Loading bookings…</td>
+                      <td colSpan={11} className="p-8 text-center text-accent animate-pulse">Loading bookings…</td>
                     </tr>
                   ) : closedClients.length === 0 ? (
                     <tr>
-                      <td colSpan={10} className="text-red-500 p-6 text-center">No closed clients found.</td>
+                      <td colSpan={11} className="text-red-500 p-6 text-center">No closed clients found.</td>
                     </tr>
                   ) : (
                     closedClients.map(b => (
                       <tr key={b.id} className="border-t transition-colors hover:bg-accent/10">
                         <td className="p-2 font-medium">{b.slot_date}</td>
                         <td className="p-2">{b.slot_time}</td>
+                        <td className="p-2">{b.slot?.time_zone ?? "UTC"}</td>
                         <td className="p-2">{b.first_name} {b.last_name}</td>
                         <td className="p-2">{b.email}</td>
                         <td className="p-2">{b.phone}</td>

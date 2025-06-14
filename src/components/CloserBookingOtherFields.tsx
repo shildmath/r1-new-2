@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -25,11 +26,12 @@ export default function CloserBookingOtherFields({ form, handleField }: Props) {
         <label className="font-semibold">Zip Code</label>
         <Input name="zip_code" value={form?.zip_code || ""} onChange={handleField} />
       </div>
-      {/* 14. Note */}
+      {/* 14. Additional Info */}
       <div>
-        <label className="font-semibold">Note</label>
-        <Textarea name="note" value={form?.note || ""} onChange={handleField} />
+        <label className="font-semibold">Additional Info</label>
+        <Textarea name="additional_info" value={form?.additional_info || ""} onChange={handleField} />
       </div>
     </div>
   );
 }
+

@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
@@ -94,7 +93,7 @@ export function useCloserBookings() {
     const validFields = [
       "call_status", "deal_status", "closed_date", "invoice_sent", "invoice_sent_date",
       "invoice_link", "contract_sent", "contract_sent_date", "contract_link",
-      "offer_made", "ad_spend", "country_area", "zip_code", "note",
+      "offer_made", "ad_spend", "country_area", "zip_code", "additional_info",
       "recording_link", "follow_up_call_date", "reschedule_date"
     ];
     // Build a new payload with only known good fields

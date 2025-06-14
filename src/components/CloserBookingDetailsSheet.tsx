@@ -73,7 +73,7 @@ export default function CloserBookingDetailsSheet({ booking, onClose }: Props) {
       ad_spend: form.ad_spend,
       country_area: form.country_area,
       zip_code: form.zip_code,
-      note: form.note,
+      additional_info: form.additional_info,
       recording_link: form.recording_link,
       follow_up_call_date: form.follow_up_call_date,
       reschedule_date: form.reschedule_date

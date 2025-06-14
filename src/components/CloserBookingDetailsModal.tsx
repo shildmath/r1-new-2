@@ -42,14 +42,15 @@ export default function CloserBookingDetailsModal({ booking, onClose }: ModalPro
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) {
     const { name } = e.target;
-    // Fix: Only check 'checked' for checkboxes
+    // Fix: Only check 'checked' for checkboxes with a type assertion
     if (
       e.target instanceof HTMLInputElement &&
       e.target.type === "checkbox"
     ) {
+      const checkbox = e.target as HTMLInputElement;
       setForm((f: any) => ({
         ...f,
-        [name]: e.target.checked,
+        [name]: checkbox.checked,
       }));
     } else {
       setForm((f: any) => ({

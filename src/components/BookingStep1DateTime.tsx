@@ -5,27 +5,47 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar as ShadcnCalendar } from "@/components/ui/calendar";
 
+type TimeSlot = {
+  id: string;
+  date: string; // ISO date string e.g., "2025-06-15"
+  time: string; // e.g., "10:00 AM"
+}
+
 type BookingStep1DateTimeProps = {
   selectedDate: Date | undefined;
   setSelectedDate: (date: Date | undefined) => void;
   selectedTime: string;
   setSelectedTime: (time: string) => void;
   onContinue: () => void;
+  availableSlots: TimeSlot[];
 };
-
-const AVAILABLE_HOURS = [
-  "10:00 AM", "11:00 AM", "1:00 PM", "2:00 PM", "4:00 PM",
-];
 
 export default function BookingStep1DateTime({
   selectedDate,
   setSelectedDate,
   selectedTime,
   setSelectedTime,
-  onContinue
+  onContinue,
+  availableSlots
 }: BookingStep1DateTimeProps) {
+  // Format selected date to YYYY-MM-DD for comparison
+  const selectedDateStr = selectedDate
+    ? selectedDate.toISOString().split("T")[0]
+    : undefined;
+
+  // Show only times for the selected date
+  const timesForSelectedDate =
+    selectedDateStr
+      ? availableSlots
+          .filter((slot) => slot.date === selectedDateStr)
+          .map((slot) => slot.time)
+      : [];
+
+  // Make times unique for display in case there are duplicates (defensive)
+  const shownTimes = Array.from(new Set(timesForSelectedDate));
+
   return (
-    <motion.div initial={{opacity: 0, y: 24}} animate={{opacity: 1, y: 0}} className="flex flex-col md:flex-row gap-8 max-w-3xl mx-auto">
+    <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col md:flex-row gap-8 max-w-3xl mx-auto">
       {/* Calendar Picker */}
       <Card className="w-full md:w-1/2">
         <CardHeader>
@@ -42,7 +62,16 @@ export default function BookingStep1DateTime({
             onSelect={setSelectedDate}
             initialFocus
             className="p-3 pointer-events-auto"
-            disabled={(date) => date < new Date()}
+            // Disable past dates and those that do not exist in any availableSlot
+            disabled={(date) => {
+              const dateStr = date.toISOString().split("T")[0];
+              const today = new Date();
+              today.setHours(0, 0, 0, 0);
+              return (
+                date < today ||
+                !availableSlots.some((slot) => slot.date === dateStr)
+              );
+            }}
           />
         </CardContent>
       </Card>
@@ -59,9 +88,11 @@ export default function BookingStep1DateTime({
         <CardContent>
           {!selectedDate ? (
             <div className="text-gray-500 text-sm">Select a date first to view available times.</div>
+          ) : shownTimes.length === 0 ? (
+            <div className="text-gray-500 text-sm">No available time slots for this day.</div>
           ) : (
             <div className="grid grid-cols-2 gap-3">
-              {AVAILABLE_HOURS.map((time) => (
+              {shownTimes.map((time) => (
                 <Button
                   key={time}
                   type="button"

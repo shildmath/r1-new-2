@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -66,9 +65,9 @@ const App = () => {
                 </ProtectedRoute>
               } />
               
-              {/* Admin routes - requires admin role */}
+              {/* Admin routes - allow both admin and closer roles */}
               <Route path="/admin" element={
-                <ProtectedRoute requiredRole="admin">
+                <ProtectedRoute requiredRole={['admin', 'closer']}>
                   <AdminLayout />
                 </ProtectedRoute>
               }>

@@ -14,6 +14,9 @@ import AuthPageSupabase from "./pages/AuthPageSupabase";
 import CloserPanel from "./pages/CloserPanel";
 import CloserTimeSlot from "./pages/CloserTimeSlot";
 import CloserBookings from "./pages/CloserBookings";
+import CallStatus from "./pages/CallStatus";
+import DealStatus from "./pages/DealStatus";
+import RescheduleCall from "./pages/RescheduleCall";
 import { SupabaseAuthProvider } from "@/hooks/useSupabaseAuth";
 
 const App = () => {
@@ -35,6 +38,9 @@ const App = () => {
             <Route path="/closer-panel" element={<CloserPanel />} />
             <Route path="/closer-timeslot" element={<CloserTimeSlot />} />
             <Route path="/closer-bookings" element={<CloserBookings />} />
+            <Route path="/call-status" element={<CallStatus />} />
+            <Route path="/deal-status" element={<DealStatus />} />
+            <Route path="/reschedule-call" element={<RescheduleCall />} />
             {/* Redirect unknown routes to home or show a minimal not-found experience if desired */}
             <Route path="*" element={<Index />} />
           </Routes>

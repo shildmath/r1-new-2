@@ -47,9 +47,10 @@ export default function CloserBookingDetailsModal({ booking, onClose }: ModalPro
       e.target instanceof HTMLInputElement &&
       e.target.type === "checkbox"
     ) {
+      const input = e.target as HTMLInputElement; // type assertion for TS
       setForm((f: any) => ({
         ...f,
-        [name]: e.target.checked,
+        [name]: input.checked,
       }));
     } else {
       setForm((f: any) => ({

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useCloserBookings } from "@/hooks/useCloserBookings";
 import { Button } from "@/components/ui/button";
@@ -13,9 +12,8 @@ export default function CloserBookingsTable() {
     isLoading,
     filter,
     setFilter,
-    clearFilter,
+    clearFilter
   } = useCloserBookings();
-
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
 
   // For debugging: log bookings and loading state whenever they change
@@ -28,36 +26,21 @@ export default function CloserBookingsTable() {
   // Feedback message in the UI if something is obviously wrong
   let infoMessage = '';
   if (!isLoading && bookings.length === 0) {
-    infoMessage =
-      "No bookings found for your slots. " +
-      "Make sure that you (the closer) have time slots with bookings " +
-      "and that your user is authenticated correctly. " +
-      "If this issue persists, check slot and booking data in Supabase.";
+    infoMessage = "No bookings found for your slots. " + "Make sure that you (the closer) have time slots with bookings " + "and that your user is authenticated correctly. " + "If this issue persists, check slot and booking data in Supabase.";
   }
-
-  return (
-    <div>
+  return <div>
       <div className="flex items-center gap-2 mb-3">
         <Filter size={18} />
-        <input
-          type="date"
-          value={filter.date ?? ""}
-          onChange={(e) =>
-            setFilter((f) => ({ ...f, date: e.target.value || undefined }))
-          }
-          className="border rounded px-2 py-1"
-        />
+        <input type="date" value={filter.date ?? ""} onChange={e => setFilter(f => ({
+        ...f,
+        date: e.target.value || undefined
+      }))} className="border rounded px-2 py-1" />
         <Button size="sm" variant="outline" onClick={clearFilter}>
           Clear Filter
         </Button>
       </div>
       <div>
-        {isLoading ? (
-          <div>Loading...</div>
-        ) : bookings.length === 0 ? (
-          <div className="text-red-500">{infoMessage}</div>
-        ) : (
-          <table className="w-full table-auto border rounded">
+        {isLoading ? <div>Loading...</div> : bookings.length === 0 ? <div className="text-red-500">{infoMessage}</div> : <table className="w-full table-auto border rounded">
             <thead>
               <tr className="bg-accent">
                 <th>Date</th>
@@ -69,8 +52,7 @@ export default function CloserBookingsTable() {
               </tr>
             </thead>
             <tbody>
-              {bookings.map((b) => (
-                <tr key={b.id} className="border-t">
+              {bookings.map(b => <tr key={b.id} className="border-t">
                   <td>{b.slot_date}</td>
                   <td>{b.slot_time}</td>
                   <td>
@@ -79,24 +61,12 @@ export default function CloserBookingsTable() {
                   <td>{b.email}</td>
                   <td>{b.phone}</td>
                   <td>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setSelectedBooking(b)}
-                    >
-                      See More
-                    </Button>
+                    <Button size="sm" variant="outline" onClick={() => setSelectedBooking(b)}>Edit</Button>
                   </td>
-                </tr>
-              ))}
+                </tr>)}
             </tbody>
-          </table>
-        )}
+          </table>}
       </div>
-      <CloserBookingDetailsModal
-        booking={selectedBooking}
-        onClose={() => setSelectedBooking(null)}
-      />
-    </div>
-  );
+      <CloserBookingDetailsModal booking={selectedBooking} onClose={() => setSelectedBooking(null)} />
+    </div>;
 }

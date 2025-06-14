@@ -21,6 +21,17 @@ import ClosedClients from "./pages/ClosedClients";
 import MonthlyPerformance from "./pages/MonthlyPerformance";
 import EODCloser from "./pages/EODCloser";
 import ExportAll from "./pages/ExportAll";
+import AdminPanel from "./pages/AdminPanel";
+import AddUsers from "./pages/AddUsers";
+import AllAvailableTimeslots from "./pages/AllAvailableTimeslots";
+import AllBookings from "./pages/AllBookings";
+import AllCallStatus from "./pages/AllCallStatus";
+import AllDealStatus from "./pages/AllDealStatus";
+import AllClosedClients from "./pages/AllClosedClients";
+import AllRescheduleCalls from "./pages/AllRescheduleCalls";
+import AllMonthlyClosersPerformance from "./pages/AllMonthlyClosersPerformance";
+import AllEODClosersPerformance from "./pages/AllEODClosersPerformance";
+import AllExportClients from "./pages/AllExportClients";
 import { SupabaseAuthProvider } from "@/hooks/useSupabaseAuth";
 
 const App = () => {
@@ -49,6 +60,17 @@ const App = () => {
             <Route path="/monthly-performance" element={<MonthlyPerformance />} />
             <Route path="/eod-closer" element={<EODCloser />} />
             <Route path="/export-all" element={<ExportAll />} />
+            <Route path="/admin-panel" element={<AdminPanel />} />
+            <Route path="/add-users" element={<AddUsers />} />
+            <Route path="/all-available-timeslots" element={<AllAvailableTimeslots />} />
+            <Route path="/all-bookings" element={<AllBookings />} />
+            <Route path="/all-call-status" element={<AllCallStatus />} />
+            <Route path="/all-deal-status" element={<AllDealStatus />} />
+            <Route path="/all-closed-clients" element={<AllClosedClients />} />
+            <Route path="/all-reschedule-calls" element={<AllRescheduleCalls />} />
+            <Route path="/all-monthly-closers-performance" element={<AllMonthlyClosersPerformance />} />
+            <Route path="/all-eod-closers-performance" element={<AllEODClosersPerformance />} />
+            <Route path="/all-export-clients" element={<AllExportClients />} />
             {/* Redirect unknown routes to home or show a minimal not-found experience if desired */}
             <Route path="*" element={<Index />} />
           </Routes>

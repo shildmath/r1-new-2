@@ -15,19 +15,25 @@ export function useUserProfileWithRole() {
       return;
     }
     setLoading(true);
-    // Fetch profile and role in one go
-    supabase
-      .from("profiles")
-      .select("full_name, user_roles(role)")
-      .eq("id", user.id)
-      .single()
-      .then(({ data }) => {
-        setProfile({
-          full_name: data?.full_name || "User",
-          role: data?.user_roles?.[0]?.role || "unknown"
-        });
-        setLoading(false);
+
+    Promise.all([
+      supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("id", user.id)
+        .maybeSingle(),
+      supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
+        .maybeSingle()
+    ]).then(([fullNameRes, roleRes]) => {
+      setProfile({
+        full_name: fullNameRes.data?.full_name || "User",
+        role: roleRes.data?.role || "unknown"
       });
+      setLoading(false);
+    });
   }, [user]);
 
   return { profile, loading };

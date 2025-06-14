@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -38,10 +37,11 @@ export default function CloserBookingDetailsModal({ booking, onClose }: ModalPro
 
   if (!booking) return null;
 
-  // FIX: Only use .checked for checkboxes
+  // FIX: Only use .checked for checkboxes with correct type-guard
   function handleField(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
-    const { name, type, value } = e.target;
-    if (type === "checkbox" && e.target instanceof HTMLInputElement) {
+    const { name } = e.target;
+    // Use type guard for checkbox
+    if (e.target instanceof HTMLInputElement && e.target.type === "checkbox") {
       setForm((f: any) => ({
         ...f,
         [name]: e.target.checked,
@@ -49,7 +49,7 @@ export default function CloserBookingDetailsModal({ booking, onClose }: ModalPro
     } else {
       setForm((f: any) => ({
         ...f,
-        [name]: value,
+        [name]: e.target.value,
       }));
     }
   }

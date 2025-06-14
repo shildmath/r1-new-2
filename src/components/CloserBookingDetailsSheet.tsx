@@ -168,8 +168,8 @@ export default function CloserBookingDetailsSheet({ booking, onClose }: Props) {
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                 <AlertDialogAction
-                  variant="destructive"
                   onClick={handleDelete}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                 >
                   Yes, delete
                 </AlertDialogAction>

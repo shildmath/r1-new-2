@@ -9,6 +9,50 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      bookings: {
+        Row: {
+          additional_info: string | null
+          client_id: string | null
+          created_at: string
+          email: string
+          first_name: string
+          id: string
+          last_name: string
+          phone: string
+          slot_id: string
+        }
+        Insert: {
+          additional_info?: string | null
+          client_id?: string | null
+          created_at?: string
+          email: string
+          first_name: string
+          id?: string
+          last_name: string
+          phone: string
+          slot_id: string
+        }
+        Update: {
+          additional_info?: string | null
+          client_id?: string | null
+          created_at?: string
+          email?: string
+          first_name?: string
+          id?: string
+          last_name?: string
+          phone?: string
+          slot_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_slot_id_fkey"
+            columns: ["slot_id"]
+            isOneToOne: false
+            referencedRelation: "time_slots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string | null
@@ -27,6 +71,33 @@ export type Database = {
           email?: string
           full_name?: string | null
           id?: string
+        }
+        Relationships: []
+      }
+      time_slots: {
+        Row: {
+          closer_id: string
+          created_at: string
+          date: string
+          id: string
+          is_available: boolean
+          time: string
+        }
+        Insert: {
+          closer_id: string
+          created_at?: string
+          date: string
+          id?: string
+          is_available?: boolean
+          time: string
+        }
+        Update: {
+          closer_id?: string
+          created_at?: string
+          date?: string
+          id?: string
+          is_available?: boolean
+          time?: string
         }
         Relationships: []
       }

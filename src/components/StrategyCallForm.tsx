@@ -3,10 +3,19 @@ import { useState } from 'react';
 import BookingStep1DateTime from './BookingStep1DateTime';
 import BookingStep2InfoForm from './BookingStep2InfoForm';
 import BookingStep3Confirmation from './BookingStep3Confirmation';
+import { useBookStrategyCall } from '@/hooks/useBookStrategyCall';
+import { toast } from 'sonner';
 
 const DUMMY_CLOSER = {
   id: "1",
   name: "John Smith",
+};
+
+// TEMP: Demo time slots (to be replaced by dynamic slots)
+const DEMO_SLOT = {
+  id: "demo-uuid-slot",
+  date: "",
+  time: ""
 };
 
 export default function StrategyCallForm() {
@@ -22,6 +31,9 @@ export default function StrategyCallForm() {
     additionalInfo: '',
   });
 
+  // Get Supabase booking hook
+  const { bookCall, isBooking, error: bookingError } = useBookStrategyCall();
+
   function handleContinue() {
     if (selectedDate && selectedTime) {
       setStep(2);
@@ -31,13 +43,33 @@ export default function StrategyCallForm() {
     setStep(1);
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
+
+    // Find/create slot_id for the selected date & time
+    // For now, use the demo slot - real implementation would query/create slot in Supabase
+    const slot_id = DEMO_SLOT.id;
+
+    // Compose booking data
+    const bookingPayload = {
+      slot_id,
+      first_name: formData.firstName,
+      last_name: formData.lastName,
+      email: formData.email,
+      phone: formData.phone,
+      additional_info: formData.additionalInfo,
+    };
+
+    const success = await bookCall(bookingPayload);
+
+    setIsSubmitting(false);
+    if (success) {
+      toast.success("Booking successful! Confirmation email sent.");
       setStep(3);
-    }, 1200);
+    } else {
+      toast.error(bookingError || "Booking failed. Please try again.");
+    }
   }
 
   if (step === 3) {
@@ -71,7 +103,7 @@ export default function StrategyCallForm() {
       setFormData={setFormData}
       onBack={handleBack}
       onSubmit={handleSubmit}
-      isSubmitting={isSubmitting}
+      isSubmitting={isSubmitting || isBooking}
       closerName={DUMMY_CLOSER.name}
     />
   );

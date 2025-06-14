@@ -122,6 +122,36 @@ export default function StrategyCallForm() {
     }
   }
 
+  if (availableSlots.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center p-10">
+        <div className="bg-gradient-to-r from-blue-600 to-purple-500 rounded-2xl shadow-lg p-8 text-white max-w-md text-center">
+          <h2 className="text-2xl font-bold mb-4">All Slots Fully Booked</h2>
+          <p className="mb-6">
+            Due to <span className="font-semibold">heavy bookings</span>, there are currently no available slots for strategy calls.<br />
+            <span className="text-yellow-200">We apologize for the inconvenience!</span>
+          </p>
+          <p className="mb-3">
+            Please{" "}
+            <a
+              href="/contact"
+              className="underline text-blue-100 hover:text-yellow-200 font-semibold transition"
+            >
+              go to our Contact Page
+            </a>{" "}
+            and we&apos;ll reach out to you within <b>12 hours</b>.
+          </p>
+          <a
+            href="/contact"
+            className="inline-block mt-4 px-6 py-3 rounded-lg bg-white text-blue-700 font-bold shadow-md hover:bg-blue-100 transition"
+          >
+            Contact Us Now
+          </a>
+        </div>
+      </div>
+    );
+  }
+
   if (step === 3) {
     return (
       <BookingStep3Confirmation 

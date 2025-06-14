@@ -37,11 +37,15 @@ export default function CloserBookingDetailsModal({ booking, onClose }: ModalPro
 
   if (!booking) return null;
 
-  // FIX: Only use .checked for checkboxes with correct type-guard
-  function handleField(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
+  // FIX: Only use .checked for checkboxes with robust type-guard
+  function handleField(
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) {
     const { name } = e.target;
-    // Use type guard for checkbox
-    if (e.target instanceof HTMLInputElement && e.target.type === "checkbox") {
+    if (
+      e.target instanceof HTMLInputElement &&
+      e.target.type === "checkbox"
+    ) {
       setForm((f: any) => ({
         ...f,
         [name]: e.target.checked,

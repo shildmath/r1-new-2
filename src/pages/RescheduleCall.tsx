@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import CloserSidebar from "@/components/CloserSidebar";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
@@ -5,13 +6,14 @@ import { Filter, PhoneCall, CalendarClock } from "lucide-react";
 import { useCloserBookings } from "@/hooks/useCloserBookings";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import BookingExtraDetailsButton from "@/components/BookingExtraDetailsButton";
+import CloserBookingDetailsModal from "@/components/CloserBookingDetailsModal";
 
 export default function RescheduleCall() {
   const [status, setStatus] = useState("");
   const [date, setDate] = useState("");
   const [search, setSearch] = useState("");
   const { bookings, isLoading } = useCloserBookings();
+  const [selectedBooking, setSelectedBooking] = useState<any>(null);
 
   // Filter to only bookings with reschedule_date or follow_up_call_date not null
   const allReschedules = bookings.filter(b =>
@@ -90,13 +92,23 @@ export default function RescheduleCall() {
                           <td className="p-2">{b.reschedule_date ?? "-"}</td>
                           <td className="p-2">{b.follow_up_call_date ?? "-"}</td>
                           <td className="p-2">
-                            <BookingExtraDetailsButton booking={b} />
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setSelectedBooking(b)}
+                            >
+                              Extra Details
+                            </Button>
                           </td>
                         </tr>
                       ))
                     )}
                   </tbody>
               </table>
+              <CloserBookingDetailsModal
+                booking={selectedBooking}
+                onClose={() => setSelectedBooking(null)}
+              />
             </div>
           </CardContent>
         </Card>

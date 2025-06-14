@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import CloserSidebar from "@/components/CloserSidebar";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
@@ -5,13 +6,14 @@ import { Filter, Handshake } from "lucide-react";
 import { useCloserBookings } from "@/hooks/useCloserBookings";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import BookingExtraDetailsButton from "@/components/BookingExtraDetailsButton";
+import CloserBookingDetailsModal from "@/components/CloserBookingDetailsModal";
 
 export default function DealStatus() {
   const [status, setStatus] = useState("");
   const [date, setDate] = useState("");
   const [search, setSearch] = useState("");
   const { bookings, isLoading } = useCloserBookings();
+  const [selectedBooking, setSelectedBooking] = useState<any>(null);
 
   // Invoice & Contract section
   const dealsWithStatus = bookings.filter(b =>
@@ -84,13 +86,23 @@ export default function DealStatus() {
                         <td className="p-2">{b.closer_email ?? "-"}</td>
                         <td className="p-2">{b.deal_status ?? "Not Started Yet"}</td>
                         <td className="p-2">
-                          <BookingExtraDetailsButton booking={b} />
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setSelectedBooking(b)}
+                          >
+                            Extra Details
+                          </Button>
                         </td>
                       </tr>
                     ))
                   )}
                 </tbody>
               </table>
+              <CloserBookingDetailsModal
+                booking={selectedBooking}
+                onClose={() => setSelectedBooking(null)}
+              />
             </div>
           </CardContent>
         </Card>

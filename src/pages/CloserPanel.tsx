@@ -1,4 +1,3 @@
-
 import React, { useMemo } from "react";
 import CloserSidebar from "@/components/CloserSidebar";
 import { useCloserBookings } from "@/hooks/useCloserBookings";
@@ -77,9 +76,9 @@ export default function CloserPanel() {
   };
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-accent-light to-secondary">
+    <div className="flex min-h-screen flex-col md:flex-row bg-gradient-to-br from-accent-light to-secondary">
       <CloserSidebar />
-      <div className="flex-1 p-8">
+      <div className="flex-1 p-3 md:p-8">
         {/* Header: Welcome & Logout */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
           <div className="flex items-center gap-3">
@@ -108,7 +107,8 @@ export default function CloserPanel() {
             </Card>
           ))}
         </div>
-        <div className="grid gap-8 md:grid-cols-2">
+        {/* Responsive cards */}
+        <div className="grid gap-8 grid-cols-1 sm:grid-cols-2">
           <div className="bg-card rounded-lg shadow p-6 flex flex-col justify-between hover-scale">
             <h2 className="font-semibold text-lg mb-2">Manage Your Time Slots</h2>
             <p className="text-gray-500 mb-4">Keep your availability up to date so clients can book you!</p>

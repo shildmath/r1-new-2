@@ -74,11 +74,11 @@ export default function CloserBookings() {
   }));
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-accent-light to-secondary">
+    <div className="flex min-h-screen flex-col md:flex-row bg-gradient-to-br from-accent-light to-secondary">
       <CloserSidebar />
-      <div className="flex-1 flex flex-col items-center p-6 gap-3 animate-fade-in">
+      <div className="flex-1 flex flex-col items-center p-3 md:p-6 gap-3 animate-fade-in">
         <Card className="w-full max-w-5xl mb-8 shadow-xl border-2 border-accent/10 bg-white/95">
-          <CardHeader className="flex flex-row items-center gap-3 pb-1">
+          <CardHeader className="flex flex-col sm:flex-row items-center gap-3 pb-1">
             <LayoutList size={32} className="text-accent" />
             <div>
               <CardTitle className="text-2xl font-extrabold text-primary">Your Bookings</CardTitle>
@@ -91,7 +91,9 @@ export default function CloserBookings() {
             <div className="flex justify-end">
               <ExportButtons data={exportData} filename="all-closer-bookings" csvHeaders={exportHeaders} />
             </div>
-            <CloserBookingsTable showTimeZoneColumn />
+            <div className="overflow-x-auto">
+              <CloserBookingsTable showTimeZoneColumn />
+            </div>
           </CardContent>
         </Card>
       </div>

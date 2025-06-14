@@ -1,10 +1,10 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Mail, Phone, MessageSquare } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { motion } from 'framer-motion';
 
 const ContactForm = () => {
   const { toast } = useToast();
@@ -39,7 +39,13 @@ const ContactForm = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
+    <motion.form
+      onSubmit={handleSubmit}
+      className="space-y-5"
+      initial={{ opacity: 0, scale: 0.98, y: 16 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: 'easeOut' }}
+    >
       <div className="flex flex-col md:flex-row gap-4">
         <div className="w-full">
           <label className="text-sm font-medium block mb-1" htmlFor="name">
@@ -110,7 +116,7 @@ const ContactForm = () => {
           </>
         )}
       </Button>
-    </form>
+    </motion.form>
   );
 };
 

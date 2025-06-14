@@ -1,10 +1,20 @@
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import CloserSidebar from "@/components/CloserSidebar";
 import { useCloserBookings } from "@/hooks/useCloserBookings";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Graph } from "@/components/ui/graph";
-import { format, isSameMonth, parseISO } from "date-fns";
+import { Info, TrendingUp, CircleX, CalendarDays, Users } from "lucide-react";
+import { format } from "date-fns";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
+} from "@/components/ui/table";
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
 function getMonthName(d: Date) {
   return d.toLocaleString('default', { month: 'long', year: "numeric" });
@@ -41,21 +51,85 @@ export default function MonthlyPerformance() {
   // For graph: Show months as x, total bookings/count/closed/completed/rescheduled as line/bar
   const performanceData = months.map(m => ({
     name: m.name,
-    "Total": m.value,
-    "Closed": m.closed,
-    "Rescheduled": m.rescheduled,
-    "Completed": m.completed,
+    Total: m.value,
+    Closed: m.closed,
+    Rescheduled: m.rescheduled,
+    Completed: m.completed,
   }));
 
+  const statBlocks = [
+    {
+      label: "Most Bookings",
+      icon: TrendingUp,
+      color: "text-primary",
+      value: months.length
+        ? months.reduce((a, b) => (a.value > b.value ? a : b)).value
+        : "—",
+      tooltip: "The highest total bookings in a single month."
+    },
+    {
+      label: "Closed Deals (All Time)",
+      icon: Users,
+      color: "text-blue-700",
+      value: months.reduce((n, m) => n + m.closed, 0),
+      tooltip: "Sum of all closed deals across all months."
+    },
+    {
+      label: "Reschedules (All Time)",
+      icon: CalendarDays,
+      color: "text-orange-500",
+      value: months.reduce((n, m) => n + m.rescheduled, 0),
+      tooltip: "Total bookings rescheduled or followed up."
+    },
+    {
+      label: "Completed Calls (All Time)",
+      icon: Users,
+      color: "text-green-600",
+      value: months.reduce((n, m) => n + m.completed, 0),
+      tooltip: "Total calls marked as completed."
+    },
+    {
+      label: "Months Recorded",
+      icon: Info,
+      color: "text-gray-500",
+      value: months.length || "—",
+      tooltip: "Number of unique months with data."
+    }
+  ];
+
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-accent-light to-secondary">
-      <CloserSidebar />
-      <div className="flex-1 p-8">
-        <h1 className="text-2xl font-bold mb-4">Monthly Performance</h1>
-        <Card className="w-full mb-10 shadow-xl border-2 border-accent/10 bg-white/95">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-            <div>
-              <div className="mb-10 animate-fade-in">
+    <TooltipProvider>
+      <div className="flex min-h-screen bg-gradient-to-br from-accent-light to-secondary">
+        <CloserSidebar />
+        <main className="flex-1 p-4 md:p-8 bg-gradient-to-br from-white/90 to-blue-50">
+          <h1 className="text-2xl md:text-3xl font-bold mb-3 animate-fade-in leading-tight">
+            <span className="font-extrabold text-primary drop-shadow">Monthly Performance</span>
+          </h1>
+          <div className="max-w-7xl mx-auto gap-10 flex flex-col animate-fade-in animate-delay-200">
+            {/* Dashboard stats blocks */}
+            <section className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-5 mb-7">
+              {statBlocks.map((stat, idx) => (
+                <Card key={stat.label} className="flex flex-col items-center p-5 gap-2 border-primary/10 hover:scale-105 transition-transform group animate-scale-in">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span>
+                        <stat.icon className={"mb-2 " + stat.color} size={30} />
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      {stat.tooltip}
+                    </TooltipContent>
+                  </Tooltip>
+                  <span className="font-extrabold text-3xl md:text-4xl text-primary group-hover:text-blue-700 transition-colors">
+                    {isLoading ? "…" : stat.value}
+                  </span>
+                  <span className="text-center text-sm font-medium text-gray-700">{stat.label}</span>
+                </Card>
+              ))}
+            </section>
+            {/* Performance Graph */}
+            <section className="flex flex-col lg:flex-row gap-6 items-start">
+              <Card className="flex-1 shadow-xl border-accent/20 bg-white/95 p-4 animate-fade-in">
                 <Graph
                   title="Monthly Bookings"
                   data={performanceData.map(({ name, Total }) => ({ name, value: Total }))}
@@ -63,58 +137,59 @@ export default function MonthlyPerformance() {
                   color="#653ad4"
                   startFromZero
                 />
-              </div>
-              <div className="flex flex-wrap gap-8 mt-6">
-                <div className="flex flex-col items-center">
-                  <span className="text-sm font-medium text-gray-500">Most Bookings</span>
-                  <span className="text-2xl font-bold text-primary">
-                    {months.length
-                      ? months.reduce((a, b) => (a.value > b.value ? a : b)).value
-                      : "—"}
-                  </span>
+              </Card>
+              <Card className="flex-1 shadow-xl border-accent/20 bg-white/95 p-4 animate-fade-in">
+                <Graph
+                  title="Closed Deals (Monthly)"
+                  data={performanceData.map(({ name, Closed }) => ({ name, value: Closed }))}
+                  type="line"
+                  color="#096ad9"
+                  startFromZero
+                />
+              </Card>
+            </section>
+            {/* Table View */}
+            <section className="mt-8">
+              <Card className="bg-white/90 border-accent/15 shadow-lg animate-fade-in">
+                <CardTitle className="p-3 pb-0 text-xl font-bold animate-fade-in">All Months Summary</CardTitle>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-gradient-to-r from-accent-light to-accent font-semibold text-accent-foreground">
+                        <TableHead>Month</TableHead>
+                        <TableHead>Total</TableHead>
+                        <TableHead>Closed</TableHead>
+                        <TableHead>Resched.</TableHead>
+                        <TableHead>Completed</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {months.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={5} className="text-red-500 p-7 text-center animate-fade-in">
+                            <CircleX className="inline-block mr-2 text-red-400" size={18} />
+                            No data found for your history.
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        months.map((m, idx) => (
+                          <TableRow key={idx} className="border-t border-none even:bg-gray-50 hover:bg-accent/40">
+                            <TableCell>{m.name}</TableCell>
+                            <TableCell>{m.value}</TableCell>
+                            <TableCell>{m.closed}</TableCell>
+                            <TableCell>{m.rescheduled}</TableCell>
+                            <TableCell>{m.completed}</TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
                 </div>
-                <div className="flex flex-col items-center">
-                  <span className="text-sm font-medium text-gray-500">Closed Deals (All Time)</span>
-                  <span className="text-2xl font-bold text-blue-700">
-                    {months.reduce((n, m) => n + m.closed, 0)}
-                  </span>
-                </div>
-                <div className="flex flex-col items-center">
-                  <span className="text-sm font-medium text-gray-500">Reschedules (All Time)</span>
-                  <span className="text-2xl font-bold text-orange-500">
-                    {months.reduce((n, m) => n + m.rescheduled, 0)}
-                  </span>
-                </div>
-              </div>
-            </div>
-            <div>
-              <h2 className="text-lg font-semibold mb-3">All Months Summary</h2>
-              <table className="table-auto w-full border">
-                <thead className="bg-accent">
-                  <tr>
-                    <th className="p-2 text-left">Month</th>
-                    <th className="p-2 text-left">Total</th>
-                    <th className="p-2 text-left">Closed</th>
-                    <th className="p-2 text-left">Resched.</th>
-                    <th className="p-2 text-left">Completed</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {months.map((m, idx) => (
-                    <tr key={idx} className="border-t">
-                      <td className="p-2">{m.name}</td>
-                      <td className="p-2">{m.value}</td>
-                      <td className="p-2">{m.closed}</td>
-                      <td className="p-2">{m.rescheduled}</td>
-                      <td className="p-2">{m.completed}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+              </Card>
+            </section>
           </div>
-        </Card>
+        </main>
       </div>
-    </div>
+    </TooltipProvider>
   );
 }

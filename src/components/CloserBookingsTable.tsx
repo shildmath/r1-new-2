@@ -1,11 +1,12 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useCloserBookings } from "@/hooks/useCloserBookings";
 import { Button } from "@/components/ui/button";
 import { Filter } from "lucide-react";
 import { toast } from "sonner";
 import CloserBookingDetailsModal from "./CloserBookingDetailsModal";
 
+// Add more debug logs and visible errors
 export default function CloserBookingsTable() {
   const {
     bookings,
@@ -16,6 +17,23 @@ export default function CloserBookingsTable() {
   } = useCloserBookings();
 
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
+
+  // For debugging: log bookings and loading state whenever they change
+  useEffect(() => {
+    console.log("Bookings loaded for table:", bookings);
+    console.log("isLoading:", isLoading);
+    console.log("Current filter:", filter);
+  }, [bookings, isLoading, filter]);
+
+  // Feedback message in the UI if something is obviously wrong
+  let infoMessage = '';
+  if (!isLoading && bookings.length === 0) {
+    infoMessage =
+      "No bookings found for your slots. " +
+      "Make sure that you (the closer) have time slots with bookings " +
+      "and that your user is authenticated correctly. " +
+      "If this issue persists, check slot and booking data in Supabase.";
+  }
 
   return (
     <div>
@@ -37,7 +55,7 @@ export default function CloserBookingsTable() {
         {isLoading ? (
           <div>Loading...</div>
         ) : bookings.length === 0 ? (
-          <div>No bookings found.</div>
+          <div className="text-red-500">{infoMessage}</div>
         ) : (
           <table className="w-full table-auto border rounded">
             <thead>

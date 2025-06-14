@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
@@ -11,6 +12,8 @@ export function useCloserBookings() {
   async function fetchBookings() {
     if (!session?.user) {
       console.log("No active session or user.");
+      setBookings([]);
+      setIsLoading(false);
       return;
     }
     setIsLoading(true);

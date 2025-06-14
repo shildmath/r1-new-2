@@ -1,4 +1,3 @@
-
 import { Booking, ContactSubmission } from '@/types/admin';
 
 export const exportBookingsToCSV = (bookings: Booking[]) => {
@@ -85,10 +84,15 @@ export const exportContactSubmissionsToCSV = (submissions: ContactSubmission[]) 
   downloadCSV(csvContent, 'contact-submissions.csv');
 };
 
-export const exportToCSV = (data: any[], filename: string) => {
+export const exportToCSV = (
+  data: any[],
+  filename: string,
+  headersOverride?: string[]
+) => {
   if (data.length === 0) return;
   
-  const headers = Object.keys(data[0]);
+  // Use provided headers or keys from first row
+  const headers = headersOverride ?? Object.keys(data[0]);
   const csvContent = [
     headers.join(','),
     ...data.map(row => 
@@ -97,7 +101,7 @@ export const exportToCSV = (data: any[], filename: string) => {
         if (typeof value === 'string' && value.includes(',')) {
           return `"${value.replace(/"/g, '""')}"`;
         }
-        return value;
+        return value ?? '';
       }).join(',')
     )
   ].join('\n');

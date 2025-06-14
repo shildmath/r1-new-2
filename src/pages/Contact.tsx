@@ -1,4 +1,5 @@
-import { Mail, Phone, Send } from "lucide-react";
+
+import { Send } from "lucide-react";
 import ContactForm from "@/components/ContactForm";
 import Navbar from "@/components/Navbar";
 import EnhancedFooter from "@/components/EnhancedFooter";
@@ -7,36 +8,37 @@ import { motion } from "framer-motion";
 
 const Contact = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-100 via-white to-purple-100 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-blue-100/50 via-white to-purple-100/30 flex flex-col">
       <Navbar />
-      <main className="flex-grow flex flex-col items-center px-2 pt-20 pb-10 md:pb-20">
+      <main className="flex-grow flex flex-col items-center p-2 pt-20 pb-8 md:pb-14">
         {/* Animated Contact Info Section */}
         <ContactInfo />
 
-        {/* Main Hero + Form section */}
+        {/* Form Area (entrance animation) */}
         <motion.section
-          initial={{ opacity: 0, translateY: 30 }}
+          initial={{ opacity: 0, translateY: 50 }}
           animate={{ opacity: 1, translateY: 0 }}
           transition={{ duration: 0.7, ease: 'easeOut' }}
           className="w-full max-w-2xl flex flex-col items-center"
         >
-          {/* Hero Card */}
-          <div className="w-full rounded-t-2xl bg-gradient-to-r from-blue-600 to-purple-600 shadow-2xl text-white p-7 pt-9 text-center relative z-10">
-            <Send size={32} className="mx-auto mb-2 animate-bounce-slow" />
-            <h1 className="text-2xl sm:text-3xl font-bold mb-2">Send Us a Message</h1>
-            <p className="opacity-95 text-base">We’ll get back to you within 24 hours.</p>
+          <div className="w-full rounded-t-3xl bg-gradient-to-br from-indigo-600 via-blue-500 to-purple-500 shadow-2xl text-white p-7 pt-10 text-center relative z-10 animate-glow">
+            <Send size={36} className="mx-auto mb-2 animate-bounce-slow" />
+            <h1 className="text-2xl sm:text-3xl font-extrabold mb-1 font-playfair tracking-tight">Send Us a Message</h1>
+            <p className="opacity-95 text-base">We&apos;ll get back to you within 24 hours.</p>
           </div>
-          {/* Contact Form Card */}
-          <div className="-mt-4 w-full bg-white shadow-2xl rounded-b-2xl p-5 sm:p-8 relative z-0">
+          <div className="-mt-5 w-full bg-white shadow-2xl rounded-b-3xl px-3 py-5 sm:p-8 relative z-0 animate-fade-in">
             <ContactForm />
-            <div className="border-t pt-6 mt-6 text-center">
-              <p className="text-gray-500 mb-3">Prefer to contact us directly?</p>
+            <div className="border-t pt-6 mt-7 text-center">
+              <p className="text-gray-500 mb-3 text-sm">Prefer to contact us directly?</p>
               <div className="flex flex-col gap-2 sm:flex-row justify-center text-sm flex-wrap">
-                <a href="mailto:info@aiadmaxify.com" className="flex items-center gap-2 justify-center text-gray-700 hover:text-blue-600 hover:underline font-medium transition-colors">
-                  <Mail size={16} /> info@aiadmaxify.com
+                <a href="mailto:info@aiadmaxify.com" className="flex items-center gap-2 justify-center text-blue-700 hover:text-blue-900 hover:underline font-semibold transition-colors">
+                  info@aiadmaxify.com
                 </a>
-                <a href="tel:+15551234567" className="flex items-center gap-2 justify-center text-gray-700 hover:text-blue-600 hover:underline font-medium transition-colors">
-                  <Phone size={16} /> +1 (555) 123-4567
+                <a href="tel:+15551234567" className="flex items-center gap-2 justify-center text-green-600 hover:text-green-900 hover:underline font-semibold transition-colors">
+                  +1 (555) 123-4567
+                </a>
+                <a href="https://wa.me/15551234567" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 justify-center text-green-500 hover:text-green-700 hover:underline font-semibold transition-colors">
+                  WhatsApp
                 </a>
               </div>
             </div>

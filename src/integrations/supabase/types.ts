@@ -11,37 +11,85 @@ export type Database = {
     Tables: {
       bookings: {
         Row: {
+          ad_spend: string | null
           additional_info: string | null
+          call_status: string | null
           client_id: string | null
+          closed_date: string | null
+          contract_link: string | null
+          contract_sent: boolean | null
+          contract_sent_date: string | null
+          country_area: string | null
           created_at: string
+          deal_status: string | null
           email: string
           first_name: string
+          follow_up_call_date: string | null
           id: string
+          invoice_link: string | null
+          invoice_sent: boolean | null
+          invoice_sent_date: string | null
           last_name: string
+          offer_made: string | null
           phone: string
+          recording_link: string | null
+          reschedule_date: string | null
           slot_id: string
+          zip_code: string | null
         }
         Insert: {
+          ad_spend?: string | null
           additional_info?: string | null
+          call_status?: string | null
           client_id?: string | null
+          closed_date?: string | null
+          contract_link?: string | null
+          contract_sent?: boolean | null
+          contract_sent_date?: string | null
+          country_area?: string | null
           created_at?: string
+          deal_status?: string | null
           email: string
           first_name: string
+          follow_up_call_date?: string | null
           id?: string
+          invoice_link?: string | null
+          invoice_sent?: boolean | null
+          invoice_sent_date?: string | null
           last_name: string
+          offer_made?: string | null
           phone: string
+          recording_link?: string | null
+          reschedule_date?: string | null
           slot_id: string
+          zip_code?: string | null
         }
         Update: {
+          ad_spend?: string | null
           additional_info?: string | null
+          call_status?: string | null
           client_id?: string | null
+          closed_date?: string | null
+          contract_link?: string | null
+          contract_sent?: boolean | null
+          contract_sent_date?: string | null
+          country_area?: string | null
           created_at?: string
+          deal_status?: string | null
           email?: string
           first_name?: string
+          follow_up_call_date?: string | null
           id?: string
+          invoice_link?: string | null
+          invoice_sent?: boolean | null
+          invoice_sent_date?: string | null
           last_name?: string
+          offer_made?: string | null
           phone?: string
+          recording_link?: string | null
+          reschedule_date?: string | null
           slot_id?: string
+          zip_code?: string | null
         }
         Relationships: [
           {

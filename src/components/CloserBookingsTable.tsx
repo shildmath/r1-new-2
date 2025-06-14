@@ -4,29 +4,18 @@ import { useCloserBookings } from "@/hooks/useCloserBookings";
 import { Button } from "@/components/ui/button";
 import { Filter } from "lucide-react";
 import { toast } from "sonner";
+import CloserBookingDetailsModal from "./CloserBookingDetailsModal";
 
 export default function CloserBookingsTable() {
   const {
     bookings,
-    updateBooking,
     isLoading,
     filter,
     setFilter,
     clearFilter,
   } = useCloserBookings();
 
-  const [editingNote, setEditingNote] = useState<{ [id: string]: string }>({});
-
-  function handleNoteChange(id: string, value: string) {
-    setEditingNote((m) => ({ ...m, [id]: value }));
-  }
-
-  async function handleSaveNote(id: string) {
-    const note = editingNote[id];
-    if (note === undefined) return;
-    const ok = await updateBooking(id, note);
-    if (ok) toast.success("Note updated!");
-  }
+  const [selectedBooking, setSelectedBooking] = useState<any>(null);
 
   return (
     <div>
@@ -58,8 +47,7 @@ export default function CloserBookingsTable() {
                 <th>Client</th>
                 <th>Email</th>
                 <th>Phone</th>
-                <th>Note</th>
-                <th>Actions</th>
+                <th>See More</th>
               </tr>
             </thead>
             <tbody>
@@ -73,19 +61,12 @@ export default function CloserBookingsTable() {
                   <td>{b.email}</td>
                   <td>{b.phone}</td>
                   <td>
-                    <input
-                      className="border rounded px-2 py-1 w-32"
-                      value={editingNote[b.id] ?? b.note ?? ""}
-                      onChange={(e) => handleNoteChange(b.id, e.target.value)}
-                    />
-                  </td>
-                  <td>
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => handleSaveNote(b.id)}
+                      onClick={() => setSelectedBooking(b)}
                     >
-                      Save
+                      See More
                     </Button>
                   </td>
                 </tr>
@@ -94,6 +75,10 @@ export default function CloserBookingsTable() {
           </table>
         )}
       </div>
+      <CloserBookingDetailsModal
+        booking={selectedBooking}
+        onClose={() => setSelectedBooking(null)}
+      />
     </div>
   );
 }

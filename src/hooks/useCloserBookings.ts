@@ -17,7 +17,8 @@ export function useCloserBookings() {
       .select(
         `
         *,
-        slot:time_slots(id, date, time)
+        slot:time_slots(id, date, time),
+        client:profiles!bookings_client_id_fkey(id, full_name)
         `
       )
       .in("slot_id", await getSlotIds(session.user.id));
@@ -51,10 +52,10 @@ export function useCloserBookings() {
     // eslint-disable-next-line
   }, [session, filter]);
 
-  async function updateBooking(id: string, note: string) {
+  async function updateBooking(id: string, fields: any) {
     const { error } = await supabase
       .from("bookings")
-      .update({ note })
+      .update(fields)
       .eq("id", id);
     if (!error) fetchBookings();
     return !error;

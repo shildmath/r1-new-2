@@ -1,22 +1,11 @@
+
 import { useState, useEffect } from 'react';
 import BookingStep1DateTime from './BookingStep1DateTime';
 import BookingStep2InfoForm from './BookingStep2InfoForm';
 import BookingStep3Confirmation from './BookingStep3Confirmation';
 import { useBookStrategyCall } from '@/hooks/useBookStrategyCall';
 import { toast } from 'sonner';
-import { supabase } from "@/integrations/supabase/client";
-
-const DUMMY_CLOSER = {
-  id: "1",
-  name: "John Smith",
-};
-
-// TEMP: Demo time slots (to be replaced by dynamic slots)
-const DEMO_SLOT = {
-  id: "demo-uuid-slot",
-  date: "",
-  time: ""
-};
+import { supabase } from "@/integrations/supabase/client';
 
 export default function StrategyCallForm() {
   const [step, setStep] = useState<1 | 2 | 3>(1);
@@ -31,11 +20,10 @@ export default function StrategyCallForm() {
     additionalInfo: '',
   });
 
-  // Get Supabase booking hook
-  const { bookCall, isBooking, error: bookingError } = useBookStrategyCall();
-
-  // New: Available slots from Supabase
+  // Available slots from Supabase
   const [availableSlots, setAvailableSlots] = useState<any[]>([]);
+  // Map slotId => closer
+  const [closers, setClosers] = useState<{ [closerId: string]: string }>({});
 
   // Fetch available slots
   useEffect(() => {
@@ -45,8 +33,39 @@ export default function StrategyCallForm() {
       .eq("is_available", true)
       .order("date", { ascending: true })
       .order("time", { ascending: true })
-      .then(({ data }) => setAvailableSlots(data || []));
+      .then(async ({ data }) => {
+        setAvailableSlots(data || []);
+        // Get all closer ids
+        const closerIds = Array.from(new Set((data || []).map(s => s.closer_id)));
+        // Fetch closer profile names (with fallback)
+        if (closerIds.length) {
+          const { data: profiles } = await supabase
+            .from("profiles")
+            .select("id, full_name")
+            .in("id", closerIds);
+          const closerMap: { [closerId: string]: string } = {};
+          profiles?.forEach((prof: any) => {
+            closerMap[prof.id] = prof.full_name || "Unknown Closer";
+          });
+          setClosers(closerMap);
+        }
+      });
   }, []);
+
+  // Given selected slot, find closer id and name
+  let selectedCloserName = "N/A";
+  if (selectedDate && selectedTime && availableSlots.length) {
+    const slot = availableSlots.find(
+      (s) =>
+        s.date &&
+        selectedDate &&
+        s.date === selectedDate.toISOString().split("T")[0] &&
+        s.time === selectedTime
+    );
+    if (slot && slot.closer_id && closers[slot.closer_id]) {
+      selectedCloserName = closers[slot.closer_id];
+    }
+  }
 
   function handleContinue() {
     if (selectedDate && selectedTime) {
@@ -57,7 +76,8 @@ export default function StrategyCallForm() {
     setStep(1);
   }
 
-  // New: when booking succeeds, remove slot from local state
+  const { bookCall, isBooking, error: bookingError } = useBookStrategyCall();
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setIsSubmitting(true);
@@ -104,13 +124,12 @@ export default function StrategyCallForm() {
       <BookingStep3Confirmation 
         selectedDate={selectedDate}
         selectedTime={selectedTime}
-        closerName={DUMMY_CLOSER.name}
+        closerName={selectedCloserName}
       />
     );
   }
 
   if (step === 1) {
-    // Instead of static slot, pass availableSlots for selection
     return (
       <BookingStep1DateTime
         selectedDate={selectedDate}
@@ -133,7 +152,7 @@ export default function StrategyCallForm() {
       onBack={handleBack}
       onSubmit={handleSubmit}
       isSubmitting={isSubmitting || isBooking}
-      closerName={DUMMY_CLOSER.name}
+      closerName={selectedCloserName}
     />
   );
 }

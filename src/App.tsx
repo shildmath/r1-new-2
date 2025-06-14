@@ -33,7 +33,6 @@ import AllMonthlyClosersPerformance from "./pages/AllMonthlyClosersPerformance";
 import AllEODClosersPerformance from "./pages/AllEODClosersPerformance";
 import AllExportClients from "./pages/AllExportClients";
 import { SupabaseAuthProvider } from "@/hooks/useSupabaseAuth";
-import AdminRoute from "@/components/AdminRoute";
 
 const App = () => {
   return (
@@ -61,19 +60,18 @@ const App = () => {
             <Route path="/monthly-performance" element={<MonthlyPerformance />} />
             <Route path="/eod-closer" element={<EODCloser />} />
             <Route path="/export-all" element={<ExportAll />} />
-            {/* --- Admin Only routes below --- */}
-            <Route path="/admin-panel" element={<AdminRoute><AdminPanel /></AdminRoute>} />
-            <Route path="/add-users" element={<AdminRoute><AddUsers /></AdminRoute>} />
-            <Route path="/all-available-timeslots" element={<AdminRoute><AllAvailableTimeslots /></AdminRoute>} />
-            <Route path="/all-bookings" element={<AdminRoute><AllBookings /></AdminRoute>} />
-            <Route path="/all-call-status" element={<AdminRoute><AllCallStatus /></AdminRoute>} />
-            <Route path="/all-deal-status" element={<AdminRoute><AllDealStatus /></AdminRoute>} />
-            <Route path="/all-closed-clients" element={<AdminRoute><AllClosedClients /></AdminRoute>} />
-            <Route path="/all-reschedule-calls" element={<AdminRoute><AllRescheduleCalls /></AdminRoute>} />
-            <Route path="/all-monthly-closers-performance" element={<AdminRoute><AllMonthlyClosersPerformance /></AdminRoute>} />
-            <Route path="/all-eod-closers-performance" element={<AdminRoute><AllEODClosersPerformance /></AdminRoute>} />
-            <Route path="/all-export-clients" element={<AdminRoute><AllExportClients /></AdminRoute>} />
-            {/* --- End Admin Only routes --- */}
+            <Route path="/admin-panel" element={<AdminPanel />} />
+            <Route path="/add-users" element={<AddUsers />} />
+            <Route path="/all-available-timeslots" element={<AllAvailableTimeslots />} />
+            <Route path="/all-bookings" element={<AllBookings />} />
+            <Route path="/all-call-status" element={<AllCallStatus />} />
+            <Route path="/all-deal-status" element={<AllDealStatus />} />
+            <Route path="/all-closed-clients" element={<AllClosedClients />} />
+            <Route path="/all-reschedule-calls" element={<AllRescheduleCalls />} />
+            <Route path="/all-monthly-closers-performance" element={<AllMonthlyClosersPerformance />} />
+            <Route path="/all-eod-closers-performance" element={<AllEODClosersPerformance />} />
+            <Route path="/all-export-clients" element={<AllExportClients />} />
+            {/* Redirect unknown routes to home or show a minimal not-found experience if desired */}
             <Route path="*" element={<Index />} />
           </Routes>
         </BrowserRouter>

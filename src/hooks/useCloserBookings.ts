@@ -90,10 +90,29 @@ export function useCloserBookings() {
   }, [session, filter]);
 
   async function updateBooking(id: string, fields: any) {
+    // Whitelist only valid fields according to the bookings table schema
+    const validFields = [
+      "call_status", "deal_status", "closed_date", "invoice_sent", "invoice_sent_date",
+      "invoice_link", "contract_sent", "contract_sent_date", "contract_link",
+      "offer_made", "ad_spend", "country_area", "zip_code", "note",
+      "recording_link", "follow_up_call_date", "reschedule_date"
+    ];
+    // Build a new payload with only known good fields
+    const cleanFields: any = {};
+    for (const key of validFields) {
+      if (Object.prototype.hasOwnProperty.call(fields, key)) {
+        cleanFields[key] = fields[key] ?? null; // NULL is better than undefined for Supabase
+      }
+    }
+
+    console.log("[updateBooking] Attempt", { id, cleanFields });
     const { error } = await supabase
       .from("bookings")
-      .update(fields)
+      .update(cleanFields)
       .eq("id", id);
+    if (error) {
+      console.error("[updateBooking] Error details:", error);
+    }
     if (!error) fetchBookings();
     return !error;
   }

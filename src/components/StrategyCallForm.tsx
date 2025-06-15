@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import BookingStep1DateTime from './BookingStep1DateTime';
 import BookingStep2InfoForm from './BookingStep2InfoForm';
@@ -5,6 +6,7 @@ import BookingStep3Confirmation from './BookingStep3Confirmation';
 import { useBookStrategyCall } from '@/hooks/useBookStrategyCall';
 import { toast } from 'sonner';
 import { supabase } from "@/integrations/supabase/client";
+import { useRealtimeSlots } from "@/hooks/useRealtimeSlots"; // NEW
 
 export default function StrategyCallForm() {
   const [step, setStep] = useState<1 | 2 | 3>(1);
@@ -19,37 +21,33 @@ export default function StrategyCallForm() {
     additionalInfo: '',
   });
 
-  // Available slots from Supabase
-  const [availableSlots, setAvailableSlots] = useState<any[]>([]);
+  // Realtime slots from Supabase
+  const { slots: availableSlots, isLoading } = useRealtimeSlots();
+
   // Map slotId => closer
   const [closers, setClosers] = useState<{ [closerId: string]: string }>({});
 
-  // Fetch available slots (include time_zone)
+  // Fetch closer names for all current slots
   useEffect(() => {
-    supabase
-      .from("time_slots")
-      .select("*")
-      .eq("is_available", true)
-      .order("date", { ascending: true })
-      .order("time", { ascending: true })
-      .then(async ({ data }) => {
-        setAvailableSlots(data || []);
-        // Get all closer ids
-        const closerIds = Array.from(new Set((data || []).map(s => s.closer_id)));
-        // Fetch closer profile names (with fallback)
-        if (closerIds.length) {
-          const { data: profiles } = await supabase
-            .from("profiles")
-            .select("id, full_name")
-            .in("id", closerIds);
+    if (availableSlots.length === 0) {
+      setClosers({});
+      return;
+    }
+    const closerIds = Array.from(new Set((availableSlots || []).map(s => s.closer_id)));
+    if (closerIds.length) {
+      supabase
+        .from("profiles")
+        .select("id, full_name")
+        .in("id", closerIds)
+        .then(({ data: profiles }) => {
           const closerMap: { [closerId: string]: string } = {};
-          profiles?.forEach((prof: any) => {
+          (profiles || []).forEach((prof: any) => {
             closerMap[prof.id] = prof.full_name || "Unknown Closer";
           });
           setClosers(closerMap);
-        }
-      });
-  }, []);
+        });
+    }
+  }, [availableSlots]);
 
   // Given selected slot, find closer id and name + time zone
   let selectedCloserName = "N/A";
@@ -113,13 +111,19 @@ export default function StrategyCallForm() {
     setIsSubmitting(false);
     if (success) {
       toast.success("Booking successful! Confirmation email sent.");
-      setAvailableSlots((prev) =>
-        prev.filter((s) => s.id !== slot.id)
-      );
+      // No need to manually remove slot, real-time will update availableSlots
       setStep(3);
     } else {
       toast.error(bookingError || "Booking failed. Please try again.");
     }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[320px] text-primary">
+        <span className="animate-pulse text-lg font-semibold">Loading available slots…</span>
+      </div>
+    );
   }
 
   if (availableSlots.length === 0) {

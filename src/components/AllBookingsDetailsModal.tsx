@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import {
   Dialog,
@@ -47,16 +48,17 @@ export default function AllBookingsDetailsModal({
 
   if (!booking) return null;
 
+  // REPLACED/FIXED: TypeScript-safe version
   function handleField(
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
     >
   ) {
-    const { name } = e.target;
-    if (e.target instanceof HTMLInputElement && e.target.type === "checkbox") {
+    const { name, type } = e.target as HTMLInputElement;
+    if (type === "checkbox") {
       setForm((f: any) => ({
         ...f,
-        [name]: e.target.checked,
+        [name]: (e.target as HTMLInputElement).checked,
       }));
     } else {
       setForm((f: any) => ({
@@ -358,5 +360,3 @@ export default function AllBookingsDetailsModal({
     </Dialog>
   );
 }
-
-// End of file. This file is now VERY LONG. Please consider splitting these 3 field components into their own files for maintainability! Let me know if you want to proceed.

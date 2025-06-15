@@ -1,44 +1,34 @@
+
 import React, { useMemo, useState } from "react";
 import CloserSidebar from "@/components/CloserSidebar";
 import { useCloserBookings } from "@/hooks/useCloserBookings";
 import { Card } from "@/components/ui/card";
-import { PhoneCall, Handshake, CalendarClock, UserCheck2, LogOut, User, Filter } from "lucide-react";
+import { PhoneCall, Handshake, CalendarClock, UserCheck2, LogOut, User } from "lucide-react";
 import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useUserProfileWithRole } from "@/hooks/useUserProfileWithRole";
-
-const STATUS_OPTIONS = [
-  { label: "All", value: "" },
-  { label: "Completed", value: "Completed" },
-  { label: "Booked", value: "Booked" },
-  { label: "Available", value: "Available" },
-  { label: "Closed", value: "Closed" },
-  { label: "No Show Up", value: "No Show Up" },
-  { label: "Not Started Yet", value: "Not Started Yet" },
-];
+import { useCloserSlots } from "@/hooks/useCloserSlots";
 
 export default function CloserPanel() {
-  const { bookings, isLoading, filter, setFilter, clearFilter } = useCloserBookings();
+  const { bookings, isLoading } = useCloserBookings();
   const { user, logout } = useSupabaseAuth();
   const navigate = useNavigate();
   const { profile, loading: profileLoading } = useUserProfileWithRole();
 
-  // STATUS FILTER HANDLING
-  const [statusFilter, setStatusFilter] = useState(""); // status value: "" is "all"
-  const filteredBookings = useMemo(() => {
-    if (!statusFilter) return bookings;
-    // matches either call_status or deal_status (case-insensitive)
-    return bookings.filter(
-      (b) =>
-        (b.call_status && b.call_status.toLowerCase() === statusFilter.toLowerCase()) ||
-        (b.deal_status && b.deal_status.toLowerCase() === statusFilter.toLowerCase())
-    );
-  }, [bookings, statusFilter]);
+  // SLOTS DATA FOR SLOT STATS
+  const { slots, isLoading: slotsLoading } = useCloserSlots();
+  const slotStats = useMemo(() => {
+    if (!slots) return { total: 0, available: 0, booked: 0 };
+    const total = slots.length;
+    const available = slots.filter(s => s.is_available).length;
+    const booked = total - available;
+    return { total, available, booked };
+  }, [slots]);
 
-  // Memoize stats for speed (use filteredBookings for stats)
+  // BOOKING STATS
   const stats = useMemo(() => {
-    if (!filteredBookings) return {
+    if (!bookings) return {
       total: 0,
       completed: 0,
       closed: 0,
@@ -46,44 +36,63 @@ export default function CloserPanel() {
       noShow: 0,
     };
     return {
-      total: filteredBookings.length,
-      completed: filteredBookings.filter(b => b.call_status === "Completed").length,
-      closed: filteredBookings.filter(b => (b.deal_status ?? "").toLowerCase() === "closed").length,
-      rescheduled: filteredBookings.filter(b => b.reschedule_date || b.follow_up_call_date).length,
-      noShow: filteredBookings.filter(b => b.call_status === "No Show Up").length,
+      total: bookings.length,
+      completed: bookings.filter(b => b.call_status === "Completed").length,
+      closed: bookings.filter(b => (b.deal_status ?? "").toLowerCase() === "closed").length,
+      rescheduled: bookings.filter(b => b.reschedule_date || b.follow_up_call_date).length,
+      noShow: bookings.filter(b => b.call_status === "No Show Up").length,
     };
-  }, [filteredBookings]);
+  }, [bookings]);
 
+  // BUILD CARDS
   const statCards = [
     {
-      label: "Total Bookings",
-      icon: <PhoneCall className="text-primary" size={30} />,
-      value: stats.total,
+      label: "Total Slots",
+      icon: <PhoneCall className="text-primary" size={28} />,
+      value: slotsLoading ? "…" : slotStats.total,
       color: "bg-primary/10"
     },
     {
-      label: "Completed Calls",
-      icon: <UserCheck2 className="text-green-600" size={30} />,
-      value: stats.completed,
+      label: "Available Slots",
+      icon: <UserCheck2 className="text-green-600" size={28} />,
+      value: slotsLoading ? "…" : slotStats.available,
       color: "bg-green-100"
     },
     {
-      label: "Closed Deals",
-      icon: <Handshake className="text-blue-700" size={30} />,
-      value: stats.closed,
+      label: "Booked Calls",
+      icon: <Handshake className="text-blue-700" size={28} />,
+      value: slotsLoading ? "…" : slotStats.booked,
       color: "bg-blue-100"
     },
     {
+      label: "Total Bookings",
+      icon: <PhoneCall className="text-primary" size={28} />,
+      value: isLoading ? "…" : stats.total,
+      color: "bg-accent/10"
+    },
+    {
+      label: "Completed Calls",
+      icon: <UserCheck2 className="text-green-600" size={28} />,
+      value: isLoading ? "…" : stats.completed,
+      color: "bg-green-50"
+    },
+    {
+      label: "Closed Deals",
+      icon: <Handshake className="text-blue-700" size={28} />,
+      value: isLoading ? "…" : stats.closed,
+      color: "bg-blue-50"
+    },
+    {
       label: "Reschedules",
-      icon: <CalendarClock className="text-orange-500" size={30} />,
-      value: stats.rescheduled,
-      color: "bg-orange-100"
+      icon: <CalendarClock className="text-orange-500" size={28} />,
+      value: isLoading ? "…" : stats.rescheduled,
+      color: "bg-orange-50"
     },
     {
       label: "No Shows",
-      icon: <PhoneCall className="text-destructive" size={30} />,
-      value: stats.noShow,
-      color: "bg-red-100"
+      icon: <PhoneCall className="text-destructive" size={28} />,
+      value: isLoading ? "…" : stats.noShow,
+      color: "bg-red-50"
     },
   ];
 
@@ -108,17 +117,17 @@ export default function CloserPanel() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col md:flex-row bg-gradient-to-br from-accent-light to-secondary">
+    <div className="flex flex-col md:flex-row min-h-screen bg-gradient-to-br from-accent-light to-secondary">
       <CloserSidebar />
       <div
         className="flex-1 p-3 md:p-8 overflow-y-auto max-h-screen"
-        style={{ minHeight: 0 }} // Ensures that the area can shrink for scrolling
+        style={{ minHeight: 0 }}
       >
         {/* Header: Welcome & Logout */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-3">
             <User className="text-primary" />
-            <h2 className="text-xl font-bold">
+            <h2 className="text-xl font-bold leading-tight sm:text-2xl">
               Welcome, <span className="text-accent">{displayName}</span>
               <span className="ml-2 text-base font-normal text-muted-foreground">
                 (Role: {displayRole})
@@ -134,66 +143,41 @@ export default function CloserPanel() {
             Logout
           </Button>
         </div>
-        <h1 className="text-3xl font-bold mb-6 animate-fade-in">Closer Dashboard</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold mb-4 animate-fade-in">
+          Closer Dashboard
+        </h1>
 
-        {/* STATUS FILTER BAR */}
-        <div className="flex items-center gap-3 mb-4">
-          <Filter size={20} className="text-accent" />
-          <label htmlFor="status-filter" className="text-base font-medium text-accent">Status:</label>
-          <select
-            id="status-filter"
-            value={statusFilter}
-            onChange={e => setStatusFilter(e.target.value)}
-            className="border rounded px-2 py-1 text-base"
-          >
-            {STATUS_OPTIONS.map(opt => (
-              <option value={opt.value} key={opt.value || "all"}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
-          {statusFilter && (
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => setStatusFilter("")}
-            >
-              Clear
-            </Button>
-          )}
-          <span className="ml-3 text-sm text-muted-foreground">
-            Showing <span className="font-semibold text-accent">{filteredBookings.length}</span> booking(s)
-          </span>
-        </div>
-
-        <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 mb-10 animate-fade-in">
+        {/* DASHBOARD STAT CARDS */}
+        <div className="w-full grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6 mb-8 animate-fade-in">
           {statCards.map((s, i) => (
             <Card
               key={i}
-              className={`flex flex-col gap-2 items-center py-6 px-3 shadow-xl border-2 border-accent/20 ${s.color} hover:scale-105 transition-transform duration-200`}
+              className={`flex flex-col gap-1 items-center py-5 px-2 md:py-6 md:px-3 shadow-lg border border-accent/20 ${s.color}
+                hover:scale-105 transition-transform duration-150`}
             >
               <span>{s.icon}</span>
-              <span className="text-5xl font-extrabold">{isLoading ? "…" : s.value}</span>
-              <span className="text-lg font-semibold">{s.label}</span>
+              <span className="text-2xl md:text-4xl font-extrabold">{s.value}</span>
+              <span className="text-xs md:text-base font-semibold text-center">{s.label}</span>
             </Card>
           ))}
         </div>
-        {/* Responsive cards */}
-        <div className="grid gap-8 grid-cols-1 sm:grid-cols-2">
-          <div className="bg-card rounded-lg shadow p-6 flex flex-col justify-between hover-scale">
-            <h2 className="font-semibold text-lg mb-2">Manage Your Time Slots</h2>
-            <p className="text-gray-500 mb-4">Keep your availability up to date so clients can book you!</p>
+
+        {/* Responsive dashboard links/cards */}
+        <div className="grid gap-6 grid-cols-1 md:grid-cols-2 mb-10 animate-fade-in">
+          <div className="bg-card rounded-lg shadow p-4 md:p-6 flex flex-col justify-between hover-scale min-h-[140px]">
+            <h2 className="font-semibold text-base md:text-lg mb-1 md:mb-2">Manage Your Time Slots</h2>
+            <p className="text-gray-500 mb-2 md:mb-4 text-sm md:text-base">Keep your availability up to date so clients can book you!</p>
             <a
               href="/closer-timeslot"
-              className="bg-primary text-white px-4 py-2 rounded hover:bg-primary/80 text-center story-link"
+              className="bg-primary text-white px-3 py-2 rounded hover:bg-primary/80 text-center story-link text-sm md:text-base"
             >Go to Time Slots</a>
           </div>
-          <div className="bg-card rounded-lg shadow p-6 flex flex-col hover-scale">
-            <h2 className="font-semibold text-lg mb-2">View Bookings</h2>
-            <p className="text-gray-500 mb-4">See who has booked a call with you and plan follow-ups.</p>
+          <div className="bg-card rounded-lg shadow p-4 md:p-6 flex flex-col hover-scale min-h-[140px]">
+            <h2 className="font-semibold text-base md:text-lg mb-1 md:mb-2">View Bookings</h2>
+            <p className="text-gray-500 mb-2 md:mb-4 text-sm md:text-base">See who has booked a call with you and plan follow-ups.</p>
             <a
               href="/closer-bookings"
-              className="bg-primary text-white px-4 py-2 rounded hover:bg-primary/80 text-center story-link"
+              className="bg-primary text-white px-3 py-2 rounded hover:bg-primary/80 text-center story-link text-sm md:text-base"
             >Go to Bookings</a>
           </div>
         </div>
@@ -201,3 +185,5 @@ export default function CloserPanel() {
     </div>
   );
 }
+
+// ... end of file

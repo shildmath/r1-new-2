@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -27,12 +26,10 @@ export function useAdminBookings() {
 
   const fetchBookings = async () => {
     setIsLoading(true);
-
-    // Get current user
     const { data: userResult } = await supabase.auth.getUser();
     const userId = userResult?.user?.id;
-    console.log("useAdminBookings – Current user ID (supabase.auth.getUser):", userId);
 
+    // Updated join to be sure: fetch all closer fields for real-time closer info
     const { data, error } = await supabase
       .from("bookings")
       .select(
@@ -43,7 +40,6 @@ export function useAdminBookings() {
       )
       .order("created_at", { ascending: false });
 
-    console.log("useAdminBookings – Supabase data:", data);
     if (error) {
       console.error("useAdminBookings – Supabase error:", error);
     }
@@ -64,12 +60,12 @@ export function useAdminBookings() {
           call_status: b.call_status,
           deal_status: b.deal_status,
           created_at: b.created_at,
-          closer_id: b.slot?.closer?.id,
+          closer_id: b.slot?.closer?.id ?? b.slot?.closer_id ?? "-",
           closer_name: b.slot?.closer?.full_name || "-",
           closer_email: b.slot?.closer?.email || "-",
+          // You can expand here with more fields if added in the future
         }))
       );
-      console.log("useAdminBookings – Final mapped bookings:", data);
     } else {
       setBookings([]);
     }

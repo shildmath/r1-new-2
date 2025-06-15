@@ -42,6 +42,7 @@ export default function CloserSlotManager() {
   const [form, setForm] = useState({ date: "", time: "", time_zone: "Etc/GMT" });
   const [isSubmitting, setIsSubmitting] = useState(false); // Optional: disable button on submit
   const [editSlot, setEditSlot] = useState<any | null>(null); // Track slot being edited
+  const [statusFilter, setStatusFilter] = useState("");
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
@@ -119,13 +120,48 @@ export default function CloserSlotManager() {
     );
   }
 
-  // Mobile slot card UI
-  if (!isLoading && slots.length > 0 && window.innerWidth < 640) {
+  // Apply status filter
+  const filteredSlots = React.useMemo(() => {
+    if (!slots) return [];
+    if (!statusFilter) return slots;
+    if (statusFilter === "available") {
+      return slots.filter((s) => s.is_available);
+    }
+    if (statusFilter === "booked") {
+      return slots.filter((s) => !s.is_available);
+    }
+    return slots;
+  }, [slots, statusFilter]);
+
+  // ---- MOBILE VIEW ----
+  if (!isLoading && filteredSlots.length > 0 && window.innerWidth < 640) {
     return (
       <>
-        {/* Mobile view slot cards */}
+        {/* NEW: Status filter */}
+        <div className="flex items-center gap-2 mb-2">
+          <label htmlFor="slot-status-filter" className="text-sm font-medium text-accent">Status:</label>
+          <select
+            id="slot-status-filter"
+            value={statusFilter}
+            onChange={e => setStatusFilter(e.target.value)}
+            className="border rounded px-2 py-1"
+          >
+            <option value="">All</option>
+            <option value="available">Available</option>
+            <option value="booked">Booked</option>
+          </select>
+          {statusFilter && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setStatusFilter("")}
+            >
+              Clear
+            </Button>
+          )}
+        </div>
         <div className="grid gap-3 sm:hidden">
-          {slots.map(slot => (
+          {filteredSlots.map(slot => (
             <div key={slot.id} className="bg-white rounded-xl border border-accent shadow p-4 flex flex-col animate-fade-in">
               <div className="flex items-center justify-between mb-1">
                 <div className="flex items-center gap-2 text-accent font-semibold">
@@ -217,10 +253,30 @@ export default function CloserSlotManager() {
     );
   }
 
-  // Desktop/tablet table UI
+  // ---- DESKTOP/TABLET VIEW ----
   return (
     <div className="w-full">
+      {/* NEW: Status filter */}
       <div className="flex flex-wrap items-center gap-3 mb-4 justify-between">
+        <div className="flex items-center gap-2">
+          <label htmlFor="slot-status-filter" className="text-base font-medium text-accent">Status:</label>
+          <select
+            id="slot-status-filter"
+            value={statusFilter}
+            onChange={e => setStatusFilter(e.target.value)}
+            className="border rounded px-2 py-1 text-base"
+          >
+            <option value="">All</option>
+            <option value="available">Available</option>
+            <option value="booked">Booked</option>
+          </select>
+          {statusFilter && (
+            <Button size="sm" variant="outline" onClick={() => setStatusFilter("")}>
+              Clear
+            </Button>
+          )}
+        </div>
+        {/* Existing date filter and Add Slot form remain untouched */}
         <form className="flex flex-row gap-2" onSubmit={handleAddSlot}>
           <input
             type="date"
@@ -266,6 +322,7 @@ export default function CloserSlotManager() {
           </Button>
         </div>
       </div>
+      {/* Slot Table */}
       <div className="rounded-xl shadow overflow-x-auto bg-white border border-accent/10">
         {isLoading ? (
           <div className="p-8 text-center text-accent animate-pulse">Loading slots...</div>
@@ -281,14 +338,14 @@ export default function CloserSlotManager() {
               </tr>
             </thead>
             <tbody>
-              {slots.length === 0 ? (
+              {filteredSlots.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="text-center py-6">
                     No slots found.
                   </td>
                 </tr>
               ) : (
-                slots.map((slot) => (
+                filteredSlots.map((slot) => (
                   <tr key={slot.id} className="border-t transition-colors hover:bg-accent/10">
                     <td className="p-2 font-medium">
                       <span className="flex items-center gap-1">

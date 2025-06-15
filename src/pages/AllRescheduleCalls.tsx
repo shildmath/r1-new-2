@@ -1,4 +1,3 @@
-
 import React, { useMemo, useState } from "react";
 import AdminSidebar from "@/components/AdminSidebar";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
@@ -77,7 +76,7 @@ export default function AllRescheduleCalls() {
     "Phone": b.phone,
     "Slot Date": b.slot_date,
     "Slot Time": b.slot_time,
-    "Time Zone": b.slot?.time_zone ?? "UTC",
+    "Time Zone": b.slot_time_zone,
     "Call Status": b.call_status,
     "Deal Status": b.deal_status,
     "Closed Date": b.closed_date,
@@ -185,7 +184,7 @@ export default function AllRescheduleCalls() {
                         <tr key={b.id} className="border-t transition-colors hover:bg-accent/10">
                           <td className="p-2 font-medium">{b.slot_date}</td>
                           <td className="p-2">{b.slot_time}</td>
-                          <td className="p-2">{b.slot?.time_zone ?? "UTC"}</td>
+                          <td className="p-2">{b.slot_time_zone}</td>
                           <td className="p-2">{b.first_name} {b.last_name}</td>
                           <td className="p-2">{b.email}</td>
                           <td className="p-2">{b.phone}</td>

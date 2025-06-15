@@ -15,6 +15,22 @@ export interface AdminBooking {
   phone: string;
   call_status: string;
   deal_status: string;
+  closed_date?: string;
+  follow_up_call_date?: string;
+  reschedule_date?: string;
+  payment_link_sent?: string;
+  contract_link_sent?: string;
+  invoice_sent?: string;
+  invoice_sent_date?: string;
+  contract_sent?: string;
+  contract_sent_date?: string;
+  offer_made?: string;
+  ad_spend?: string;
+  country_area?: string;
+  zip_code?: string;
+  recording_link?: string;
+  note?: string;
+  additional_info?: string;
   created_at: string;
   closer_id: string;
   closer_name: string;
@@ -28,11 +44,9 @@ export function useAdminBookings() {
   const fetchBookings = async () => {
     setIsLoading(true);
 
-    // Enhanced join with extra debugging
     const { data, error } = await supabase
       .from("bookings")
-      .select(
-        `
+      .select(`
         *,
         slot:time_slots(
           id,
@@ -43,8 +57,7 @@ export function useAdminBookings() {
           closer_id,
           closer:profiles(id, full_name, email)
         )
-        `
-      )
+      `)
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -54,31 +67,24 @@ export function useAdminBookings() {
     if (!error && data) {
       setBookings(
         data.map((b: any) => {
-          // Fallbacks and clear diagnostics for missing closer info
           let closer_name = "-";
           let closer_email = "-";
           let closer_id = b?.slot?.closer_id || "-";
-          // Try nested join first
           if (b.slot?.closer) {
             closer_name = b.slot.closer.full_name || "No closer name in profile";
             closer_email = b.slot.closer.email || "No closer email in profile";
-          }
-          // Fallback: if no profile, still show the closer_id (for admin diagnosis)
-          else if (closer_id && closer_id !== "-") {
+          } else if (closer_id && closer_id !== "-") {
             closer_name = "[Missing closer profile]";
             closer_email = "[Missing closer profile]";
           } else {
             closer_name = "No closer assigned";
             closer_email = "No closer assigned";
           }
-
-          // Optional console logs for easier debugging
           if (!b.slot?.closer && process.env.NODE_ENV !== "production") {
             console.warn(
               `Booking ${b.id} (slot_id: ${b.slot_id}) has no closer profile linked. closer_id: ${closer_id}`
             );
           }
-
           return {
             id: b.id,
             slot_id: b.slot_id,
@@ -92,6 +98,22 @@ export function useAdminBookings() {
             phone: b.phone,
             call_status: b.call_status,
             deal_status: b.deal_status,
+            closed_date: b.closed_date ?? "",
+            follow_up_call_date: b.follow_up_call_date ?? "",
+            reschedule_date: b.reschedule_date ?? "",
+            payment_link_sent: b.payment_link_sent ?? "",
+            contract_link_sent: b.contract_link_sent ?? "",
+            invoice_sent: b.invoice_sent ?? "",
+            invoice_sent_date: b.invoice_sent_date ?? "",
+            contract_sent: b.contract_sent ?? "",
+            contract_sent_date: b.contract_sent_date ?? "",
+            offer_made: b.offer_made ?? "",
+            ad_spend: b.ad_spend ?? "",
+            country_area: b.country_area ?? "",
+            zip_code: b.zip_code ?? "",
+            recording_link: b.recording_link ?? "",
+            note: b.note ?? "",
+            additional_info: b.additional_info ?? "",
             created_at: b.created_at,
             closer_id,
             closer_name,
@@ -111,4 +133,3 @@ export function useAdminBookings() {
 
   return { bookings, isLoading, refresh: fetchBookings };
 }
-

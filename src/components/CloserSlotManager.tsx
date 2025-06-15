@@ -1,19 +1,20 @@
+
 import React, { useState } from "react";
 import { useCloserSlots } from "@/hooks/useCloserSlots";
 import { CalendarDays, Filter, LayoutPanelLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-// Add import for the list of IANA time zones
-import { IANA_TIME_ZONES } from "@/utils/timezones";
 
-// Add favorite zones at top of dropdown (label + IANA value)
-const FAVORITE_TIME_ZONES = [
+// Only show this set of zones (matches image and user request)
+const SIMPLE_TIME_ZONES = [
   { label: "Greenwich Mean Time (GMT)", value: "Etc/GMT" },
   { label: "British Summer Time (BST)", value: "Europe/London" },
   { label: "Eastern Time (ET)", value: "America/New_York" },
   { label: "Central Time (CT)", value: "America/Chicago" },
   { label: "Mountain Time (MT)", value: "America/Denver" },
   { label: "Pacific Time (PT)", value: "America/Los_Angeles" },
+  { label: "SEPARATOR", value: "SEPARATOR" },
+  { label: "UTC", value: "UTC" },
 ];
 
 export default function CloserSlotManager() {
@@ -27,7 +28,7 @@ export default function CloserSlotManager() {
     setFilter,
     clearFilter,
   } = useCloserSlots();
-  const [form, setForm] = useState({ date: "", time: "", time_zone: "UTC" });
+  const [form, setForm] = useState({ date: "", time: "", time_zone: "Etc/GMT" });
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
@@ -35,32 +36,29 @@ export default function CloserSlotManager() {
 
   async function handleAddSlot(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.date || !form.time || !form.time_zone) {
+    if (!form.date || !form.time || !form.time_zone || form.time_zone === "SEPARATOR") {
       toast.error("Please provide date, time, and time zone.");
       return;
     }
     const ok = await addSlot(form.date, form.time, form.time_zone);
-    if (ok) setForm({ date: "", time: "", time_zone: "UTC" });
+    if (ok) setForm({ date: "", time: "", time_zone: "Etc/GMT" });
   }
 
-  // Function to get dropdown options
+  // Render only the whitelisted time zones, with separator for "UTC"
   function renderTimeZoneOptions() {
-    // Filter out favorites from the IANA list to avoid duplicates
-    const favoriteValues = new Set(FAVORITE_TIME_ZONES.map(fav => fav.value));
-    const filteredIanaZones = IANA_TIME_ZONES.filter(tz => !favoriteValues.has(tz));
     return (
       <>
-        {FAVORITE_TIME_ZONES.map((tz) => (
-          <option value={tz.value} key={tz.value + "-fav"}>
-            {tz.label}
-          </option>
-        ))}
-        <option disabled>──────────</option>
-        {filteredIanaZones.map((tz) => (
-          <option value={tz} key={tz}>
-            {tz}
-          </option>
-        ))}
+        {SIMPLE_TIME_ZONES.map((tz) =>
+          tz.value === "SEPARATOR" ? (
+            <option key="sep" disabled>
+              ──────────
+            </option>
+          ) : (
+            <option value={tz.value} key={tz.value}>
+              {tz.label}
+            </option>
+          )
+        )}
       </>
     );
   }
@@ -261,3 +259,4 @@ export default function CloserSlotManager() {
 }
 
 // The file is now getting quite long. Consider refactoring it into smaller, focused components for better maintainability!
+

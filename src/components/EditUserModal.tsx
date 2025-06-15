@@ -45,6 +45,7 @@ const EditUserModal: React.FC<Props> = ({ user, open, onOpenChange, onUserUpdate
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+
     // 1. Update profiles
     const { error: profileError } = await supabase.from("profiles").update({
       email,
@@ -57,16 +58,27 @@ const EditUserModal: React.FC<Props> = ({ user, open, onOpenChange, onUserUpdate
       return;
     }
 
-    // 2. Upsert user_roles
-    const { error: roleError } = await supabase.from("user_roles").upsert({
-      user_id: user.id,
-      role,
-    });
+    // 2. Upsert user_roles, but use onConflict: 'user_id'
+    const { error: roleError } = await supabase.from("user_roles").upsert(
+      {
+        user_id: user.id,
+        role,
+      },
+      { onConflict: "user_id" }
+    );
+
     if (roleError) {
       toast({ title: "Error", description: roleError.message, variant: "destructive" });
       setLoading(false);
       return;
     }
+
+    // 3. Ensure only one role per user: delete any user_roles for this user that don't match the new role
+    await supabase
+      .from("user_roles")
+      .delete()
+      .eq("user_id", user.id)
+      .neq("role", role);
 
     toast({ title: "User updated!" });
     setLoading(false);

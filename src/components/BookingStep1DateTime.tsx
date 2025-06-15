@@ -1,10 +1,11 @@
+
 import { motion } from "framer-motion";
 import { Calendar, Clock } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar as ShadcnCalendar } from "@/components/ui/calendar";
 
-// Define mapping: IANA ID => Friendly Label for /strategy-call UI and slot manager
+// Define mapping: IANA ID => Friendly Label
 const TIME_ZONE_LABELS: Record<string, string> = {
   "Etc/GMT": "Greenwich Mean Time (GMT)",
   "Europe/London": "British Summer Time (BST)",
@@ -17,9 +18,9 @@ const TIME_ZONE_LABELS: Record<string, string> = {
 
 type TimeSlot = {
   id: string;
-  date: string; // ISO date string e.g., "2025-06-15"
-  time: string; // e.g., "10:00 AM"
-  time_zone?: string; // add optional time_zone field
+  date: string;
+  time: string;
+  time_zone?: string;
 }
 
 type BookingStep1DateTimeProps = {
@@ -30,7 +31,7 @@ type BookingStep1DateTimeProps = {
   onContinue: () => void;
   availableSlots: TimeSlot[];
   showTimeZone?: boolean;
-  timeZoneForSelectedDate?: string; // picked up for currently selected slot
+  timeZoneForSelectedDate?: string;
 };
 
 export default function BookingStep1DateTime({
@@ -54,13 +55,11 @@ export default function BookingStep1DateTime({
       ? availableSlots.filter((slot) => slot.date === selectedDateStr)
       : [];
 
-  // Map of time => time zone (prefer friendly label)
-  const timeZoneMap = Object.fromEntries(
-    slotsForSelectedDate.map((slot) => [
-      slot.time,
-      TIME_ZONE_LABELS[slot.time_zone ?? "UTC"] || slot.time_zone || "UTC"
-    ])
-  );
+  // Map time => slot
+  const timeSlotMap: Record<string, TimeSlot> = {};
+  slotsForSelectedDate.forEach(slot => {
+    timeSlotMap[slot.time] = slot;
+  });
 
   // Use Set to display unique times
   const shownTimes = Array.from(new Set(slotsForSelectedDate.map(slot => slot.time)));
@@ -83,7 +82,6 @@ export default function BookingStep1DateTime({
             onSelect={setSelectedDate}
             initialFocus
             className="p-3 pointer-events-auto"
-            // Disable past dates and those that do not exist in any availableSlot
             disabled={(date) => {
               const dateStr = date.toISOString().split("T")[0];
               const today = new Date();
@@ -113,29 +111,37 @@ export default function BookingStep1DateTime({
             <div className="text-gray-500 text-sm">No available time slots for this day.</div>
           ) : (
             <div className="grid grid-cols-2 gap-3">
-              {shownTimes.map((time) => (
-                <Button
-                  key={time}
-                  type="button"
-                  variant={selectedTime === time ? "default" : "outline"}
-                  className={selectedTime === time ? "bg-accent text-white" : ""}
-                  onClick={() => setSelectedTime(time)}
-                >
-                  {time}
-                  {/* Show friendly label if enabled */}
-                  {showTimeZone && timeZoneMap[time] ? (
-                    <span className="block text-xs text-muted-foreground ml-2">
-                      {timeZoneMap[time]}
+              {shownTimes.map((time) => {
+                const slot = timeSlotMap[time];
+                const friendlyTz = slot?.time_zone
+                  ? (TIME_ZONE_LABELS[slot.time_zone] ?? slot.time_zone)
+                  : "UTC";
+                const isSelected = selectedTime === time;
+                return (
+                  <Button
+                    key={time}
+                    type="button"
+                    variant={isSelected ? "default" : "outline"}
+                    className={`
+                      flex flex-col items-start justify-center px-4 py-2 h-16 rounded-md border
+                      ${isSelected ? "bg-accent text-white border-accent" : "bg-white border-muted"}
+                      shadow-sm transition-colors
+                    `}
+                    onClick={() => setSelectedTime(time)}
+                  >
+                    <span className={`text-base font-bold leading-5 ${isSelected ? "" : "text-primary"}`}>{time}</span>
+                    <span className={`text-xs ${isSelected ? "text-white/80" : "text-muted-foreground"} mt-1`}>
+                      {friendlyTz}
                     </span>
-                  ) : null}
-                </Button>
-              ))}
+                  </Button>
+                );
+              })}
             </div>
           )}
           {/* Selected time zone display */}
-          {showTimeZone && selectedTime && timeZoneMap[selectedTime] ? (
+          {showTimeZone && selectedTime && timeSlotMap[selectedTime]?.time_zone ? (
             <div className="mt-2 text-xs text-blue-600">
-              <b>Selected time zone:</b> {timeZoneMap[selectedTime]}
+              <b>Selected time zone:</b> {TIME_ZONE_LABELS[timeSlotMap[selectedTime].time_zone] ?? timeSlotMap[selectedTime].time_zone}
             </div>
           ) : null}
           <div className="mt-5">

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useCloserBookings } from "@/hooks/useCloserBookings";
 import { Button } from "@/components/ui/button";
@@ -28,6 +27,17 @@ export default function CloserBookingsTable({ showTimeZoneColumn = false }: { sh
     infoMessage = "No bookings found for your slots. Make sure that you (the closer) have time slots with bookings and that your user is authenticated correctly. If this issue persists, check slot and booking data in Supabase.";
   }
 
+  // Add the same label dictionary here for consistency:
+  const TIME_ZONE_LABELS: Record<string, string> = {
+    "Etc/GMT": "Greenwich Mean Time (GMT)",
+    "Europe/London": "British Summer Time (BST)",
+    "America/New_York": "Eastern Time (ET)",
+    "America/Chicago": "Central Time (CT)",
+    "America/Denver": "Mountain Time (MT)",
+    "America/Los_Angeles": "Pacific Time (PT)",
+    "UTC": "UTC",
+  };
+
   // Mobile card view
   if (!isLoading && bookings.length > 0 && window.innerWidth < 640) {
     // Responsive card display for small screens
@@ -46,7 +56,9 @@ export default function CloserBookingsTable({ showTimeZoneColumn = false }: { sh
               <div className="text-sm"><span className="font-semibold">Email:</span> {b.email}</div>
               <div className="text-sm"><span className="font-semibold">Phone:</span> {b.phone}</div>
               <div className="text-sm"><span className="font-semibold">Closer Mail:</span> {b.closer_email ?? "-"}</div>
-              <div className="text-sm"><span className="font-semibold">Time Zone:</span> {b.slot?.time_zone ?? "UTC"}</div>
+              <div className="text-sm">
+                <span className="font-semibold">Time Zone:</span> {TIME_ZONE_LABELS[b.slot?.time_zone ?? "UTC"] ?? b.slot?.time_zone ?? "UTC"}
+              </div>
             </div>
             <Button
               size="sm"
@@ -116,7 +128,7 @@ export default function CloserBookingsTable({ showTimeZoneColumn = false }: { sh
                   <td className="p-2 font-medium">{b.slot_date}</td>
                   <td className="p-2">{b.slot_time}</td>
                   {showTimeZoneColumn && (
-                    <td className="p-2">{b.slot?.time_zone ?? "UTC"}</td>
+                    <td className="p-2">{TIME_ZONE_LABELS[b.slot?.time_zone ?? "UTC"] ?? b.slot?.time_zone ?? "UTC"}</td>
                   )}
                   <td className="p-2">{b.first_name} {b.last_name}</td>
                   <td className="p-2">{b.email}</td>

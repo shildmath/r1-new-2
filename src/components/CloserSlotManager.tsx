@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useCloserSlots } from "@/hooks/useCloserSlots";
 import { CalendarDays, Filter, LayoutPanelLeft } from "lucide-react";
@@ -16,6 +15,17 @@ const SIMPLE_TIME_ZONES = [
   { label: "SEPARATOR", value: "SEPARATOR" },
   { label: "UTC", value: "UTC" },
 ];
+
+// -- Friendly label mapping (reuse same as booking step) --
+const TIME_ZONE_LABELS: Record<string, string> = {
+  "Etc/GMT": "Greenwich Mean Time (GMT)",
+  "Europe/London": "British Summer Time (BST)",
+  "America/New_York": "Eastern Time (ET)",
+  "America/Chicago": "Central Time (CT)",
+  "America/Denver": "Mountain Time (MT)",
+  "America/Los_Angeles": "Pacific Time (PT)",
+  "UTC": "UTC",
+};
 
 export default function CloserSlotManager() {
   const {
@@ -94,7 +104,7 @@ export default function CloserSlotManager() {
               <strong>Time:</strong> {slot.time}
             </div>
             <div className="mb-2 text-xs">
-              <strong>Time Zone:</strong> {slot.time_zone}
+              <strong>Time Zone:</strong> {TIME_ZONE_LABELS[slot.time_zone ?? "UTC"] ?? slot.time_zone ?? "UTC"}
             </div>
             <div className="flex flex-row gap-1 mt-1">
               <Button
@@ -234,7 +244,7 @@ export default function CloserSlotManager() {
                       </span>
                     </td>
                     <td className="p-2">{slot.time}</td>
-                    <td className="p-2 text-xs">{slot.time_zone}</td>
+                    <td className="p-2 text-xs">{TIME_ZONE_LABELS[slot.time_zone ?? "UTC"] ?? slot.time_zone ?? "UTC"}</td>
                     <td className="p-2">
                       {slot.is_available ? (
                         <span className="text-green-700 font-medium bg-green-100 rounded px-2 py-1">Available</span>

@@ -44,6 +44,14 @@ export default function CloserSlotManager() {
   const [editSlot, setEditSlot] = useState<any | null>(null); // Track slot being edited
   const [statusFilter, setStatusFilter] = useState("");
 
+  // ---- Slot STATS ----
+  const stats = React.useMemo(() => {
+    const total = slots?.length ?? 0;
+    const available = slots?.filter((s) => s.is_available).length ?? 0;
+    const booked = slots?.filter((s) => !s.is_available).length ?? 0;
+    return { total, available, booked };
+  }, [slots]);
+
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
   }
@@ -137,6 +145,21 @@ export default function CloserSlotManager() {
   if (!isLoading && filteredSlots.length > 0 && window.innerWidth < 640) {
     return (
       <>
+        {/* DASHBOARD STATS CARDS */}
+        <div className="flex gap-2 pb-2">
+          <div className="flex-1 bg-primary/10 p-3 rounded-lg text-center flex flex-col">
+            <span className="text-2xl font-bold text-primary">{stats.total}</span>
+            <span className="text-xs mt-1 text-accent-foreground font-medium">Total Slots</span>
+          </div>
+          <div className="flex-1 bg-green-100 p-3 rounded-lg text-center flex flex-col">
+            <span className="text-2xl font-bold text-green-700">{stats.available}</span>
+            <span className="text-xs mt-1 font-medium text-green-700">Available</span>
+          </div>
+          <div className="flex-1 bg-gray-200 p-3 rounded-lg text-center flex flex-col">
+            <span className="text-2xl font-bold text-gray-600">{stats.booked}</span>
+            <span className="text-xs mt-1 font-medium text-gray-600">Booked</span>
+          </div>
+        </div>
         {/* NEW: Status filter */}
         <div className="flex items-center gap-2 mb-2">
           <label htmlFor="slot-status-filter" className="text-sm font-medium text-accent">Status:</label>
@@ -256,6 +279,21 @@ export default function CloserSlotManager() {
   // ---- DESKTOP/TABLET VIEW ----
   return (
     <div className="w-full">
+      {/* DASHBOARD STATS CARDS */}
+      <div className="flex gap-4 mb-4">
+        <div className="flex-1 bg-primary/10 p-4 rounded-lg text-center flex flex-col">
+          <span className="text-3xl font-extrabold text-primary">{stats.total}</span>
+          <span className="text-base mt-1 text-accent-foreground font-medium">Total Slots</span>
+        </div>
+        <div className="flex-1 bg-green-100 p-4 rounded-lg text-center flex flex-col">
+          <span className="text-3xl font-extrabold text-green-700">{stats.available}</span>
+          <span className="text-base mt-1 font-medium text-green-700">Available</span>
+        </div>
+        <div className="flex-1 bg-gray-200 p-4 rounded-lg text-center flex flex-col">
+          <span className="text-3xl font-extrabold text-gray-600">{stats.booked}</span>
+          <span className="text-base mt-1 font-medium text-gray-600">Booked</span>
+        </div>
+      </div>
       {/* NEW: Status filter */}
       <div className="flex flex-wrap items-center gap-3 mb-4 justify-between">
         <div className="flex items-center gap-2">

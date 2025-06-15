@@ -5,7 +5,7 @@ import { CalendarClock, Filter } from "lucide-react";
 import { useAdminBookings } from "@/hooks/useAdminBookings";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import CloserBookingDetailsModal from "@/components/CloserBookingDetailsModal";
+import BookingExtraDetailsButton from "@/components/BookingExtraDetailsButton";
 import ExportButtons from "@/components/ExportButtons";
 
 export default function AllRescheduleCalls() {
@@ -102,7 +102,8 @@ export default function AllRescheduleCalls() {
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-accent-light to-secondary">
       <AdminSidebar />
-      <div className="flex-1 flex flex-col items-center p-6 gap-3">
+      {/* Add overflow to make area scrollable */}
+      <div className="flex-1 flex flex-col items-center p-6 gap-3 overflow-y-auto max-h-screen">
         <Card className="w-full max-w-6xl mb-8 shadow-xl border-2 border-accent/10 bg-white/95">
           <CardHeader className="flex flex-row items-center gap-3 pb-3">
             <CalendarClock size={32} className="text-accent animate-fade-in" />
@@ -194,23 +195,13 @@ export default function AllRescheduleCalls() {
                           <td className="p-2">{b.reschedule_date ?? "-"}</td>
                           <td className="p-2">{b.follow_up_call_date ?? "-"}</td>
                           <td className="p-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => setSelectedBooking(b)}
-                            >
-                              Extra Details
-                            </Button>
+                            <BookingExtraDetailsButton booking={b} ButtonLabel="Extra Details" />
                           </td>
                         </tr>
                       ))
                     )}
                   </tbody>
               </table>
-              <CloserBookingDetailsModal
-                booking={selectedBooking}
-                onClose={() => setSelectedBooking(null)}
-              />
             </div>
           </CardContent>
         </Card>

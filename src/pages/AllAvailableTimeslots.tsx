@@ -21,6 +21,7 @@ const AllAvailableTimeslots = () => {
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-accent-light to-secondary">
       <AdminSidebar />
+      {/* Make content area scrollable */}
       <div className="flex-1 flex flex-col items-center p-6 gap-3 animate-fade-in overflow-y-auto max-h-screen">
         <Card className="w-full max-w-5xl mb-8 shadow-xl border-2 border-accent/10 bg-white/95">
           <CardHeader className="flex flex-row items-center gap-3 pb-1">
@@ -83,5 +84,4 @@ const AllAvailableTimeslots = () => {
     </div>
   );
 };
-
 export default AllAvailableTimeslots;

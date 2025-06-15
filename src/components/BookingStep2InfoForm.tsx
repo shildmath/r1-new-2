@@ -1,3 +1,4 @@
+
 import { motion } from "framer-motion";
 import { User } from "lucide-react";
 import { format } from "date-fns";
@@ -6,6 +7,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+
+// Add time zone label mapping
+const TIME_ZONE_LABELS: Record<string, string> = {
+  "Etc/GMT": "Greenwich Mean Time (GMT)",
+  "Europe/London": "British Summer Time (BST)",
+  "America/New_York": "Eastern Time (ET)",
+  "America/Chicago": "Central Time (CT)",
+  "America/Denver": "Mountain Time (MT)",
+  "America/Los_Angeles": "Pacific Time (PT)",
+  "UTC": "UTC",
+};
 
 type BookingStep2InfoFormProps = {
   selectedDate: Date | undefined;
@@ -35,6 +47,12 @@ export default function BookingStep2InfoForm({
     setFormData({ ...formData, [name]: value });
   }
 
+  // Use friendly label for display
+  const friendlyTz =
+    timeZone && (TIME_ZONE_LABELS[timeZone] ?? undefined)
+      ? TIME_ZONE_LABELS[timeZone]
+      : timeZone || "UTC";
+
   return (
     <motion.div initial={{opacity: 0, y: 40}} animate={{opacity: 1, y: 0}} className="max-w-xl mx-auto">
       <Card>
@@ -51,7 +69,12 @@ export default function BookingStep2InfoForm({
             <div className="flex flex-wrap gap-6 text-blue-800 text-sm">
               <div><b>Date:</b> {selectedDate ? format(selectedDate, "PPP") : ""}</div>
               <div><b>Time:</b> {selectedTime}</div>
-              <div><b>TimeZone:</b> <span className="font-mono">{timeZone ?? "UTC"}</span></div>
+              <div>
+                <b>TimeZone:</b>{" "}
+                <span className="font-mono">
+                  {friendlyTz}
+                </span>
+              </div>
               <div><b>With:</b> {closerName}</div>
             </div>
           </div>

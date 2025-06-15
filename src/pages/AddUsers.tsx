@@ -14,6 +14,7 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
+import { supabase } from "@/integrations/supabase/client"; // <-- added import
 
 const AddUsers = () => {
   const { users, loading, error, addUser, fetchUsers } = useAdminUsers();
@@ -66,7 +67,7 @@ const AddUsers = () => {
     setEditError(null);
 
     // Step 1: Update profiles table
-    const { error: updateProfileErr } = await window.supabase
+    const { error: updateProfileErr } = await supabase // <-- replaced window.supabase
       .from("profiles")
       .update({
         full_name: editForm.name,
@@ -81,7 +82,7 @@ const AddUsers = () => {
     }
 
     // Step 2: Update user_roles
-    const { error: updateRoleErr } = await window.supabase
+    const { error: updateRoleErr } = await supabase // <-- replaced window.supabase
       .from("user_roles")
       .update({
         role: editForm.role,

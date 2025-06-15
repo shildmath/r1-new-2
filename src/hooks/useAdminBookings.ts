@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -26,16 +27,22 @@ export function useAdminBookings() {
 
   const fetchBookings = async () => {
     setIsLoading(true);
-    const { data: userResult } = await supabase.auth.getUser();
-    const userId = userResult?.user?.id;
 
-    // Updated join to be sure: fetch all closer fields for real-time closer info
+    // Enhanced join to guarantee closer name/email if available
     const { data, error } = await supabase
       .from("bookings")
       .select(
         `
         *,
-        slot:time_slots(id, date, time, time_zone, closer_id, is_available, closer:profiles(id, full_name, email))
+        slot:time_slots(
+          id,
+          date,
+          time,
+          time_zone,
+          is_available,
+          closer_id,
+          closer:profiles(id, full_name, email)
+        )
         `
       )
       .order("created_at", { ascending: false });
@@ -49,10 +56,10 @@ export function useAdminBookings() {
         data.map((b: any) => ({
           id: b.id,
           slot_id: b.slot_id,
-          slot_date: b.slot?.date,
-          slot_time: b.slot?.time,
+          slot_date: b.slot?.date || "-",
+          slot_time: b.slot?.time || "-",
           slot_time_zone: b.slot?.time_zone || "UTC",
-          is_available: b.slot?.is_available,
+          is_available: b.slot?.is_available ?? false,
           first_name: b.first_name,
           last_name: b.last_name,
           email: b.email,
@@ -60,10 +67,9 @@ export function useAdminBookings() {
           call_status: b.call_status,
           deal_status: b.deal_status,
           created_at: b.created_at,
-          closer_id: b.slot?.closer?.id ?? b.slot?.closer_id ?? "-",
+          closer_id: b.slot?.closer?.id || b.slot?.closer_id || "-",
           closer_name: b.slot?.closer?.full_name || "-",
           closer_email: b.slot?.closer?.email || "-",
-          // You can expand here with more fields if added in the future
         }))
       );
     } else {

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useAdminBookings } from "@/hooks/useAdminBookings";
 import { Button } from "@/components/ui/button";
@@ -40,8 +39,8 @@ export default function AllBookingsTable() {
             <div className="mb-2">
               <div className="text-sm"><span className="font-semibold">Email:</span> {b.email}</div>
               <div className="text-sm"><span className="font-semibold">Phone:</span> {b.phone}</div>
-              <div className="text-sm"><span className="font-semibold">Closer Name:</span> {b.closer_name ?? "-"}</div>
-              <div className="text-sm"><span className="font-semibold">Closer Email:</span> {b.closer_email ?? "-"}</div>
+              <div className="text-sm"><span className="font-semibold">Closer Name:</span> {b.closer_name || <span className="text-red-500">No closer info</span>}</div>
+              <div className="text-sm"><span className="font-semibold">Closer Email:</span> {b.closer_email || <span className="text-red-500">No closer info</span>}</div>
             </div>
             <Button
               size="sm"
@@ -53,7 +52,7 @@ export default function AllBookingsTable() {
             </Button>
           </div>
         ))}
-        {/* You can add a modal or sheet here for extra details */}
+        {/* Modal/sheet for extra details if needed */}
       </div>
     );
   }
@@ -96,8 +95,8 @@ export default function AllBookingsTable() {
                   <td className="p-2">{b.first_name} {b.last_name}</td>
                   <td className="p-2">{b.email}</td>
                   <td className="p-2">{b.phone}</td>
-                  <td className="p-2">{b.closer_name ?? "-"}</td>
-                  <td className="p-2">{b.closer_email ?? "-"}</td>
+                  <td className="p-2">{b.closer_name ?? <span className="text-red-500">No closer info</span>}</td>
+                  <td className="p-2">{b.closer_email ?? <span className="text-red-500">No closer info</span>}</td>
                   <td className="p-2">{b.call_status}</td>
                   <td className="p-2">{b.deal_status}</td>
                   <td className="p-2">{b.created_at}</td>
@@ -116,7 +115,7 @@ export default function AllBookingsTable() {
           </table>
         )}
       </div>
-      {/* You can add a modal or sheet here for extra details */}
+      {/* Modal/sheet for extra details if needed */}
     </div>
   );
 }

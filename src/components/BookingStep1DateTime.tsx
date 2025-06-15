@@ -4,6 +4,17 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar as ShadcnCalendar } from "@/components/ui/calendar";
 
+// Define mapping: IANA ID => Friendly Label for /strategy-call UI and slot manager
+const TIME_ZONE_LABELS: Record<string, string> = {
+  "Etc/GMT": "Greenwich Mean Time (GMT)",
+  "Europe/London": "British Summer Time (BST)",
+  "America/New_York": "Eastern Time (ET)",
+  "America/Chicago": "Central Time (CT)",
+  "America/Denver": "Mountain Time (MT)",
+  "America/Los_Angeles": "Pacific Time (PT)",
+  "UTC": "UTC",
+};
+
 type TimeSlot = {
   id: string;
   date: string; // ISO date string e.g., "2025-06-15"
@@ -37,18 +48,21 @@ export default function BookingStep1DateTime({
     ? selectedDate.toISOString().split("T")[0]
     : undefined;
 
-  // Show only times for the selected date -- pick up slot object for time zones
+  // Only times/slots for selected date
   const slotsForSelectedDate =
     selectedDateStr
       ? availableSlots.filter((slot) => slot.date === selectedDateStr)
       : [];
 
-  // Create map of time => time_zone for quick lookup
+  // Map of time => time zone (prefer friendly label)
   const timeZoneMap = Object.fromEntries(
-    slotsForSelectedDate.map((slot) => [slot.time, slot.time_zone ?? "UTC"])
+    slotsForSelectedDate.map((slot) => [
+      slot.time,
+      TIME_ZONE_LABELS[slot.time_zone ?? "UTC"] || slot.time_zone || "UTC"
+    ])
   );
 
-  // Make times unique for display in case there are duplicates
+  // Use Set to display unique times
   const shownTimes = Array.from(new Set(slotsForSelectedDate.map(slot => slot.time)));
 
   return (
@@ -108,6 +122,7 @@ export default function BookingStep1DateTime({
                   onClick={() => setSelectedTime(time)}
                 >
                   {time}
+                  {/* Show friendly label if enabled */}
                   {showTimeZone && timeZoneMap[time] ? (
                     <span className="block text-xs text-muted-foreground ml-2">
                       {timeZoneMap[time]}
@@ -117,6 +132,7 @@ export default function BookingStep1DateTime({
               ))}
             </div>
           )}
+          {/* Selected time zone display */}
           {showTimeZone && selectedTime && timeZoneMap[selectedTime] ? (
             <div className="mt-2 text-xs text-blue-600">
               <b>Selected time zone:</b> {timeZoneMap[selectedTime]}

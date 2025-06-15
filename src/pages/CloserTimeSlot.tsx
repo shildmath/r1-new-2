@@ -9,7 +9,10 @@ export default function CloserTimeSlot() {
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-accent-light to-secondary">
       <CloserSidebar />
-      <div className="flex-1 flex flex-col items-center p-6 gap-3 animate-fade-in">
+      <div
+        className="flex-1 flex flex-col items-center p-6 gap-3 animate-fade-in overflow-y-auto max-h-screen"
+        style={{ minHeight: 0 }}
+      >
         <Card className="w-full max-w-3xl mb-8 shadow-xl border-2 border-accent/10 bg-white/95">
           <CardHeader className="flex flex-row items-center gap-3 pb-1">
             <LayoutPanelLeft size={32} className="text-accent" />

@@ -1,4 +1,3 @@
-
 import React, { useMemo, useState } from "react";
 import CloserSidebar from "@/components/CloserSidebar";
 import { useCloserBookings } from "@/hooks/useCloserBookings";
@@ -111,7 +110,10 @@ export default function CloserPanel() {
   return (
     <div className="flex min-h-screen flex-col md:flex-row bg-gradient-to-br from-accent-light to-secondary">
       <CloserSidebar />
-      <div className="flex-1 p-3 md:p-8">
+      <div
+        className="flex-1 p-3 md:p-8 overflow-y-auto max-h-screen"
+        style={{ minHeight: 0 }} // Ensures that the area can shrink for scrolling
+      >
         {/* Header: Welcome & Logout */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
           <div className="flex items-center gap-3">

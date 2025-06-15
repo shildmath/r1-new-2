@@ -68,10 +68,9 @@ export default function CloserSlotManager() {
     setIsSubmitting(false);
   }
 
-  // Edit Slot Save Handler
+  // Edit Slot Save Handler FIXED: do not call fetchSlots as it doesn't exist.
   async function handleEditSlotSave(updates: {date: string, time: string, time_zone: string}) {
     if (!editSlot?.id) return;
-    // Only date, time, and time_zone are editable
     const { error } = await import("@/integrations/supabase/client").then(mod =>
       mod.supabase.from("time_slots").update({
         date: updates.date,
@@ -80,7 +79,7 @@ export default function CloserSlotManager() {
       }).eq("id", editSlot.id)
     );
     if (!error) {
-      await (typeof fetchSlots === "function" ? fetchSlots() : Promise.resolve());
+      // Slot list will auto-refresh via useCloserSlots when db updates complete.
       setEditSlot(null);
     } else {
       console.error("Update error", error);

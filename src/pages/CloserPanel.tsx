@@ -1,23 +1,45 @@
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import CloserSidebar from "@/components/CloserSidebar";
 import { useCloserBookings } from "@/hooks/useCloserBookings";
 import { Card } from "@/components/ui/card";
-import { PhoneCall, Handshake, CalendarClock, UserCheck2, LogOut, User } from "lucide-react";
+import { PhoneCall, Handshake, CalendarClock, UserCheck2, LogOut, User, Filter } from "lucide-react";
 import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useUserProfileWithRole } from "@/hooks/useUserProfileWithRole";
 
+const STATUS_OPTIONS = [
+  { label: "All", value: "" },
+  { label: "Completed", value: "Completed" },
+  { label: "Booked", value: "Booked" },
+  { label: "Available", value: "Available" },
+  { label: "Closed", value: "Closed" },
+  { label: "No Show Up", value: "No Show Up" },
+  { label: "Not Started Yet", value: "Not Started Yet" },
+];
+
 export default function CloserPanel() {
-  const { bookings, isLoading } = useCloserBookings();
+  const { bookings, isLoading, filter, setFilter, clearFilter } = useCloserBookings();
   const { user, logout } = useSupabaseAuth();
   const navigate = useNavigate();
   const { profile, loading: profileLoading } = useUserProfileWithRole();
 
-  // Memoize stats for speed
+  // STATUS FILTER HANDLING
+  const [statusFilter, setStatusFilter] = useState(""); // status value: "" is "all"
+  const filteredBookings = useMemo(() => {
+    if (!statusFilter) return bookings;
+    // matches either call_status or deal_status (case-insensitive)
+    return bookings.filter(
+      (b) =>
+        (b.call_status && b.call_status.toLowerCase() === statusFilter.toLowerCase()) ||
+        (b.deal_status && b.deal_status.toLowerCase() === statusFilter.toLowerCase())
+    );
+  }, [bookings, statusFilter]);
+
+  // Memoize stats for speed (use filteredBookings for stats)
   const stats = useMemo(() => {
-    if (!bookings) return {
+    if (!filteredBookings) return {
       total: 0,
       completed: 0,
       closed: 0,
@@ -25,13 +47,13 @@ export default function CloserPanel() {
       noShow: 0,
     };
     return {
-      total: bookings.length,
-      completed: bookings.filter(b => b.call_status === "Completed").length,
-      closed: bookings.filter(b => (b.deal_status ?? "").toLowerCase() === "closed").length,
-      rescheduled: bookings.filter(b => b.reschedule_date || b.follow_up_call_date).length,
-      noShow: bookings.filter(b => b.call_status === "No Show Up").length,
+      total: filteredBookings.length,
+      completed: filteredBookings.filter(b => b.call_status === "Completed").length,
+      closed: filteredBookings.filter(b => (b.deal_status ?? "").toLowerCase() === "closed").length,
+      rescheduled: filteredBookings.filter(b => b.reschedule_date || b.follow_up_call_date).length,
+      noShow: filteredBookings.filter(b => b.call_status === "No Show Up").length,
     };
-  }, [bookings]);
+  }, [filteredBookings]);
 
   const statCards = [
     {
@@ -111,6 +133,37 @@ export default function CloserPanel() {
           </Button>
         </div>
         <h1 className="text-3xl font-bold mb-6 animate-fade-in">Closer Dashboard</h1>
+
+        {/* STATUS FILTER BAR */}
+        <div className="flex items-center gap-3 mb-4">
+          <Filter size={20} className="text-accent" />
+          <label htmlFor="status-filter" className="text-base font-medium text-accent">Status:</label>
+          <select
+            id="status-filter"
+            value={statusFilter}
+            onChange={e => setStatusFilter(e.target.value)}
+            className="border rounded px-2 py-1 text-base"
+          >
+            {STATUS_OPTIONS.map(opt => (
+              <option value={opt.value} key={opt.value || "all"}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+          {statusFilter && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setStatusFilter("")}
+            >
+              Clear
+            </Button>
+          )}
+          <span className="ml-3 text-sm text-muted-foreground">
+            Showing <span className="font-semibold text-accent">{filteredBookings.length}</span> booking(s)
+          </span>
+        </div>
+
         <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 mb-10 animate-fade-in">
           {statCards.map((s, i) => (
             <Card

@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import AdminSidebar from "@/components/AdminSidebar";
 import { Input } from "@/components/ui/input";
@@ -14,7 +13,8 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
-import { supabase } from "@/integrations/supabase/client"; // <-- added import
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const AddUsers = () => {
   const { users, loading, error, addUser, fetchUsers } = useAdminUsers();
@@ -31,6 +31,19 @@ const AddUsers = () => {
   const [editForm, setEditForm] = useState({ name: "", email: "", role: "closer" as "admin" | "closer" });
   const [editLoading, setEditLoading] = useState(false);
   const [editError, setEditError] = useState<string | null>(null);
+
+  // Handler for syncing profiles from auth.users
+  const handleSyncProfiles = async () => {
+    toast.loading("Syncing users from Auth...");
+    const res = await fetch("/api/sync_profiles_from_auth", { method: "POST" });
+    const data = await res.json();
+    if (data.success) {
+      toast.success(`Synced ${data.syncedCount} users from Auth!`);
+      await fetchUsers();
+    } else {
+      toast.error(data.error || "Failed to sync users.");
+    }
+  };
 
   // Handlers for adding users
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -67,7 +80,7 @@ const AddUsers = () => {
     setEditError(null);
 
     // Step 1: Update profiles table
-    const { error: updateProfileErr } = await supabase // <-- replaced window.supabase
+    const { error: updateProfileErr } = await supabase
       .from("profiles")
       .update({
         full_name: editForm.name,
@@ -82,7 +95,7 @@ const AddUsers = () => {
     }
 
     // Step 2: Update user_roles
-    const { error: updateRoleErr } = await supabase // <-- replaced window.supabase
+    const { error: updateRoleErr } = await supabase
       .from("user_roles")
       .update({
         role: editForm.role,
@@ -174,7 +187,12 @@ const AddUsers = () => {
             {error && <div className="text-red-500 text-sm">{error}</div>}
             {success && <div className="text-green-500 text-sm">{success}</div>}
           </form>
-          <h2 className="text-xl font-semibold mb-3">Users List</h2>
+          <div className="flex justify-between items-center mb-2">
+            <h2 className="text-xl font-semibold">Users List</h2>
+            <Button type="button" variant="secondary" onClick={handleSyncProfiles}>
+              Sync All Users from Auth
+            </Button>
+          </div>
           <div className="overflow-x-auto">
             <table className="min-w-full bg-white rounded shadow border">
               <thead>
@@ -277,4 +295,3 @@ const AddUsers = () => {
 };
 
 export default AddUsers;
-

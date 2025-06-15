@@ -29,6 +29,7 @@ export default function CloserSlotManager() {
     clearFilter,
   } = useCloserSlots();
   const [form, setForm] = useState({ date: "", time: "", time_zone: "Etc/GMT" });
+  const [isSubmitting, setIsSubmitting] = useState(false); // Optional: disable button on submit
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
@@ -40,8 +41,19 @@ export default function CloserSlotManager() {
       toast.error("Please provide date, time, and time zone.");
       return;
     }
+    setIsSubmitting(true);
+    // Capture the addSlot result and possible error
     const ok = await addSlot(form.date, form.time, form.time_zone);
-    if (ok) setForm({ date: "", time: "", time_zone: "Etc/GMT" });
+    if (ok) {
+      setForm({ date: "", time: "", time_zone: "Etc/GMT" });
+      toast.success("Slot added!");
+    } else {
+      toast.error("Unable to add slot. You may not be logged in or do not have permission.");
+      // For developer: check console for more details
+      // Add a console log for debugging
+      console.log("Failed to add slot. Possible reasons: not logged in, duplicate slot, or RLS policy. Check Supabase logs.");
+    }
+    setIsSubmitting(false);
   }
 
   // Render only the whitelisted time zones, with separator for "UTC"
@@ -133,8 +145,8 @@ export default function CloserSlotManager() {
             >
               {renderTimeZoneOptions()}
             </select>
-            <Button type="submit" className="bg-primary text-white">
-              Add
+            <Button type="submit" className="bg-primary text-white" disabled={isSubmitting}>
+              {isSubmitting ? "Adding..." : "Add"}
             </Button>
           </div>
         </form>
@@ -172,8 +184,8 @@ export default function CloserSlotManager() {
           >
             {renderTimeZoneOptions()}
           </select>
-          <Button type="submit" className="bg-primary text-white">
-            Add Slot
+          <Button type="submit" className="bg-primary text-white" disabled={isSubmitting}>
+            {isSubmitting ? "Adding..." : "Add Slot"}
           </Button>
         </form>
         <div className="flex items-center gap-2">
@@ -257,6 +269,4 @@ export default function CloserSlotManager() {
     </div>
   );
 }
-
 // The file is now getting quite long. Consider refactoring it into smaller, focused components for better maintainability!
-

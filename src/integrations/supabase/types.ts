@@ -157,7 +157,15 @@ export type Database = {
           time?: string
           time_zone?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "time_slots_closer_id_fkey"
+            columns: ["closer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {

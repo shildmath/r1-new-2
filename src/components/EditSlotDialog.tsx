@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -58,6 +57,7 @@ export default function EditSlotDialog({ open, onOpenChange, slot, onSave }: Edi
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
+    // Prevent bad data (SEPARATOR as time zone)
     if (!form.date || !form.time || !form.time_zone || form.time_zone==="SEPARATOR") {
       toast.error("Please provide all required details.");
       return;
@@ -69,14 +69,15 @@ export default function EditSlotDialog({ open, onOpenChange, slot, onSave }: Edi
         time: form.time,
         time_zone: form.time_zone,
       });
+      setLoading(false); // ensure loading is reset before closing
       toast.success("Slot updated!");
       onOpenChange(false);
     } catch (error) {
+      setLoading(false);
       toast.error("Error updating slot.");
       // Log error for dev trouble-shooting
       console.error(error);
     }
-    setLoading(false);
   }
 
   function renderTimeZoneOptions() {

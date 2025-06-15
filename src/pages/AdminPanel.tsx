@@ -5,10 +5,18 @@ import { useUserProfileWithRole } from "@/hooks/useUserProfileWithRole";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 import AdminSidebar from "@/components/AdminSidebar";
+import { useNavigate } from "react-router-dom"; // Added for navigation
 
 const AdminPanel = () => {
   const { logout } = useSupabaseAuth();
   const { profile, loading } = useUserProfileWithRole();
+  const navigate = useNavigate(); // Initialize navigation
+
+  // Updated logout to redirect on completion
+  const handleLogout = async () => {
+    await logout();
+    navigate("/auth");
+  };
 
   return (
     <div className="min-h-screen flex">
@@ -33,7 +41,11 @@ const AdminPanel = () => {
               )
             )}
           </div>
-          <Button variant="outline" onClick={logout} className="ml-4 flex gap-2 items-center">
+          <Button
+            variant="outline"
+            onClick={handleLogout}
+            className="ml-4 flex gap-2 items-center"
+          >
             <LogOut size={18} className="mr-1" />
             Logout
           </Button>
@@ -48,3 +60,4 @@ const AdminPanel = () => {
 };
 
 export default AdminPanel;
+

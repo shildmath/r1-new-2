@@ -20,6 +20,12 @@ export function useAdminSlots() {
 
   const fetchSlots = async () => {
     setIsLoading(true);
+
+    // Get current user
+    const { data: userResult } = await supabase.auth.getUser();
+    const userId = userResult?.user?.id;
+    console.log("useAdminSlots – Current user ID (supabase.auth.getUser):", userId);
+
     const { data, error } = await supabase
       .from("time_slots")
       .select(
@@ -30,6 +36,11 @@ export function useAdminSlots() {
       )
       .order("date", { ascending: true })
       .order("time", { ascending: true });
+
+    console.log("useAdminSlots – Supabase data:", data);
+    if (error) {
+      console.error("useAdminSlots – Supabase error:", error);
+    }
 
     if (!error && data) {
       const slots = data.map((s: any) => ({
@@ -44,6 +55,7 @@ export function useAdminSlots() {
         closer_email: s.closer?.email || "-",
       }));
       setSlots(slots);
+      console.log("useAdminSlots – Final mapped slots:", slots);
     } else {
       setSlots([]);
     }

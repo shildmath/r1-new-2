@@ -27,6 +27,12 @@ export function useAdminBookings() {
 
   const fetchBookings = async () => {
     setIsLoading(true);
+
+    // Get current user
+    const { data: userResult } = await supabase.auth.getUser();
+    const userId = userResult?.user?.id;
+    console.log("useAdminBookings – Current user ID (supabase.auth.getUser):", userId);
+
     const { data, error } = await supabase
       .from("bookings")
       .select(
@@ -36,6 +42,11 @@ export function useAdminBookings() {
         `
       )
       .order("created_at", { ascending: false });
+
+    console.log("useAdminBookings – Supabase data:", data);
+    if (error) {
+      console.error("useAdminBookings – Supabase error:", error);
+    }
 
     if (!error && data) {
       setBookings(
@@ -58,6 +69,7 @@ export function useAdminBookings() {
           closer_email: b.slot?.closer?.email || "-",
         }))
       );
+      console.log("useAdminBookings – Final mapped bookings:", data);
     } else {
       setBookings([]);
     }

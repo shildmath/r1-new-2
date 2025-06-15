@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -22,7 +23,7 @@ import MonthlyPerformance from "./pages/MonthlyPerformance";
 import EODCloser from "./pages/EODCloser";
 import ExportAll from "./pages/ExportAll";
 import AdminPanel from "./pages/AdminPanel";
-import AddUsers from "./pages/AddUsers";
+// Removed import for AddUsers
 import AllAvailableTimeslots from "./pages/AllAvailableTimeslots";
 import AllBookings from "./pages/AllBookings";
 import AllCallStatus from "./pages/AllCallStatus";
@@ -61,7 +62,7 @@ const App = () => {
             <Route path="/eod-closer" element={<EODCloser />} />
             <Route path="/export-all" element={<ExportAll />} />
             <Route path="/admin-panel" element={<AdminPanel />} />
-            <Route path="/add-users" element={<AddUsers />} />
+            {/* Removed the AddUsers route */}
             <Route path="/all-available-timeslots" element={<AllAvailableTimeslots />} />
             <Route path="/all-bookings" element={<AllBookings />} />
             <Route path="/all-call-status" element={<AllCallStatus />} />
@@ -81,3 +82,4 @@ const App = () => {
 };
 
 export default App;
+

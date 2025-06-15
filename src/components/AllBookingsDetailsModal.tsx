@@ -54,10 +54,22 @@ export default function AllBookingsDetailsModal({
     >
   ) {
     const { name } = e.target;
-    if (e.target instanceof HTMLInputElement && e.target.type === "checkbox") {
-      setForm((f: any) => ({ ...f, [name]: e.target.checked }));
+
+    if (
+      e.target instanceof HTMLInputElement &&
+      e.target.type === "checkbox"
+    ) {
+      // For checkboxes, use .checked
+      setForm((f: any) => ({
+        ...f,
+        [name]: (e.target as HTMLInputElement).checked,
+      }));
     } else {
-      setForm((f: any) => ({ ...f, [name]: e.target.value }));
+      // For everything else, use .value
+      setForm((f: any) => ({
+        ...f,
+        [name]: e.target.value,
+      }));
     }
   }
 

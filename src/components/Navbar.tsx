@@ -1,24 +1,35 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Menu, X, Calendar, Phone, Mail } from 'lucide-react';
+import { Menu, X, Calendar, Mail } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getNavbarConfig } from '@/utils/navbarConfig';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const [config, setConfig] = useState(getNavbarConfig());
 
-  const isActive = (path: string) => {
-    return location.pathname === path;
-  };
+  // Keep in sync with config if changed in localStorage
+  useEffect(() => {
+    function sync() {
+      setConfig(getNavbarConfig());
+    }
+    window.addEventListener("storage", sync);
+    return () => window.removeEventListener("storage", sync);
+  }, []);
 
-  const navItems = [
-    { name: 'Home', path: '/' },
-    { name: 'About', path: '/#about' },
-    { name: 'Services', path: '/#services' },
-    { name: 'Contact', path: '/contact' },
-    { name: 'Login/Sign Up', path: '/auth' }
-  ];
+  // Hot reload config when editing in admin view
+  useEffect(() => {
+    // Allow other components to dispatch this event to auto-refresh the navbar
+    const handler = () => setConfig(getNavbarConfig());
+    window.addEventListener('navbarConfigUpdated', handler);
+    return () => window.removeEventListener('navbarConfigUpdated', handler);
+  }, []);
+
+  const isActive = (path: string) => location.pathname === path;
+
+  const navItems = config.navItems;
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-lg border-b border-gray-200 shadow-lg">
@@ -30,7 +41,7 @@ const Navbar = () => {
               whileHover={{ scale: 1.05 }}
               className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent"
             >
-              AIAdMaxify
+              {config.brand}
             </motion.div>
           </Link>
 

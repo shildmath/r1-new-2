@@ -41,6 +41,7 @@ import EditContactPage from "./pages/EditContactPage";
 import EditStrategyCallPage from "./pages/EditStrategyCallPage";
 import EditNavbarPage from "./pages/EditNavbarPage";
 import EditFooterPage from "./pages/EditFooterPage";
+import ContactResponsePage from "./pages/ContactResponsePage";
 import { SupabaseAuthProvider } from "@/hooks/useSupabaseAuth";
 
 const App = () => {
@@ -89,6 +90,7 @@ const App = () => {
             <Route path="/edit-strategy-call" element={<EditStrategyCallPage />} />
             <Route path="/edit-navbar" element={<EditNavbarPage />} />
             <Route path="/edit-footer" element={<EditFooterPage />} />
+            <Route path="/contact-responses" element={<ContactResponsePage />} />
             <Route path="*" element={<Index />} />
           </Routes>
         </BrowserRouter>

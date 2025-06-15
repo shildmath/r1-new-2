@@ -25,6 +25,7 @@ const adminLinks = [
   { name: "Edit Strategy Call", path: "/edit-strategy-call" },
   { name: "Edit Navbar", path: "/edit-navbar" },
   { name: "Edit Footer", path: "/edit-footer" },
+  { name: "Contact Responses", path: "/contact-responses" },
 ];
 
 const AdminSidebar = () => {

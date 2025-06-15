@@ -45,52 +45,53 @@ export default function CloserPanel() {
   }, [bookings]);
 
   // BUILD CARDS
+  // Reorder to prioritize slots and main booking stats
   const statCards = [
     {
       label: "Total Slots",
-      icon: <PhoneCall className="text-primary" size={28} />,
+      icon: <PhoneCall className="text-primary" size={24} />,
       value: slotsLoading ? "…" : slotStats.total,
       color: "bg-primary/10"
     },
     {
       label: "Available Slots",
-      icon: <UserCheck2 className="text-green-600" size={28} />,
+      icon: <UserCheck2 className="text-green-600" size={24} />,
       value: slotsLoading ? "…" : slotStats.available,
       color: "bg-green-100"
     },
     {
       label: "Booked Calls",
-      icon: <Handshake className="text-blue-700" size={28} />,
+      icon: <Handshake className="text-blue-700" size={24} />,
       value: slotsLoading ? "…" : slotStats.booked,
       color: "bg-blue-100"
     },
     {
       label: "Total Bookings",
-      icon: <PhoneCall className="text-primary" size={28} />,
+      icon: <PhoneCall className="text-primary" size={24} />,
       value: isLoading ? "…" : stats.total,
       color: "bg-accent/10"
     },
     {
       label: "Completed Calls",
-      icon: <UserCheck2 className="text-green-600" size={28} />,
+      icon: <UserCheck2 className="text-green-600" size={24} />,
       value: isLoading ? "…" : stats.completed,
       color: "bg-green-50"
     },
     {
       label: "Closed Deals",
-      icon: <Handshake className="text-blue-700" size={28} />,
+      icon: <Handshake className="text-blue-700" size={24} />,
       value: isLoading ? "…" : stats.closed,
       color: "bg-blue-50"
     },
     {
       label: "Reschedules",
-      icon: <CalendarClock className="text-orange-500" size={28} />,
+      icon: <CalendarClock className="text-orange-500" size={24} />,
       value: isLoading ? "…" : stats.rescheduled,
       color: "bg-orange-50"
     },
     {
       label: "No Shows",
-      icon: <PhoneCall className="text-destructive" size={28} />,
+      icon: <PhoneCall className="text-destructive" size={24} />,
       value: isLoading ? "…" : stats.noShow,
       color: "bg-red-50"
     },
@@ -118,66 +119,67 @@ export default function CloserPanel() {
 
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-gradient-to-br from-accent-light to-secondary">
+      {/* Sidebar on the left, collapses below md */}
       <CloserSidebar />
       <div
-        className="flex-1 p-3 md:p-8 overflow-y-auto max-h-screen"
+        className="flex-1 p-2 sm:p-3 md:p-6 overflow-y-auto max-h-screen flex flex-col"
         style={{ minHeight: 0 }}
       >
         {/* Header: Welcome & Logout */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
-          <div className="flex items-center gap-3">
-            <User className="text-primary" />
-            <h2 className="text-xl font-bold leading-tight sm:text-2xl">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-4 mb-4 sm:mb-6">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <User className="text-primary" size={28} />
+            <h2 className="text-lg sm:text-xl font-bold leading-tight">
               Welcome, <span className="text-accent">{displayName}</span>
-              <span className="ml-2 text-base font-normal text-muted-foreground">
+              <span className="ml-2 text-sm sm:text-base font-normal text-muted-foreground">
                 (Role: {displayRole})
               </span>
             </h2>
           </div>
           <Button
             variant="outline"
-            className="flex items-center gap-2 border-destructive text-destructive hover:bg-destructive hover:text-white transition"
+            className="flex items-center gap-1 border-destructive text-destructive hover:bg-destructive hover:text-white transition py-1 px-3 text-xs sm:text-sm"
             onClick={handleLogout}
           >
-            <LogOut size={18} />
+            <LogOut size={16} />
             Logout
           </Button>
         </div>
-        <h1 className="text-2xl sm:text-3xl font-bold mb-4 animate-fade-in">
+        <h1 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 animate-fade-in">
           Closer Dashboard
         </h1>
 
-        {/* DASHBOARD STAT CARDS */}
-        <div className="w-full grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6 mb-8 animate-fade-in">
+        {/* STAT CARDS */}
+        <div className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-4 mb-5 animate-fade-in">
           {statCards.map((s, i) => (
             <Card
               key={i}
-              className={`flex flex-col gap-1 items-center py-5 px-2 md:py-6 md:px-3 shadow-lg border border-accent/20 ${s.color}
-                hover:scale-105 transition-transform duration-150`}
+              className={`flex flex-col gap-0.5 sm:gap-1 items-center py-3 px-1 sm:py-5 sm:px-2 shadow border border-accent/20 ${s.color}
+                hover:scale-105 transition-transform duration-150 min-h-[65px]`}
             >
-              <span>{s.icon}</span>
-              <span className="text-2xl md:text-4xl font-extrabold">{s.value}</span>
-              <span className="text-xs md:text-base font-semibold text-center">{s.label}</span>
+              <span className="mb-1">{s.icon}</span>
+              <span className="text-lg sm:text-2xl font-extrabold">{s.value}</span>
+              <span className="text-[11px] sm:text-xs md:text-sm font-semibold text-center">{s.label}</span>
             </Card>
           ))}
         </div>
 
         {/* Responsive dashboard links/cards */}
-        <div className="grid gap-6 grid-cols-1 md:grid-cols-2 mb-10 animate-fade-in">
-          <div className="bg-card rounded-lg shadow p-4 md:p-6 flex flex-col justify-between hover-scale min-h-[140px]">
-            <h2 className="font-semibold text-base md:text-lg mb-1 md:mb-2">Manage Your Time Slots</h2>
-            <p className="text-gray-500 mb-2 md:mb-4 text-sm md:text-base">Keep your availability up to date so clients can book you!</p>
+        <div className="grid gap-3 sm:gap-6 grid-cols-1 md:grid-cols-2 mb-7 animate-fade-in">
+          <div className="bg-card rounded-lg shadow p-3 sm:p-4 flex flex-col justify-between hover-scale min-h-[110px]">
+            <h2 className="font-semibold text-[15px] sm:text-base mb-1">Manage Your Time Slots</h2>
+            <p className="text-gray-500 mb-2 text-xs sm:text-sm">Keep your availability up to date so clients can book you!</p>
             <a
               href="/closer-timeslot"
-              className="bg-primary text-white px-3 py-2 rounded hover:bg-primary/80 text-center story-link text-sm md:text-base"
+              className="bg-primary text-white px-2 py-1 sm:px-3 sm:py-2 rounded hover:bg-primary/80 text-center story-link text-xs sm:text-sm"
             >Go to Time Slots</a>
           </div>
-          <div className="bg-card rounded-lg shadow p-4 md:p-6 flex flex-col hover-scale min-h-[140px]">
-            <h2 className="font-semibold text-base md:text-lg mb-1 md:mb-2">View Bookings</h2>
-            <p className="text-gray-500 mb-2 md:mb-4 text-sm md:text-base">See who has booked a call with you and plan follow-ups.</p>
+          <div className="bg-card rounded-lg shadow p-3 sm:p-4 flex flex-col hover-scale min-h-[110px]">
+            <h2 className="font-semibold text-[15px] sm:text-base mb-1">View Bookings</h2>
+            <p className="text-gray-500 mb-2 text-xs sm:text-sm">See who has booked a call with you and plan follow-ups.</p>
             <a
               href="/closer-bookings"
-              className="bg-primary text-white px-3 py-2 rounded hover:bg-primary/80 text-center story-link text-sm md:text-base"
+              className="bg-primary text-white px-2 py-1 sm:px-3 sm:py-2 rounded hover:bg-primary/80 text-center story-link text-xs sm:text-sm"
             >Go to Bookings</a>
           </div>
         </div>
@@ -185,5 +187,3 @@ export default function CloserPanel() {
     </div>
   );
 }
-
-// ... end of file

@@ -32,6 +32,15 @@ import AllRescheduleCalls from "./pages/AllRescheduleCalls";
 import AllMonthlyClosersPerformance from "./pages/AllMonthlyClosersPerformance";
 import AllEODClosersPerformance from "./pages/AllEODClosersPerformance";
 import AllExportClients from "./pages/AllExportClients";
+import EditHomePage from "./pages/EditHomePage";
+import EditServicesPage from "./pages/EditServicesPage";
+import EditTestimonialsPage from "./pages/EditTestimonialsPage";
+import EditAboutPage from "./pages/EditAboutPage";
+import AddTeamMemberPage from "./pages/AddTeamMemberPage";
+import EditContactPage from "./pages/EditContactPage";
+import EditStrategyCallPage from "./pages/EditStrategyCallPage";
+import EditNavbarPage from "./pages/EditNavbarPage";
+import EditFooterPage from "./pages/EditFooterPage";
 import { SupabaseAuthProvider } from "@/hooks/useSupabaseAuth";
 
 const App = () => {
@@ -71,6 +80,15 @@ const App = () => {
             <Route path="/all-monthly-closers-performance" element={<AllMonthlyClosersPerformance />} />
             <Route path="/all-eod-closers-performance" element={<AllEODClosersPerformance />} />
             <Route path="/all-export-clients" element={<AllExportClients />} />
+            <Route path="/edit-home" element={<EditHomePage />} />
+            <Route path="/edit-services" element={<EditServicesPage />} />
+            <Route path="/edit-testimonials" element={<EditTestimonialsPage />} />
+            <Route path="/edit-about" element={<EditAboutPage />} />
+            <Route path="/add-team-member" element={<AddTeamMemberPage />} />
+            <Route path="/edit-contact" element={<EditContactPage />} />
+            <Route path="/edit-strategy-call" element={<EditStrategyCallPage />} />
+            <Route path="/edit-navbar" element={<EditNavbarPage />} />
+            <Route path="/edit-footer" element={<EditFooterPage />} />
             <Route path="*" element={<Index />} />
           </Routes>
         </BrowserRouter>

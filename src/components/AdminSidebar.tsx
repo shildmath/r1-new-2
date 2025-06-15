@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useLocation } from "react-router-dom";
 import clsx from "clsx";
@@ -16,6 +15,16 @@ const adminLinks = [
   { name: "Export Clients", path: "/all-export-clients" },
   { name: "All Call Status", path: "/all-call-status" },
   { name: "All Reschedule Calls", path: "/all-reschedule-calls" },
+  // NEW EDIT LINKS
+  { name: "Edit Home", path: "/edit-home" },
+  { name: "Edit Services", path: "/edit-services" },
+  { name: "Edit Testimonials", path: "/edit-testimonials" },
+  { name: "Edit About", path: "/edit-about" },
+  { name: "Add Team Member", path: "/add-team-member" },
+  { name: "Edit Contact", path: "/edit-contact" },
+  { name: "Edit Strategy Call", path: "/edit-strategy-call" },
+  { name: "Edit Navbar", path: "/edit-navbar" },
+  { name: "Edit Footer", path: "/edit-footer" },
 ];
 
 const AdminSidebar = () => {

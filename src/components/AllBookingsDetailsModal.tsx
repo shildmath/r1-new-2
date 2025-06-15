@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import {
   Dialog,
@@ -10,6 +9,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { BadgeCheck, Link as LinkIcon, Info, UserCheck, Trash2 } from "lucide-react";
+import AdminBookingStatusFields from "./AdminBookingStatusFields";
+import AdminBookingLinksFields from "./AdminBookingLinksFields";
+import AdminBookingOtherFields from "./AdminBookingOtherFields";
 
 // Status field options
 const CALL_STATUS_OPTIONS = [
@@ -92,198 +94,6 @@ export default function AllBookingsDetailsModal({
     }, 1000);
   }
 
-  // COMPONENTS: for more reuse, these can later be moved to separate files!
-  // 1. STATUS & CORE FIELDS
-  const AdminBookingStatusFields = () => (
-    <div className="space-y-2">
-      <div>
-        <label className="font-semibold">Call Status</label>
-        <select
-          name="call_status"
-          className="border rounded px-2 py-1 w-full bg-white"
-          value={form.call_status ?? ""}
-          onChange={handleField}
-        >
-          <option value="">Select call status…</option>
-          {CALL_STATUS_OPTIONS.map((opt) => (
-            <option key={opt} value={opt}>{opt}</option>
-          ))}
-        </select>
-      </div>
-      <div>
-        <label className="font-semibold">Deal Status</label>
-        <select
-          name="deal_status"
-          className="border rounded px-2 py-1 w-full bg-white"
-          value={form.deal_status ?? ""}
-          onChange={handleField}
-        >
-          <option value="">Select deal status…</option>
-          {DEAL_STATUS_OPTIONS.map((opt) => (
-            <option key={opt} value={opt}>{opt}</option>
-          ))}
-        </select>
-      </div>
-      <div>
-        <label className="font-semibold">Closed Date</label>
-        <input
-          type="date"
-          name="closed_date"
-          className="border rounded px-2 py-1 w-full bg-white"
-          value={form.closed_date ?? ""}
-          onChange={handleField}
-        />
-      </div>
-      <div className="flex items-center gap-2">
-        <input
-          type="checkbox"
-          name="invoice_sent"
-          checked={!!form.invoice_sent}
-          onChange={handleField}
-          id="invoice_sent"
-        />
-        <label htmlFor="invoice_sent" className="font-semibold">Invoice Sent</label>
-      </div>
-      <div>
-        <label className="font-semibold">Invoice Sent Date</label>
-        <input
-          type="date"
-          name="invoice_sent_date"
-          className="border rounded px-2 py-1 w-full bg-white"
-          value={form.invoice_sent_date ?? ""}
-          onChange={handleField}
-        />
-      </div>
-      <div className="flex items-center gap-2">
-        <input
-          type="checkbox"
-          name="contract_sent"
-          checked={!!form.contract_sent}
-          onChange={handleField}
-          id="contract_sent"
-        />
-        <label htmlFor="contract_sent" className="font-semibold">Contract Sent</label>
-      </div>
-      <div>
-        <label className="font-semibold">Contract Sent Date</label>
-        <input
-          type="date"
-          name="contract_sent_date"
-          className="border rounded px-2 py-1 w-full bg-white"
-          value={form.contract_sent_date ?? ""}
-          onChange={handleField}
-        />
-      </div>
-      <div>
-        <label className="font-semibold">Follow Up Call Date</label>
-        <input
-          type="date"
-          name="follow_up_call_date"
-          className="border rounded px-2 py-1 w-full bg-white"
-          value={form.follow_up_call_date ?? ""}
-          onChange={handleField}
-        />
-      </div>
-      <div>
-        <label className="font-semibold">Reschedule Date</label>
-        <input
-          type="date"
-          name="reschedule_date"
-          className="border rounded px-2 py-1 w-full bg-white"
-          value={form.reschedule_date ?? ""}
-          onChange={handleField}
-        />
-      </div>
-    </div>
-  );
-
-  // 2. LINKS & OFFERS
-  const AdminBookingLinksFields = () => (
-    <div className="space-y-2">
-      <div>
-        <label className="font-semibold">Invoice Link</label>
-        <input
-          type="text"
-          name="invoice_link"
-          className="border rounded px-2 py-1 w-full bg-white"
-          value={form.invoice_link ?? ""}
-          onChange={handleField}
-        />
-      </div>
-      <div>
-        <label className="font-semibold">Contract Link</label>
-        <input
-          type="text"
-          name="contract_link"
-          className="border rounded px-2 py-1 w-full bg-white"
-          value={form.contract_link ?? ""}
-          onChange={handleField}
-        />
-      </div>
-      <div>
-        <label className="font-semibold">What Offer Made</label>
-        <textarea
-          name="offer_made"
-          className="border rounded px-2 py-1 w-full bg-white min-h-[38px]"
-          value={form.offer_made ?? ""}
-          onChange={handleField}
-        />
-      </div>
-      <div>
-        <label className="font-semibold">Recording Link</label>
-        <input
-          type="text"
-          name="recording_link"
-          className="border rounded px-2 py-1 w-full bg-white"
-          value={form.recording_link ?? ""}
-          onChange={handleField}
-        />
-      </div>
-    </div>
-  );
-
-  // 3. OTHER FIELDS
-  const AdminBookingOtherFields = () => (
-    <div className="space-y-2">
-      <div>
-        <label className="font-semibold">Ad Spend</label>
-        <input
-          name="ad_spend"
-          className="border rounded px-2 py-1 w-full bg-white"
-          value={form.ad_spend ?? ""}
-          onChange={handleField}
-        />
-      </div>
-      <div>
-        <label className="font-semibold">Country/Area</label>
-        <input
-          name="country_area"
-          className="border rounded px-2 py-1 w-full bg-white"
-          value={form.country_area ?? ""}
-          onChange={handleField}
-        />
-      </div>
-      <div>
-        <label className="font-semibold">Zip Code</label>
-        <input
-          name="zip_code"
-          className="border rounded px-2 py-1 w-full bg-white"
-          value={form.zip_code ?? ""}
-          onChange={handleField}
-        />
-      </div>
-      <div>
-        <label className="font-semibold">Additional Info</label>
-        <textarea
-          name="additional_info"
-          className="border rounded px-2 py-1 w-full bg-white min-h-[38px]"
-          value={form.additional_info ?? ""}
-          onChange={handleField}
-        />
-      </div>
-    </div>
-  );
-
   // MAIN UI
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -306,7 +116,12 @@ export default function AllBookingsDetailsModal({
                   Status & Core Fields
                 </span>
               </div>
-              <AdminBookingStatusFields />
+              <AdminBookingStatusFields
+                form={form}
+                handleField={handleField}
+                CALL_STATUS_OPTIONS={CALL_STATUS_OPTIONS}
+                DEAL_STATUS_OPTIONS={DEAL_STATUS_OPTIONS}
+              />
             </div>
             {/* Links & Offers */}
             <div className="rounded-xl bg-white/90 p-5 shadow-sm border mb-2">
@@ -316,7 +131,7 @@ export default function AllBookingsDetailsModal({
                   Links & Offers
                 </span>
               </div>
-              <AdminBookingLinksFields />
+              <AdminBookingLinksFields form={form} handleField={handleField} />
             </div>
             {/* Other Info */}
             <div className="md:col-span-2 rounded-xl bg-white/90 p-5 shadow-sm border mb-2">
@@ -326,7 +141,7 @@ export default function AllBookingsDetailsModal({
                   Other Info
                 </span>
               </div>
-              <AdminBookingOtherFields />
+              <AdminBookingOtherFields form={form} handleField={handleField} />
             </div>
           </div>
         </div>

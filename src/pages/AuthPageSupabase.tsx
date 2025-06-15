@@ -7,6 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 import { LogIn, UserPlus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+// ADDED: Import supabase client directly
+import { supabase } from "@/integrations/supabase/client";
 
 const AuthPageSupabase = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -22,6 +24,19 @@ const AuthPageSupabase = () => {
   const { register, login } = useSupabaseAuth();
   const navigate = useNavigate();
 
+  // ADDED: Helper function to get role by user id
+  const getRoleByUserId = async (userId: string): Promise<"admin" | "closer" | null> => {
+    const { data, error } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId)
+      .maybeSingle();
+    if (data?.role === "admin" || data?.role === "closer") {
+      return data.role;
+    }
+    return null;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -30,9 +45,26 @@ const AuthPageSupabase = () => {
     if (isLogin) {
       const { success, message } = await login(form.email, form.password);
       if (success) {
+        // AFTER login, fetch user and get role for redirect
+        // (Session is now available, retrieve user from supabase client)
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (user?.id) {
+          const role = await getRoleByUserId(user.id);
+          if (role === "admin") {
+            navigate("/admin-panel");
+          } else if (role === "closer") {
+            navigate("/closer-panel");
+          } else {
+            // fallback, if role not found, go to home
+            navigate("/");
+          }
+        } else {
+          // No user? Fallback
+          navigate("/");
+        }
         setFeedback("Login successful!");
-        // Redirect based on role could be done here, but will need to fetch role from user_roles
-        navigate("/");
       } else {
         setFeedback(message || "Login failed");
       }

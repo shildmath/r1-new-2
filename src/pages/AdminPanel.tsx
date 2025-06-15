@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 import { useUserProfileWithRole } from "@/hooks/useUserProfileWithRole";
@@ -6,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 import AdminSidebar from "@/components/AdminSidebar";
 import { useNavigate } from "react-router-dom"; // Added for navigation
+import CloserListTable from "@/components/CloserListTable";
 
 const AdminPanel = () => {
   const { logout } = useSupabaseAuth();
@@ -54,10 +54,11 @@ const AdminPanel = () => {
         <div className="flex flex-col items-center justify-center text-gray-400">
           <p>Select an option from the sidebar to get started.</p>
         </div>
+        {/* --- NEW: Closer List Table --- */}
+        <CloserListTable />
       </div>
     </div>
   );
 };
 
 export default AdminPanel;
-

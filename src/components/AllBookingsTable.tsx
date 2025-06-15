@@ -1,8 +1,10 @@
+
 import React, { useState, useEffect } from "react";
 import { useAdminBookings } from "@/hooks/useAdminBookings";
 import { Button } from "@/components/ui/button";
-import { Filter, LayoutList } from "lucide-react";
+import { LayoutList } from "lucide-react";
 import { toast } from "sonner";
+import AllBookingsDetailsModal from "./AllBookingsDetailsModal";
 
 // Show all closer fields
 const CLOSER_LABELS = {
@@ -13,15 +15,35 @@ const CLOSER_LABELS = {
 export default function AllBookingsTable() {
   const { bookings, isLoading } = useAdminBookings();
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
+  const [detailsOpen, setDetailsOpen] = useState(false);
 
   // Info for mobile card view only
-  const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setIsMobile(window.innerWidth < 640);
+      const listener = () => setIsMobile(window.innerWidth < 640);
+      window.addEventListener("resize", listener);
+      return () => window.removeEventListener("resize", listener);
+    }
+  }, []);
 
   // Defensive fallback message
   let infoMessage = '';
   if (!isLoading && bookings.length === 0) {
     infoMessage = "No bookings found. If this persists, check booking and slot data in Supabase.";
   }
+
+  const handleOpenDetails = (booking: any) => {
+    setSelectedBooking(booking);
+    setDetailsOpen(true);
+  };
+
+  const handleCloseDetails = () => {
+    setDetailsOpen(false);
+    setSelectedBooking(null);
+  };
 
   // Mobile card view
   if (isMobile && bookings.length > 0) {
@@ -46,13 +68,13 @@ export default function AllBookingsTable() {
               size="sm"
               className="self-end mt-2"
               variant="outline"
-              onClick={() => setSelectedBooking(b)}
+              onClick={() => handleOpenDetails(b)}
             >
               Extra Details
             </Button>
           </div>
         ))}
-        {/* Modal/sheet for extra details if needed */}
+        <AllBookingsDetailsModal booking={selectedBooking} open={detailsOpen} onClose={handleCloseDetails} />
       </div>
     );
   }
@@ -104,7 +126,7 @@ export default function AllBookingsTable() {
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => setSelectedBooking(b)}
+                      onClick={() => handleOpenDetails(b)}
                     >
                       Extra Details
                     </Button>
@@ -115,7 +137,7 @@ export default function AllBookingsTable() {
           </table>
         )}
       </div>
-      {/* Modal/sheet for extra details if needed */}
+      <AllBookingsDetailsModal booking={selectedBooking} open={detailsOpen} onClose={handleCloseDetails} />
     </div>
   );
 }

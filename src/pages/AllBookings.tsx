@@ -1,36 +1,39 @@
 
 import React from "react";
-import AdminSidebar from "@/components/AdminSidebar";
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/ui/card";
 import { LayoutList } from "lucide-react";
 import AllBookingsTable from "@/components/AllBookingsTable";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { AdminShadcnSidebar } from "@/components/AdminShadcnSidebar";
 
+// Enhanced responsive and scrollable admin bookings page
 const AllBookings = () => {
   return (
-    <div className="flex min-h-screen flex-col md:flex-row bg-gradient-to-br from-accent-light to-secondary">
-      <AdminSidebar />
-      <div
-        className="flex-1 flex flex-col items-center p-3 md:p-6 gap-3 animate-fade-in overflow-y-auto max-h-screen"
-        style={{ minHeight: 0 }}
-      >
-        <Card className="w-full max-w-6xl mb-8 shadow-xl border-2 border-accent/10 bg-white/95">
-          <CardHeader className="flex flex-col sm:flex-row items-center gap-3 pb-1">
-            <LayoutList size={32} className="text-accent" />
-            <div>
-              <CardTitle className="text-3xl font-extrabold text-primary">All Bookings</CardTitle>
-              <CardDescription className="text-muted-foreground text-base">
-                View and manage all client call bookings (real time).
+    <SidebarProvider>
+      <div className="flex min-h-screen w-full bg-gradient-to-br from-accent-light to-secondary">
+        <AdminShadcnSidebar />
+        <main className="flex-1 flex flex-col items-center px-1 pt-3 pb-8 md:py-8 animate-fade-in">
+          <SidebarTrigger />
+          <Card className="w-full max-w-6xl shadow-xl border-2 border-accent/10 bg-white/95 rounded-2xl">
+            <CardHeader className="flex flex-col items-center gap-2 pb-2">
+              <LayoutList size={36} className="text-accent mb-1" />
+              <CardTitle className="text-3xl font-extrabold text-primary text-center">All Bookings</CardTitle>
+              <CardDescription className="text-muted-foreground text-base text-center">
+                View and manage all client call bookings (real time). Table below is scrollable and looks great on all devices.
               </CardDescription>
-            </div>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <div className="overflow-x-auto">
-              <AllBookingsTable />
-            </div>
-          </CardContent>
-        </Card>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <ScrollArea className="max-h-[60vh] min-w-full md:min-w-[900px] px-1">
+                <div className="overflow-x-auto min-w-full">
+                  <AllBookingsTable />
+                </div>
+              </ScrollArea>
+            </CardContent>
+          </Card>
+        </main>
       </div>
-    </div>
+    </SidebarProvider>
   );
 };
 

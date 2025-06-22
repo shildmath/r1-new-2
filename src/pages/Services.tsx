@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
@@ -46,13 +45,9 @@ const Services = () => {
     const serviceWithModal = {
       ...service,
       fullDescription: service.description + " Our expert team combines cutting-edge technology with proven strategies to deliver exceptional results for your business.",
-      benefits: service.expected_benefits || [
-        "Increased ROI and business growth",
-        "Enhanced online presence and visibility", 
-        "Improved customer engagement and conversion",
-        "Data-driven insights and optimization",
-        "24/7 monitoring and support"
-      ]
+      features: service.key_features || [],
+      benefits: service.expected_benefits || [],
+      icon: getIconComponent(service.icon)
     };
     setSelectedService(serviceWithModal);
   };

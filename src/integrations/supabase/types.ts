@@ -204,6 +204,78 @@ export type Database = {
         }
         Relationships: []
       }
+      testimonial_stats: {
+        Row: {
+          average_roi: string
+          client_rating: string
+          happy_clients: string
+          id: string
+          success_rate: string
+          updated_at: string
+        }
+        Insert: {
+          average_roi?: string
+          client_rating?: string
+          happy_clients?: string
+          id?: string
+          success_rate?: string
+          updated_at?: string
+        }
+        Update: {
+          average_roi?: string
+          client_rating?: string
+          happy_clients?: string
+          id?: string
+          success_rate?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      testimonials: {
+        Row: {
+          client_name: string
+          company_name: string
+          created_at: string
+          description: string
+          id: string
+          industry: string
+          is_active: boolean
+          profile_photo: string | null
+          rating: number
+          results: string | null
+          sequence_order: number
+          updated_at: string
+        }
+        Insert: {
+          client_name: string
+          company_name: string
+          created_at?: string
+          description: string
+          id?: string
+          industry: string
+          is_active?: boolean
+          profile_photo?: string | null
+          rating?: number
+          results?: string | null
+          sequence_order?: number
+          updated_at?: string
+        }
+        Update: {
+          client_name?: string
+          company_name?: string
+          created_at?: string
+          description?: string
+          id?: string
+          industry?: string
+          is_active?: boolean
+          profile_photo?: string | null
+          rating?: number
+          results?: string | null
+          sequence_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       time_slots: {
         Row: {
           closer_id: string

@@ -165,6 +165,45 @@ export type Database = {
         }
         Relationships: []
       }
+      services: {
+        Row: {
+          created_at: string
+          description: string
+          expected_benefits: string[]
+          icon: string
+          id: string
+          is_active: boolean
+          key_features: string[]
+          sequence_order: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          expected_benefits?: string[]
+          icon: string
+          id?: string
+          is_active?: boolean
+          key_features?: string[]
+          sequence_order?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          expected_benefits?: string[]
+          icon?: string
+          id?: string
+          is_active?: boolean
+          key_features?: string[]
+          sequence_order?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       time_slots: {
         Row: {
           closer_id: string

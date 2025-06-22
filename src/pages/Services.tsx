@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,36 +8,45 @@ import { Link } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import ServiceModal from '@/components/ServiceModal';
+import { supabase } from '@/integrations/supabase/client';
+import { Service } from '@/types/service';
 import {
-  Brain,
-  TrendingUp,
-  Target,
-  Users,
-  BarChart3,
-  Megaphone,
-  Search,
-  ShoppingCart,
-  Mail,
-  Camera,
-  Code,
   ArrowRight,
-  CheckCircle,
-  Star,
-  Zap,
-  Video,
-  Smartphone,
-  Globe,
-  MessageSquare
+  CheckCircle
 } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 
 const Services = () => {
   const [selectedService, setSelectedService] = useState(null);
+  const [services, setServices] = useState<Service[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('services')
+          .select('*')
+          .eq('is_active', true)
+          .order('sequence_order', { ascending: true });
+
+        if (error) throw error;
+        setServices(data || []);
+      } catch (error) {
+        console.error('Error fetching services:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchServices();
+  }, []);
 
   const handleLearnMore = (service: any) => {
     const serviceWithModal = {
       ...service,
       fullDescription: service.description + " Our expert team combines cutting-edge technology with proven strategies to deliver exceptional results for your business.",
-      benefits: [
+      benefits: service.expected_benefits || [
         "Increased ROI and business growth",
         "Enhanced online presence and visibility", 
         "Improved customer engagement and conversion",
@@ -48,253 +57,37 @@ const Services = () => {
     setSelectedService(serviceWithModal);
   };
 
-  const mainServices = [
-    {
-      id: 1,
-      icon: Brain,
-      title: "AI-Powered Social Media Marketing",
-      description: "Intelligent content creation, audience targeting, and automated posting using cutting-edge AI algorithms.",
-      features: [
-        "AI Content Generation",
-        "Smart Audience Targeting", 
-        "Automated Posting Schedule",
-        "Performance Analytics",
-        "Competitor Analysis",
-        "Brand Voice Optimization"
-      ],
-      pricing: "Starting at $997/month",
-      results: "+300% engagement rates",
-      image: "https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=600&h=400&fit=crop"
-    },
-    {
-      icon: Search,
-      title: "SEO & Content Strategy",
-      description: "Data-driven SEO strategies that boost your organic visibility and traffic.",
-      features: [
-        "Advanced Keyword Research & Analysis",
-        "Technical SEO Optimization",
-        "Content Strategy & Creation",
-        "Link Building & Outreach",
-        "Local SEO Optimization"
-      ],
-      pricing: "Starting at $297/month",
-      results: "+250% increase in organic traffic",
-      image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&h=400&fit=crop"
-    },
-    {
-      icon: Target,
-      title: "Data-Driven PPC Advertising",
-      description: "Maximize ROI with precision-targeted advertising campaigns across all platforms.",
-      features: [
-        "Google Ads & Microsoft Ads Management",
-        "Facebook & Instagram Advertising",
-        "AI-Powered Bid Optimization",
-        "Advanced Conversion Tracking",
-        "A/B Testing & Performance Analysis"
-      ],
-      pricing: "Starting at $197/month",
-      results: "+400% ROI improvement",
-      image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=400&fit=crop"
-    },
-    {
-      icon: Mail,
-      title: "Email Marketing Automation",
-      description: "Personalized email campaigns that nurture leads and drive conversions.",
-      features: [
-        "Automated Email Sequences",
-        "Personalization & Segmentation",
-        "A/B Testing & Optimization",
-        "Advanced Analytics & Reporting",
-        "Integration with CRM Systems"
-      ],
-      pricing: "Starting at $297/month",
-      results: "+45% increase in email open rates",
-      image: "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=600&h=400&fit=crop"
-    },
-    {
-      icon: BarChart3,
-      title: "Conversion Rate Optimization",
-      description: "Increase your website's conversion rates through data-driven testing and optimization.",
-      features: [
-        "Comprehensive Website Audits",
-        "A/B & Multivariate Testing",
-        "User Experience Optimization",
-        "Landing Page Development",
-        "Conversion Funnel Analysis"
-      ],
-      pricing: "Starting at $197/month",
-      results: "+35% increase in conversion rates",
-      image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=400&fit=crop"
-    },
-    {
-      icon: Video,
-      title: "Video Marketing Excellence",
-      description: "Engage your audience with compelling video content and strategic distribution.",
-      features: [
-        "Video Strategy Development",
-        "Production & Post-Production",
-        "YouTube Channel Optimization",
-        "Video Advertising Campaigns",
-        "Performance Analytics"
-      ],
-      pricing: "Starting at $197/month",
-      results: "+Higher engagement rates",
-      image: "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=600&h=400&fit=crop"
-    },
-    {
-      icon: Smartphone,
-      title: "Mobile App Marketing",
-      description: "Drive app downloads and engagement with targeted mobile marketing strategies.",
-      features: [
-        "App Store Optimization (ASO)",
-        "Mobile Ad Campaign Management",
-        "User Acquisition Strategies",
-        "In-App Engagement Optimization",
-        "App Analytics & Reporting"
-      ],
-      pricing: "Starting at $197/month",
-      results: "+300% increase in app downloads",
-      image: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=600&h=400&fit=crop"
-    },
-    {
-      icon: Globe,
-      title: "Website Design & Development",
-      description: "Create stunning, high-converting websites that drive business growth.",
-      features: [
-        "Custom Website Design",
-        "Responsive Development",
-        "E-commerce Solutions",
-        "CMS Integration",
-        "Performance Optimization"
-      ],
-      pricing: "Starting at $197/month",
-      results: "+Improved user experience",
-      image: "https://images.unsplash.com/photo-1467232004584-a241de8bcf5d?w=600&h=400&fit=crop"
-    },
-    {
-      icon: MessageSquare,
-      title: "Chatbot & AI Automation",
-      description: "Automate customer service and lead generation with intelligent chatbots.",
-      features: [
-        "AI Chatbot Development",
-        "Lead Qualification Automation",
-        "Customer Support Integration",
-        "Multi-platform Deployment",
-        "Analytics & Optimization"
-      ],
-      pricing: "Starting at $197/month",
-      results: "+24/7 customer support availability",
-      image: "https://images.unsplash.com/photo-1531746790731-6c087fecd65a?w=600&h=400&fit=crop"
-    },
-    {
-      icon: ShoppingCart,
-      title: "E-commerce Marketing",
-      description: "Boost online sales with comprehensive e-commerce marketing strategies.",
-      features: [
-        "Product Listing Optimization",
-        "Shopping Campaign Management",
-        "Cart Abandonment Recovery",
-        "Inventory Marketing",
-        "Customer Retention Strategies"
-      ],
-      pricing: "Starting at $197/month",
-      results: "+40% increase in online sales",
-      image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600&h=400&fit=crop"
-    },
-    {
-      icon: Camera,
-      title: "Brand Photography & Design",
-      description: "Professional visual content that elevates your brand presence.",
-      features: [
-        "Professional Photography",
-        "Brand Identity Design",
-        "Graphic Design Services",
-        "Visual Content Strategy",
-        "Brand Guidelines Development"
-      ],
-      pricing: "Starting at $197/month",
-      results: "+Enhanced brand recognition",
-      image: "https://images.unsplash.com/photo-1606857521015-7f9fcf423740?w=600&h=400&fit=crop"
-    },
-    {
-      icon: Megaphone,
-      title: "Influencer Marketing",
-      description: "Leverage influencer partnerships to expand your reach and credibility.",
-      features: [
-        "Influencer Identification & Outreach",
-        "Campaign Strategy & Management",
-        "Content Collaboration",
-        "Performance Tracking",
-        "ROI Measurement"
-      ],
-      pricing: "Starting at $197/month",
-      results: "+Expanded brand reach",
-      image: "https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=600&h=400&fit=crop"
-    }
-  ];
+  const getIconComponent = (iconName: string) => {
+    const IconComponent = (LucideIcons as any)[iconName];
+    return IconComponent || LucideIcons.Star;
+  };
 
-  const additionalServices = [
-    {
-      icon: Mail,
-      title: "Email Marketing Automation",
-      description: "Personalized email campaigns that convert leads into customers.",
-      features: [
-        "Automated Email Sequences",
-        "Personalization & Segmentation",
-        "A/B Testing & Optimization",
-        "Advanced Analytics & Reporting",
-        "Integration with CRM Systems"
-      ],
-      pricing: "Starting at $297/month",
-      results: "+45% increase in email open rates",
-      image: "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=600&h=400&fit=crop"
-    },
-    {
-      icon: Code,
-      title: "Custom Software Development",
-      description: "Build custom software solutions tailored to your business needs.",
-      features: [
-        "Custom Application Development",
-        "API Integration",
-        "Scalability & Performance",
-        "User Experience Design",
-        "Maintenance & Support"
-      ],
-      pricing: "Starting at $297/month",
-      results: "+Increased efficiency",
-      image: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=600&h=400&fit=crop"
-    },
-    {
-      icon: Star,
-      title: "SEO & Content Strategy",
-      description: "Data-driven SEO strategies that boost your organic visibility and traffic.",
-      features: [
-        "Advanced Keyword Research & Analysis",
-        "Technical SEO Optimization",
-        "Content Strategy & Creation",
-        "Link Building & Outreach",
-        "Local SEO Optimization"
-      ],
-      pricing: "Starting at $297/month",
-      results: "+250% increase in organic traffic",
-      image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&h=400&fit=crop"
-    },
-    {
-      icon: Zap,
-      title: "Data-Driven PPC Advertising",
-      description: "Maximize ROI with precision-targeted advertising campaigns across all platforms.",
-      features: [
-        "Google Ads & Microsoft Ads Management",
-        "Facebook & Instagram Advertising",
-        "AI-Powered Bid Optimization",
-        "Advanced Conversion Tracking",
-        "A/B Testing & Performance Analysis"
-      ],
-      pricing: "Starting at $197/month",
-      results: "+400% ROI improvement",
-      image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=400&fit=crop"
-    }
-  ];
+  // Default service image for services that don't have one
+  const getServiceImage = (index: number) => {
+    const images = [
+      "https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=600&h=400&fit=crop",
+      "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&h=400&fit=crop",
+      "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=400&fit=crop",
+      "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=600&h=400&fit=crop",
+      "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=600&h=400&fit=crop",
+      "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=600&h=400&fit=crop",
+      "https://images.unsplash.com/photo-1467232004584-a241de8bcf5d?w=600&h=400&fit=crop",
+      "https://images.unsplash.com/photo-1531746790731-6c087fecd65a?w=600&h=400&fit=crop"
+    ];
+    return images[index % images.length];
+  };
+
+  if (loading) {
+    return (
+      <>
+        <Navbar />
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-lg">Loading services...</div>
+        </div>
+        <Footer />
+      </>
+    );
+  }
 
   return (
     <>
@@ -346,150 +139,80 @@ const Services = () => {
         </div>
       </section>
 
-      {/* Main Services Section */}
+      {/* Services Section */}
       <section className="bg-white section-padding">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {mainServices.map((service, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                whileHover={{ y: -5, scale: 1.02 }}
-                className="h-full scale-on-hover"
-              >
-                <Card className="h-full flex flex-col overflow-hidden shadow-xl border-0 bg-white glow-border">
-                  {/* Service Image */}
-                  <div className="relative h-48 overflow-hidden">
-                    <img 
-                      src={service.image} 
-                      alt={service.title}
-                      className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                    <motion.div
-                      whileHover={{ scale: 1.1, rotate: 5 }}
-                      className="absolute bottom-4 left-4 rotate-on-hover"
-                    >
-                      <service.icon size={40} className="text-white pulse-glow" />
-                    </motion.div>
-                  </div>
-
-                  <CardHeader className="flex-grow">
-                    <CardTitle className="text-xl font-bold text-gray-900 mb-2 bounce-in">
-                      {service.title}
-                    </CardTitle>
-                    <CardDescription className="text-gray-600 mb-4 slide-up">
-                      {service.description}
-                    </CardDescription>
-                  </CardHeader>
-                  
-                  <CardContent className="flex-grow">
-                    <div className="mb-6">
-                      <h4 className="font-semibold text-gray-900 mb-3">Key Features:</h4>
-                      <ul className="space-y-2">
-                        {service.features.slice(0, 3).map((feature, featureIndex) => (
-                          <motion.li 
-                            key={featureIndex} 
-                            className="flex items-start space-x-2"
-                            initial={{ opacity: 0, x: -20 }}
-                            whileInView={{ opacity: 1, x: 0 }}
-                            transition={{ delay: featureIndex * 0.1 }}
-                          >
-                            <CheckCircle size={16} className="text-green-500 mt-0.5 flex-shrink-0 pulse" />
-                            <span className="text-gray-600 text-sm">{feature}</span>
-                          </motion.li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    <div className="mt-auto">
-                      <Button 
-                        onClick={() => handleLearnMore(service)}
-                        className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 shimmer"
+            {services.map((service, index) => {
+              const IconComponent = getIconComponent(service.icon);
+              
+              return (
+                <motion.div
+                  key={service.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                  whileHover={{ y: -5, scale: 1.02 }}
+                  className="h-full scale-on-hover"
+                >
+                  <Card className="h-full flex flex-col overflow-hidden shadow-xl border-0 bg-white glow-border">
+                    {/* Service Image */}
+                    <div className="relative h-48 overflow-hidden">
+                      <img 
+                        src={getServiceImage(index)}
+                        alt={service.title}
+                        className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                      <motion.div
+                        whileHover={{ scale: 1.1, rotate: 5 }}
+                        className="absolute bottom-4 left-4 rotate-on-hover"
                       >
-                        Learn More <ArrowRight className="ml-2" size={16} />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Additional Services Section */}
-      <section className="bg-secondary section-padding">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {additionalServices.map((service, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                whileHover={{ y: -5, scale: 1.02 }}
-                className="h-full scale-on-hover"
-              >
-                <Card className="h-full flex flex-col overflow-hidden shadow-xl border-0 bg-white glow-border">
-                  {/* Service Image */}
-                  <div className="relative h-48 overflow-hidden">
-                    <img 
-                      src={service.image} 
-                      alt={service.title}
-                      className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                    <motion.div
-                      whileHover={{ scale: 1.1, rotate: 5 }}
-                      className="absolute bottom-4 left-4 rotate-on-hover"
-                    >
-                      <service.icon size={40} className="text-white pulse-glow" />
-                    </motion.div>
-                  </div>
-
-                  <CardHeader className="flex-grow">
-                    <CardTitle className="text-xl font-bold text-gray-900 mb-2 bounce-in">
-                      {service.title}
-                    </CardTitle>
-                    <CardDescription className="text-gray-600 mb-4 slide-up">
-                      {service.description}
-                    </CardDescription>
-                  </CardHeader>
-                  
-                  <CardContent className="flex-grow">
-                    <div className="mb-6">
-                      <h4 className="font-semibold text-gray-900 mb-3">Key Features:</h4>
-                      <ul className="space-y-2">
-                        {service.features.slice(0, 3).map((feature, featureIndex) => (
-                          <motion.li 
-                            key={featureIndex} 
-                            className="flex items-start space-x-2"
-                            initial={{ opacity: 0, x: -20 }}
-                            whileInView={{ opacity: 1, x: 0 }}
-                            transition={{ delay: featureIndex * 0.1 }}
-                          >
-                            <CheckCircle size={16} className="text-green-500 mt-0.5 flex-shrink-0 pulse" />
-                            <span className="text-gray-600 text-sm">{feature}</span>
-                          </motion.li>
-                        ))}
-                      </ul>
+                        <IconComponent size={40} className="text-white pulse-glow" />
+                      </motion.div>
                     </div>
 
-                    <div className="mt-auto">
-                      <Button 
-                        onClick={() => handleLearnMore(service)}
-                        className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 shimmer"
-                      >
-                        Learn More <ArrowRight className="ml-2" size={16} />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
+                    <CardHeader className="flex-grow">
+                      <CardTitle className="text-xl font-bold text-gray-900 mb-2 bounce-in">
+                        {service.title}
+                      </CardTitle>
+                      <CardDescription className="text-gray-600 mb-4 slide-up">
+                        {service.description}
+                      </CardDescription>
+                    </CardHeader>
+                    
+                    <CardContent className="flex-grow">
+                      <div className="mb-6">
+                        <h4 className="font-semibold text-gray-900 mb-3">Key Features:</h4>
+                        <ul className="space-y-2">
+                          {service.key_features.slice(0, 3).map((feature, featureIndex) => (
+                            <motion.li 
+                              key={featureIndex} 
+                              className="flex items-start space-x-2"
+                              initial={{ opacity: 0, x: -20 }}
+                              whileInView={{ opacity: 1, x: 0 }}
+                              transition={{ delay: featureIndex * 0.1 }}
+                            >
+                              <CheckCircle size={16} className="text-green-500 mt-0.5 flex-shrink-0 pulse" />
+                              <span className="text-gray-600 text-sm">{feature}</span>
+                            </motion.li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      <div className="mt-auto">
+                        <Button 
+                          onClick={() => handleLearnMore(service)}
+                          className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 shimmer"
+                        >
+                          Learn More <ArrowRight className="ml-2" size={16} />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </section>

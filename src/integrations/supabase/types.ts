@@ -9,6 +9,72 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      about_stats: {
+        Row: {
+          awards_won: string
+          growth_rate: string
+          happy_clients: string
+          id: string
+          success_rate: string
+          updated_at: string
+        }
+        Insert: {
+          awards_won?: string
+          growth_rate?: string
+          happy_clients?: string
+          id?: string
+          success_rate?: string
+          updated_at?: string
+        }
+        Update: {
+          awards_won?: string
+          growth_rate?: string
+          happy_clients?: string
+          id?: string
+          success_rate?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      awards: {
+        Row: {
+          color: string
+          created_at: string
+          icon: string
+          id: string
+          is_active: boolean
+          organization: string
+          sequence_order: number
+          title: string
+          updated_at: string
+          year: string
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          icon?: string
+          id?: string
+          is_active?: boolean
+          organization: string
+          sequence_order?: number
+          title: string
+          updated_at?: string
+          year: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          icon?: string
+          id?: string
+          is_active?: boolean
+          organization?: string
+          sequence_order?: number
+          title?: string
+          updated_at?: string
+          year?: string
+        }
+        Relationships: []
+      }
       bookings: {
         Row: {
           ad_spend: string | null
@@ -144,6 +210,51 @@ export type Database = {
         }
         Relationships: []
       }
+      journey_milestones: {
+        Row: {
+          color: string
+          created_at: string
+          description: string
+          highlight: string
+          icon: string
+          id: string
+          is_active: boolean
+          metrics: string
+          sequence_order: number
+          title: string
+          updated_at: string
+          year: string
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          description: string
+          highlight: string
+          icon?: string
+          id?: string
+          is_active?: boolean
+          metrics: string
+          sequence_order?: number
+          title: string
+          updated_at?: string
+          year: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          description?: string
+          highlight?: string
+          icon?: string
+          id?: string
+          is_active?: boolean
+          metrics?: string
+          sequence_order?: number
+          title?: string
+          updated_at?: string
+          year?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string | null
@@ -200,6 +311,42 @@ export type Database = {
           key_features?: string[]
           sequence_order?: number
           title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      team_members: {
+        Row: {
+          bio: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          profile_photo: string | null
+          role: string
+          sequence_order: number
+          updated_at: string
+        }
+        Insert: {
+          bio?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          profile_photo?: string | null
+          role: string
+          sequence_order?: number
+          updated_at?: string
+        }
+        Update: {
+          bio?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          profile_photo?: string | null
+          role?: string
+          sequence_order?: number
           updated_at?: string
         }
         Relationships: []

@@ -5,129 +5,36 @@ import { Badge } from '@/components/ui/badge';
 import { Users, Target, Award, TrendingUp, Calendar, CheckCircle, Zap, Users2, Medal, Star, Trophy, Globe, Lightbulb } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import EnhancedFooter from '@/components/EnhancedFooter';
+import { useTeamMembers, useAboutStats, useAwards, useJourneyMilestones } from '@/hooks/useAboutData';
+
+const iconMap = {
+  users: Users,
+  target: Target,
+  award: Award,
+  'trending-up': TrendingUp,
+  calendar: Calendar,
+  'check-circle': CheckCircle,
+  zap: Zap,
+  'users-2': Users2,
+  medal: Medal,
+  star: Star,
+  trophy: Trophy,
+  globe: Globe,
+  lightbulb: Lightbulb,
+};
 
 const About = () => {
-  const stats = [
-    { icon: Users, label: 'Happy Clients', value: '500+' },
-    { icon: Target, label: 'Success Rate', value: '95%' },
-    { icon: Award, label: 'Awards Won', value: '15' },
-    { icon: TrendingUp, label: 'Growth Rate', value: '300%' }
-  ];
+  const { data: teamMembers = [] } = useTeamMembers();
+  const { data: aboutStats } = useAboutStats();
+  const { data: awards = [] } = useAwards();
+  const { data: journeyMilestones = [] } = useJourneyMilestones();
 
-  const awards = [
-    {
-      year: '2024',
-      title: 'Best AI Marketing Agency',
-      organization: 'Digital Marketing Institute',
-      icon: Trophy,
-      color: 'from-yellow-400 to-orange-500'
-    },
-    {
-      year: '2023',
-      title: 'Innovation Excellence Award',
-      organization: 'Tech Innovation Council',
-      icon: Lightbulb,
-      color: 'from-blue-400 to-purple-500'
-    },
-    {
-      year: '2023',
-      title: 'Top Marketing Agency',
-      organization: 'Business Excellence Awards',
-      icon: Star,
-      color: 'from-green-400 to-blue-500'
-    },
-    {
-      year: '2022',
-      title: 'Global Marketing Leader',
-      organization: 'International Marketing Federation',
-      icon: Globe,
-      color: 'from-pink-400 to-red-500'
-    }
-  ];
-
-  const journey = [
-    {
-      year: '2017',
-      title: 'The Vision Begins',
-      description: 'Founded AIAdMaxify with a revolutionary vision to transform digital marketing through cutting-edge AI technology',
-      icon: Zap,
-      color: 'bg-gradient-to-br from-blue-500 to-blue-600',
-      metrics: 'Initial Investment: $50K',
-      highlight: 'Founding Moment'
-    },
-    {
-      year: '2018',
-      title: 'AI Breakthrough', 
-      description: 'Developed proprietary machine learning algorithms for intelligent customer targeting and campaign optimization',
-      icon: Target,
-      color: 'bg-gradient-to-br from-purple-500 to-purple-600',
-      metrics: 'First 10 Clients',
-      highlight: 'Technical Innovation'
-    },
-    {
-      year: '2019',
-      title: 'Market Validation',
-      description: 'Achieved remarkable milestone of 100+ clients with an unprecedented 300% average ROI across all campaigns',
-      icon: Users2,
-      color: 'bg-gradient-to-br from-pink-500 to-pink-600',
-      metrics: '100+ Clients, 300% ROI',
-      highlight: 'Growth Milestone'
-    },
-    {
-      year: '2020',
-      title: 'Platform Evolution',
-      description: 'Launched comprehensive AI-powered marketing platform integrating SEO, PPC, social media, and analytics',
-      icon: Award,
-      color: 'bg-gradient-to-br from-red-500 to-red-600',
-      metrics: '$1M+ Ad Spend Managed',
-      highlight: 'Product Launch'
-    },
-    {
-      year: '2021',
-      title: 'Industry Recognition',
-      description: 'Received prestigious "Best AI Marketing Agency" award and established ourselves as thought leaders',
-      icon: Medal,
-      color: 'bg-gradient-to-br from-orange-500 to-orange-600',
-      metrics: '15+ Industry Awards',
-      highlight: 'Recognition'
-    },
-    {
-      year: '2022',
-      title: 'Global Expansion',
-      description: 'Expanded operations internationally, now serving clients across 15 countries with localized strategies',
-      icon: TrendingUp,
-      color: 'bg-gradient-to-br from-green-500 to-green-600',
-      metrics: '15 Countries, 250+ Clients',
-      highlight: 'International Growth'
-    },
-    {
-      year: '2023',
-      title: 'Success Stories',
-      description: 'Reached 500+ successful business transformations with AI-powered marketing solutions',
-      icon: CheckCircle,
-      color: 'bg-gradient-to-br from-emerald-500 to-emerald-600',
-      metrics: '500+ Success Stories',
-      highlight: 'Client Success'
-    },
-    {
-      year: '2024',
-      title: 'Innovation Lab',
-      description: 'Established dedicated R&D lab for next-generation marketing AI and predictive analytics',
-      icon: Zap,
-      color: 'bg-gradient-to-br from-cyan-500 to-cyan-600',
-      metrics: '$2M R&D Investment',
-      highlight: 'Future Focus'
-    },
-    {
-      year: '2025',
-      title: 'Leading Tomorrow',
-      description: 'Pioneering the next wave of AI marketing transformation with advanced machine learning capabilities',
-      icon: Target,
-      color: 'bg-gradient-to-br from-blue-600 to-indigo-600',
-      metrics: 'Next-Gen AI Platform',
-      highlight: 'Vision 2025'
-    }
-  ];
+  const stats = aboutStats ? [
+    { icon: Users, label: 'Happy Clients', value: aboutStats.happy_clients },
+    { icon: Target, label: 'Success Rate', value: aboutStats.success_rate },
+    { icon: Award, label: 'Awards Won', value: aboutStats.awards_won },
+    { icon: TrendingUp, label: 'Growth Rate', value: aboutStats.growth_rate }
+  ] : [];
 
   const values = [
     {
@@ -150,29 +57,6 @@ const About = () => {
       description: 'Every campaign is optimized for maximum ROI and business growth.',
       icon: Target
     }
-  ];
-
-  const teamMembers = [
-    { name: 'Alex Johnson', role: 'CEO & Founder', bio: '10+ years in digital marketing and AI strategy', image: '/lovable-uploads/f28d1397-f087-49e3-b66b-6f8a17346fdc.png' },
-    { name: 'Sarah Chen', role: 'Head of AI Marketing', bio: 'Former Google AI researcher with 8 years experience', image: '/lovable-uploads/80bafa31-117d-4d13-ac9f-23a08b241713.png' },
-    { name: 'Mike Rodriguez', role: 'Creative Director', bio: 'Award-winning designer with 12 years in digital', image: '/lovable-uploads/80380992-ea0d-49be-9c56-569a7baa5096.png' },
-    { name: 'Emily Davis', role: 'Data Scientist', bio: 'PhD in Machine Learning, AI optimization expert', image: null },
-    { name: 'James Wilson', role: 'Marketing Strategist', bio: 'Growth hacking specialist, 300+ campaigns', image: null },
-    { name: 'Lisa Thompson', role: 'Account Manager', bio: 'Client success expert, 95% retention rate', image: null },
-    { name: 'David Kim', role: 'SEO Director', bio: 'Technical SEO master, 7 years experience', image: null },
-    { name: 'Anna Garcia', role: 'Social Media Lead', bio: 'Viral content creator, millions of engagements', image: null },
-    { name: 'Tom Brown', role: 'PPC Specialist', bio: 'Google Ads certified, $50M+ ad spend managed', image: null },
-    { name: 'Rachel Lee', role: 'Content Manager', bio: 'Brand storytelling expert, 500+ articles published', image: null },
-    { name: 'Kevin Zhang', role: 'Tech Lead', bio: 'Full-stack developer, marketing automation expert', image: null },
-    { name: 'Sophie Martin', role: 'Analytics Manager', bio: 'Data visualization specialist, actionable insights', image: null },
-    { name: 'Carlos Silva', role: 'Email Marketing Director', bio: 'Email automation expert, 45% avg open rates', image: null },
-    { name: 'Maya Patel', role: 'Conversion Optimizer', bio: 'CRO specialist, doubled client conversions', image: null },
-    { name: 'Ryan Murphy', role: 'Brand Strategist', bio: 'Brand positioning expert, Fortune 500 experience', image: null },
-    { name: 'Jessica Wang', role: 'Video Marketing Lead', bio: 'Video content creator, 100M+ views generated', image: null },
-    { name: 'Mark Taylor', role: 'Mobile Marketing Expert', bio: 'App marketing specialist, 10M+ downloads', image: null },
-    { name: 'Olivia Johnson', role: 'Influencer Relations', bio: 'Influencer partnership expert, 1000+ collaborations', image: null },
-    { name: 'Daniel Lee', role: 'E-commerce Specialist', bio: 'Online store optimization, 400% revenue growth', image: null },
-    { name: 'Grace Chen', role: 'Customer Success Manager', bio: 'Client onboarding expert, seamless transitions', image: null }
   ];
 
   const containerVariants = {
@@ -274,7 +158,7 @@ const About = () => {
               transition={{ duration: 0.6, delay: 0.6 }}
             >
               <Badge className="text-lg py-2 px-6 bg-gradient-to-r from-primary to-accent">
-                Established 2017 • 500+ Success Stories
+                Established 2017 • {aboutStats?.happy_clients || '500+'} Success Stories
               </Badge>
             </motion.div>
           </motion.div>
@@ -342,41 +226,44 @@ const About = () => {
             animate="visible"
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
           >
-            {awards.map((award, index) => (
-              <motion.div
-                key={index}
-                variants={itemVariants}
-                whileHover={{ 
-                  scale: 1.05, 
-                  y: -10,
-                  transition: { duration: 0.3 }
-                }}
-                className="text-center"
-              >
-                <Card className="p-6 h-full hover:shadow-xl transition-all duration-300 border-0 bg-white">
-                  <CardContent className="p-0">
-                    <motion.div 
-                      className={`w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r ${award.color} flex items-center justify-center`}
-                      whileHover={{ 
-                        rotate: 360,
-                        scale: 1.1
-                      }}
-                      transition={{ duration: 0.6 }}
-                    >
-                      <award.icon className="text-white" size={24} />
-                    </motion.div>
-                    <Badge className="mb-3">{award.year}</Badge>
-                    <h3 className="text-lg font-bold text-primary mb-2">{award.title}</h3>
-                    <p className="text-sm text-gray-600">{award.organization}</p>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
+            {awards.map((award, index) => {
+              const IconComponent = iconMap[award.icon] || Trophy;
+              return (
+                <motion.div
+                  key={award.id}
+                  variants={itemVariants}
+                  whileHover={{ 
+                    scale: 1.05, 
+                    y: -10,
+                    transition: { duration: 0.3 }
+                  }}
+                  className="text-center"
+                >
+                  <Card className="p-6 h-full hover:shadow-xl transition-all duration-300 border-0 bg-white">
+                    <CardContent className="p-0">
+                      <motion.div 
+                        className={`w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r ${award.color} flex items-center justify-center`}
+                        whileHover={{ 
+                          rotate: 360,
+                          scale: 1.1
+                        }}
+                        transition={{ duration: 0.6 }}
+                      >
+                        <IconComponent className="text-white" size={24} />
+                      </motion.div>
+                      <Badge className="mb-3">{award.year}</Badge>
+                      <h3 className="text-lg font-bold text-primary mb-2">{award.title}</h3>
+                      <p className="text-sm text-gray-600">{award.organization}</p>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              );
+            })}
           </motion.div>
         </div>
       </section>
 
-      {/* Enhanced Journey Section */}
+      {/* Enhanced Journey Section with Flip-Flop Layout */}
       <section className="py-20 bg-white relative overflow-hidden">
         {/* Background decorations */}
         <motion.div
@@ -413,7 +300,7 @@ const About = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
             >
-              From a visionary startup in 2017 to the industry-leading AI marketing powerhouse of 2025
+              From a visionary startup in 2017 to the industry-leading AI marketing powerhouse of today
             </motion.p>
           </motion.div>
 
@@ -427,139 +314,142 @@ const About = () => {
                 transition={{ duration: 2, delay: 0.5 }}
               />
               
-              {journey.map((milestone, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, x: index % 2 === 0 ? -100 : 100 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ 
-                    duration: 0.8, 
-                    delay: index * 0.2,
-                    type: "spring",
-                    stiffness: 100
-                  }}
-                  className={`relative flex items-center mb-16 lg:mb-20 ${
-                    index % 2 === 0 ? 'lg:flex-row-reverse' : ''
-                  }`}
-                >
-                  {/* Enhanced Timeline dot with pulsing effect */}
-                  <motion.div 
-                    className={`hidden lg:block absolute left-1/2 transform -translate-x-1/2 w-20 h-20 ${milestone.color} rounded-full border-4 border-white shadow-2xl z-10 flex items-center justify-center group`}
-                    variants={journeyItemVariants}
-                    initial="hidden"
-                    animate="visible"
-                    transition={{ duration: 0.6, delay: index * 0.2 + 0.5 }}
-                    whileHover={{ 
-                      scale: 1.3,
-                      boxShadow: "0 20px 40px rgba(0,0,0,0.2)"
+              {journeyMilestones.map((milestone, index) => {
+                const IconComponent = iconMap[milestone.icon] || Zap;
+                return (
+                  <motion.div
+                    key={milestone.id}
+                    initial={{ opacity: 0, x: index % 2 === 0 ? -100 : 100 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ 
+                      duration: 0.8, 
+                      delay: index * 0.2,
+                      type: "spring",
+                      stiffness: 100
                     }}
+                    className={`relative flex items-center mb-16 lg:mb-20 ${
+                      index % 2 === 0 ? 'lg:flex-row-reverse' : ''
+                    }`}
                   >
-                    <milestone.icon className="text-white group-hover:scale-110 transition-transform duration-300" size={28} />
-                    
-                    {/* Pulsing ring effect */}
-                    <motion.div
-                      className="absolute inset-0 rounded-full border-2 border-white/30"
-                      animate={{ 
-                        scale: [1, 1.5, 1],
-                        opacity: [0.5, 0, 0.5]
-                      }}
-                      transition={{ 
-                        duration: 2,
-                        repeat: Infinity,
-                        delay: index * 0.3
-                      }}
-                    />
-                  </motion.div>
-                  
-                  {/* Enhanced Content card */}
-                  <div className={`w-full lg:w-5/12 ${index % 2 === 0 ? 'lg:pr-16' : 'lg:pl-16'}`}>
-                    <motion.div
+                    {/* Enhanced Timeline dot with pulsing effect */}
+                    <motion.div 
+                      className={`hidden lg:block absolute left-1/2 transform -translate-x-1/2 w-20 h-20 ${milestone.color.replace('bg-gradient-to-br', 'bg-gradient-to-r')} rounded-full border-4 border-white shadow-2xl z-10 flex items-center justify-center group`}
+                      variants={journeyItemVariants}
+                      initial="hidden"
+                      animate="visible"
+                      transition={{ duration: 0.6, delay: index * 0.2 + 0.5 }}
                       whileHover={{ 
-                        scale: 1.03, 
-                        y: -8,
-                        boxShadow: "0 25px 50px rgba(0,0,0,0.15)"
+                        scale: 1.3,
+                        boxShadow: "0 20px 40px rgba(0,0,0,0.2)"
                       }}
-                      transition={{ duration: 0.4, type: "spring", stiffness: 300 }}
-                      className="group"
                     >
-                      <Card className="p-8 shadow-xl hover:shadow-2xl transition-all duration-500 border-0 bg-white/90 backdrop-blur-sm relative overflow-hidden">
-                        {/* Gradient overlay on hover */}
-                        <motion.div
-                          className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                          initial={{ scale: 0 }}
-                          whileHover={{ scale: 1 }}
-                        />
-                        
-                        <CardContent className="p-0 relative z-10">
-                          <div className="flex items-center mb-6">
-                            <motion.div 
-                              className={`w-16 h-16 rounded-2xl ${milestone.color} flex items-center justify-center mr-6 lg:hidden shadow-lg`}
-                              whileHover={{ rotate: 360, scale: 1.1 }}
-                              transition={{ duration: 0.6 }}
-                            >
-                              <milestone.icon className="text-white" size={24} />
-                            </motion.div>
-                            <div className="flex-1">
-                              <motion.div
-                                initial={{ opacity: 0, x: -20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: index * 0.2 + 0.8 }}
-                              >
-                                <Badge className={`${milestone.color} text-white mb-3 text-sm px-3 py-1`}>
-                                  {milestone.year}
-                                </Badge>
-                                <Badge variant="outline" className="ml-2 text-xs">
-                                  {milestone.highlight}
-                                </Badge>
-                              </motion.div>
-                              <motion.h4 
-                                className="text-2xl font-bold text-gray-800 mb-3 group-hover:text-blue-600 transition-colors duration-300"
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: index * 0.2 + 1.0 }}
-                              >
-                                {milestone.title}
-                              </motion.h4>
-                            </div>
-                          </div>
-                          
-                          <motion.p 
-                            className="text-gray-600 leading-relaxed mb-4 text-lg"
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: index * 0.2 + 1.2 }}
-                          >
-                            {milestone.description}
-                          </motion.p>
-                          
-                          <motion.div
-                            className="flex items-center justify-between pt-4 border-t border-gray-100"
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ delay: index * 0.2 + 1.4 }}
-                          >
-                            <div className="text-sm font-semibold text-blue-600">
-                              {milestone.metrics}
-                            </div>
-                            <motion.div
-                              className="w-2 h-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"
-                              animate={{ 
-                                scale: [1, 1.5, 1],
-                                opacity: [0.5, 1, 0.5]
-                              }}
-                              transition={{ 
-                                duration: 2,
-                                repeat: Infinity,
-                                delay: index * 0.5
-                              }}
-                            />
-                          </motion.div>
-                        </CardContent>
-                      </Card>
+                      <IconComponent className="text-white group-hover:scale-110 transition-transform duration-300" size={28} />
+                      
+                      {/* Pulsing ring effect */}
+                      <motion.div
+                        className="absolute inset-0 rounded-full border-2 border-white/30"
+                        animate={{ 
+                          scale: [1, 1.5, 1],
+                          opacity: [0.5, 0, 0.5]
+                        }}
+                        transition={{ 
+                          duration: 2,
+                          repeat: Infinity,
+                          delay: index * 0.3
+                        }}
+                      />
                     </motion.div>
-                  </div>
-                </motion.div>
-              ))}
+                    
+                    {/* Enhanced Content card */}
+                    <div className={`w-full lg:w-5/12 ${index % 2 === 0 ? 'lg:pr-16' : 'lg:pl-16'}`}>
+                      <motion.div
+                        whileHover={{ 
+                          scale: 1.03, 
+                          y: -8,
+                          boxShadow: "0 25px 50px rgba(0,0,0,0.15)"
+                        }}
+                        transition={{ duration: 0.4, type: "spring", stiffness: 300 }}
+                        className="group"
+                      >
+                        <Card className="p-8 shadow-xl hover:shadow-2xl transition-all duration-500 border-0 bg-white/90 backdrop-blur-sm relative overflow-hidden">
+                          {/* Gradient overlay on hover */}
+                          <motion.div
+                            className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                            initial={{ scale: 0 }}
+                            whileHover={{ scale: 1 }}
+                          />
+                          
+                          <CardContent className="p-0 relative z-10">
+                            <div className="flex items-center mb-6">
+                              <motion.div 
+                                className={`w-16 h-16 rounded-2xl ${milestone.color} flex items-center justify-center mr-6 lg:hidden shadow-lg`}
+                                whileHover={{ rotate: 360, scale: 1.1 }}
+                                transition={{ duration: 0.6 }}
+                              >
+                                <IconComponent className="text-white" size={24} />
+                              </motion.div>
+                              <div className="flex-1">
+                                <motion.div
+                                  initial={{ opacity: 0, x: -20 }}
+                                  animate={{ opacity: 1, x: 0 }}
+                                  transition={{ delay: index * 0.2 + 0.8 }}
+                                >
+                                  <Badge className={`${milestone.color.replace('bg-gradient-to-br', 'bg-gradient-to-r')} text-white mb-3 text-sm px-3 py-1`}>
+                                    {milestone.year}
+                                  </Badge>
+                                  <Badge variant="outline" className="ml-2 text-xs">
+                                    {milestone.highlight}
+                                  </Badge>
+                                </motion.div>
+                                <motion.h4 
+                                  className="text-2xl font-bold text-gray-800 mb-3 group-hover:text-blue-600 transition-colors duration-300"
+                                  initial={{ opacity: 0, y: 10 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  transition={{ delay: index * 0.2 + 1.0 }}
+                                >
+                                  {milestone.title}
+                                </motion.h4>
+                              </div>
+                            </div>
+                            
+                            <motion.p 
+                              className="text-gray-600 leading-relaxed mb-4 text-lg"
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: index * 0.2 + 1.2 }}
+                            >
+                              {milestone.description}
+                            </motion.p>
+                            
+                            <motion.div
+                              className="flex items-center justify-between pt-4 border-t border-gray-100"
+                              initial={{ opacity: 0, scale: 0.9 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              transition={{ delay: index * 0.2 + 1.4 }}
+                            >
+                              <div className="text-sm font-semibold text-blue-600">
+                                {milestone.metrics}
+                              </div>
+                              <motion.div
+                                className="w-2 h-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"
+                                animate={{ 
+                                  scale: [1, 1.5, 1],
+                                  opacity: [0.5, 1, 0.5]
+                                }}
+                                transition={{ 
+                                  duration: 2,
+                                  repeat: Infinity,
+                                  delay: index * 0.5
+                                }}
+                              />
+                            </motion.div>
+                          </CardContent>
+                        </Card>
+                      </motion.div>
+                    </div>
+                  </motion.div>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -636,7 +526,7 @@ const About = () => {
           >
             {teamMembers.map((member, index) => (
               <motion.div
-                key={index}
+                key={member.id}
                 variants={itemVariants}
                 whileHover={{ scale: 1.05, y: -10 }}
                 className="text-center"
@@ -648,8 +538,8 @@ const About = () => {
                       whileHover={{ scale: 1.1 }}
                       transition={{ duration: 0.3 }}
                     >
-                      {member.image ? (
-                        <img src={member.image} alt={member.name} className="w-full h-full object-cover" />
+                      {member.profile_photo ? (
+                        <img src={member.profile_photo} alt={member.name} className="w-full h-full object-cover" />
                       ) : (
                         <div className="w-full h-full bg-gray-200 flex items-center justify-center">
                           <Users className="text-gray-400" size={28} />
@@ -658,7 +548,7 @@ const About = () => {
                     </motion.div>
                     <h3 className="text-lg font-bold text-primary mb-1">{member.name}</h3>
                     <p className="text-purple-600 font-medium mb-2 text-sm">{member.role}</p>
-                    <p className="text-gray-600 text-xs leading-relaxed">{member.bio}</p>
+                    {member.bio && <p className="text-gray-600 text-xs leading-relaxed">{member.bio}</p>}
                   </CardContent>
                 </Card>
               </motion.div>

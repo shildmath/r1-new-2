@@ -1,11 +1,15 @@
+
 import { Send } from "lucide-react";
 import ContactForm from "@/components/ContactForm";
 import Navbar from "@/components/Navbar";
-import EnhancedFooter from "@/components/EnhancedFooter";
+import Footer from "@/components/Footer";
 import ContactInfo from "@/components/ContactInfo";
 import { motion } from "framer-motion";
+import { useContactPageConfig } from "@/hooks/useContactPageConfig";
 
 const Contact = () => {
+  const { data: config } = useContactPageConfig();
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-100/50 via-white to-purple-100/30 flex flex-col">
       <Navbar />
@@ -27,24 +31,26 @@ const Contact = () => {
           </div>
           <div className="-mt-5 w-full bg-white shadow-2xl rounded-b-3xl px-3 py-5 sm:p-8 relative z-0 animate-fade-in">
             <ContactForm />
-            <div className="border-t pt-6 mt-7 text-center">
-              <p className="text-gray-500 mb-3 text-sm">Prefer to contact us directly?</p>
-              <div className="flex flex-col gap-2 sm:flex-row justify-center text-sm flex-wrap">
-                <a href="mailto:info@aiadmaxify.com" className="flex items-center gap-2 justify-center text-blue-700 hover:text-blue-900 hover:underline font-semibold transition-colors">
-                  info@aiadmaxify.com
-                </a>
-                <a href="tel:+15551234567" className="flex items-center gap-2 justify-center text-green-600 hover:text-green-900 hover:underline font-semibold transition-colors">
-                  +1 (555) 123-4567
-                </a>
-                <a href="https://wa.me/15551234567" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 justify-center text-green-500 hover:text-green-700 hover:underline font-semibold transition-colors">
-                  WhatsApp
-                </a>
+            {config && (
+              <div className="border-t pt-6 mt-7 text-center">
+                <p className="text-gray-500 mb-3 text-sm">{config.contact_directly_title}</p>
+                <div className="flex flex-col gap-2 sm:flex-row justify-center text-sm flex-wrap">
+                  <a href={`mailto:${config.email_us_value}`} className="flex items-center gap-2 justify-center text-blue-700 hover:text-blue-900 hover:underline font-semibold transition-colors">
+                    {config.email_us_value}
+                  </a>
+                  <a href={`tel:${config.call_us_value}`} className="flex items-center gap-2 justify-center text-green-600 hover:text-green-900 hover:underline font-semibold transition-colors">
+                    {config.call_us_value}
+                  </a>
+                  <a href={`https://wa.me/${config.whatsapp_value.replace(/[^\d]/g, '')}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 justify-center text-green-500 hover:text-green-700 hover:underline font-semibold transition-colors">
+                    WhatsApp
+                  </a>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </motion.section>
       </main>
-      <EnhancedFooter />
+      <Footer />
     </div>
   );
 };

@@ -174,6 +174,72 @@ export type Database = {
           },
         ]
       }
+      contact_page_config: {
+        Row: {
+          business_hours_description: string
+          business_hours_title: string
+          business_hours_value: string
+          call_us_description: string
+          call_us_title: string
+          call_us_value: string
+          contact_directly_description: string
+          contact_directly_title: string
+          email_us_description: string
+          email_us_title: string
+          email_us_value: string
+          id: string
+          updated_at: string
+          visit_office_description: string
+          visit_office_title: string
+          visit_office_value: string
+          whatsapp_description: string
+          whatsapp_title: string
+          whatsapp_value: string
+        }
+        Insert: {
+          business_hours_description?: string
+          business_hours_title?: string
+          business_hours_value?: string
+          call_us_description?: string
+          call_us_title?: string
+          call_us_value?: string
+          contact_directly_description?: string
+          contact_directly_title?: string
+          email_us_description?: string
+          email_us_title?: string
+          email_us_value?: string
+          id?: string
+          updated_at?: string
+          visit_office_description?: string
+          visit_office_title?: string
+          visit_office_value?: string
+          whatsapp_description?: string
+          whatsapp_title?: string
+          whatsapp_value?: string
+        }
+        Update: {
+          business_hours_description?: string
+          business_hours_title?: string
+          business_hours_value?: string
+          call_us_description?: string
+          call_us_title?: string
+          call_us_value?: string
+          contact_directly_description?: string
+          contact_directly_title?: string
+          email_us_description?: string
+          email_us_title?: string
+          email_us_value?: string
+          id?: string
+          updated_at?: string
+          visit_office_description?: string
+          visit_office_title?: string
+          visit_office_value?: string
+          whatsapp_description?: string
+          whatsapp_title?: string
+          whatsapp_value?: string
+        }
+        Relationships: []
+      }
       contact_submissions: {
         Row: {
           created_at: string
@@ -207,6 +273,72 @@ export type Database = {
           source?: string
           status?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      footer_config: {
+        Row: {
+          company_description: string
+          company_name: string
+          contact_address: string
+          contact_email: string
+          contact_phone: string
+          copyright_text: string
+          facebook_url: string
+          id: string
+          instagram_url: string
+          linkedin_url: string
+          newsletter_placeholder: string
+          newsletter_title: string
+          privacy_policy_link: string
+          quick_links: Json
+          services_list: Json
+          terms_of_service_link: string
+          twitter_url: string
+          updated_at: string
+          youtube_url: string
+        }
+        Insert: {
+          company_description?: string
+          company_name?: string
+          contact_address?: string
+          contact_email?: string
+          contact_phone?: string
+          copyright_text?: string
+          facebook_url?: string
+          id?: string
+          instagram_url?: string
+          linkedin_url?: string
+          newsletter_placeholder?: string
+          newsletter_title?: string
+          privacy_policy_link?: string
+          quick_links?: Json
+          services_list?: Json
+          terms_of_service_link?: string
+          twitter_url?: string
+          updated_at?: string
+          youtube_url?: string
+        }
+        Update: {
+          company_description?: string
+          company_name?: string
+          contact_address?: string
+          contact_email?: string
+          contact_phone?: string
+          copyright_text?: string
+          facebook_url?: string
+          id?: string
+          instagram_url?: string
+          linkedin_url?: string
+          newsletter_placeholder?: string
+          newsletter_title?: string
+          privacy_policy_link?: string
+          quick_links?: Json
+          services_list?: Json
+          terms_of_service_link?: string
+          twitter_url?: string
+          updated_at?: string
+          youtube_url?: string
         }
         Relationships: []
       }

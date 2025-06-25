@@ -1,127 +1,146 @@
 
-import { motion } from 'framer-motion';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Mail, Phone, MapPin, Clock } from 'lucide-react';
+import { motion } from "framer-motion";
+import { Mail, Phone, MapPin, Clock, MessageCircle } from "lucide-react";
+import { useContactPageConfig } from "@/hooks/useContactPageConfig";
 
-// Add WhatsApp detail for extra contact option
-const contactInfo = [
-  {
-    icon: Mail,
-    title: "Email Us",
-    details: (
-      <a href="mailto:info@aiadmaxify.com" className="text-blue-600 underline hover:text-blue-800 transition">
-        info@aiadmaxify.com
-      </a>
-    ),
-    description: "Send us an email anytime.",
-    color: "text-blue-600",
-    bgColor: "bg-blue-50"
-  },
-  {
-    icon: Phone,
-    title: "Call Us",
-    details: (
-      <a href="tel:+15551234567" className="text-green-700 underline hover:text-green-900 transition">
-        +1 (555) 123-4567
-      </a>
-    ),
-    description: "Mon–Fri, 8am–6pm EST",
-    color: "text-green-600",
-    bgColor: "bg-green-50"
-  },
-  {
-    icon: MapPin,
-    title: "Visit Office",
-    details: (
-      <span className="text-purple-700 font-medium">
-        123 Innovation Dr, Tech City
-      </span>
-    ),
-    description: "Headquarters location.",
-    color: "text-purple-600",
-    bgColor: "bg-purple-50"
-  },
-  {
-    icon: Clock,
-    title: "Business Hours",
-    details: (
-      <span>
-        <span className="text-orange-600 font-semibold">Mon–Fri: 8am–6pm EST</span>
-        <br className="hidden sm:block" />
-        <span className="text-orange-600 font-medium">Sat: 9am–2pm EST</span>
-      </span>
-    ),
-    description: "Feel free to reach out during these hours.",
-    color: "text-orange-600",
-    bgColor: "bg-orange-50"
-  },
-  {
-    icon: () => <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" className="w-7 h-7" />,
-    title: "WhatsApp Message",
-    details: (
-      <a
-        href="https://wa.me/15551234567"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-green-500 underline hover:text-green-700 transition"
-      >
-        +1 (555) 123-4567
-      </a>
-    ),
-    description: "Chat with us instantly on WhatsApp.",
-    color: "text-green-500",
-    bgColor: "bg-green-100"
+const ContactInfo = () => {
+  const { data: config } = useContactPageConfig();
+
+  if (!config) {
+    return null;
   }
-];
 
-// Responsive grid for cards
-const gridVariant = {
-  hidden: {},
-  visible: {
-    transition: {
-      staggerChildren: 0.11,
+  const contactItems = [
+    {
+      icon: Mail,
+      title: config.email_us_title,
+      value: config.email_us_value,
+      description: config.email_us_description,
+      href: `mailto:${config.email_us_value}`,
+      color: "from-blue-500 to-cyan-500",
     },
-  },
-};
-const cardVariant = {
-  hidden: { opacity: 0, y: 30, scale: 0.96 },
-  visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.5, ease: "easeOut" } },
-  hover: { y: -8, scale: 1.042, boxShadow: "0 8px 24px rgba(170,170,255,0.12)" }
-};
+    {
+      icon: Phone,
+      title: config.call_us_title,
+      value: config.call_us_value,
+      description: config.call_us_description,
+      href: `tel:${config.call_us_value}`,
+      color: "from-green-500 to-emerald-500",
+    },
+    {
+      icon: MapPin,
+      title: config.visit_office_title,
+      value: config.visit_office_value,
+      description: config.visit_office_description,
+      href: `https://maps.google.com/?q=${encodeURIComponent(config.visit_office_value)}`,
+      color: "from-red-500 to-pink-500",
+    },
+    {
+      icon: Clock,
+      title: config.business_hours_title,
+      value: config.business_hours_value,
+      description: config.business_hours_description,
+      href: null,
+      color: "from-purple-500 to-indigo-500",
+    },
+    {
+      icon: MessageCircle,
+      title: config.whatsapp_title,
+      value: config.whatsapp_value,
+      description: config.whatsapp_description,
+      href: `https://wa.me/${config.whatsapp_value.replace(/[^\d]/g, '')}`,
+      color: "from-green-600 to-green-500",
+    },
+  ];
 
-const ContactInfo = () => (
-  <motion.div
-    className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5 sm:gap-6 mb-8 w-full [&>div]:h-full"
-    variants={gridVariant}
-    initial="hidden"
-    animate="visible"
-  >
-    {contactInfo.map((info, idx) => (
+  return (
+    <motion.section
+      initial={{ opacity: 0, translateY: 30 }}
+      animate={{ opacity: 1, translateY: 0 }}
+      transition={{ duration: 0.6, ease: 'easeOut' }}
+      className="w-full max-w-6xl mx-auto mb-12 px-4"
+    >
       <motion.div
-        key={info.title}
-        variants={cardVariant}
-        whileHover="hover"
-        className="will-change-transform"
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+        className="text-center mb-10"
       >
-        <Card className="h-full text-center shadow-xl border-0 hover-lift transition-all duration-300">
-          <CardHeader>
-            <div className={`w-14 h-14 ${info.bgColor} rounded-full flex items-center justify-center mx-auto mb-2 shadow-sm`}>
-              {/* @ts-ignore */}
-              <info.icon size={32} className={info.color} />
-            </div>
-            <CardTitle className="text-base font-bold text-primary mb-1">
-              {info.title}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-sm font-bold text-accent mb-1 leading-snug">{info.details}</div>
-            <CardDescription className="text-muted-foreground">{info.description}</CardDescription>
-          </CardContent>
-        </Card>
+        <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
+          Get in Touch
+        </h2>
+        <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+          We're here to help! Reach out to us through any of these channels and we'll get back to you promptly.
+        </p>
       </motion.div>
-    ))}
-  </motion.div>
-);
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+        {contactItems.map((item, index) => (
+          <motion.div
+            key={index}
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 * index }}
+            className="group"
+          >
+            {item.href ? (
+              <a
+                href={item.href}
+                target={item.href.startsWith('http') ? '_blank' : undefined}
+                rel={item.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                className="block"
+              >
+                <motion.div
+                  whileHover={{ scale: 1.05, y: -5 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 p-6 text-center h-full"
+                >
+                  <motion.div
+                    whileHover={{ rotate: 360 }}
+                    transition={{ duration: 0.6 }}
+                    className={`w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r ${item.color} flex items-center justify-center text-white shadow-lg`}
+                  >
+                    <item.icon size={28} />
+                  </motion.div>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                    {item.title}
+                  </h3>
+                  <p className="text-sm font-medium text-gray-700 mb-2">
+                    {item.value}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {item.description}
+                  </p>
+                </motion.div>
+              </a>
+            ) : (
+              <motion.div
+                whileHover={{ scale: 1.05, y: -5 }}
+                className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 p-6 text-center h-full"
+              >
+                <motion.div
+                  whileHover={{ rotate: 360 }}
+                  transition={{ duration: 0.6 }}
+                  className={`w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r ${item.color} flex items-center justify-center text-white shadow-lg`}
+                >
+                  <item.icon size={28} />
+                </motion.div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                  {item.title}
+                </h3>
+                <p className="text-sm font-medium text-gray-700 mb-2">
+                  {item.value}
+                </p>
+                <p className="text-xs text-gray-500">
+                  {item.description}
+                </p>
+              </motion.div>
+            )}
+          </motion.div>
+        ))}
+      </div>
+    </motion.section>
+  );
+};
 
 export default ContactInfo;
-

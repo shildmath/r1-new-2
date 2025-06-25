@@ -2,30 +2,21 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Mail, Phone, MapPin, Facebook, Instagram, Linkedin, Twitter, Youtube } from 'lucide-react';
+import { useFooterConfig } from '@/hooks/useFooterConfig';
 
 const Footer = () => {
+  const { data: config } = useFooterConfig();
+
+  if (!config) {
+    return null; // or loading state
+  }
+
   const socialLinks = [
-    { icon: Facebook, href: "https://facebook.com", label: "Facebook" },
-    { icon: Instagram, href: "https://instagram.com", label: "Instagram" },
-    { icon: Linkedin, href: "https://linkedin.com", label: "LinkedIn" },
-    { icon: Twitter, href: "https://twitter.com", label: "Twitter" },
-    { icon: Youtube, href: "https://youtube.com", label: "YouTube" }
-  ];
-
-  const quickLinks = [
-    { name: "Home", href: "/" },
-    { name: "Services", href: "/services" },
-    { name: "Results", href: "/testimonials" },
-    { name: "About Us", href: "/about" },
-    { name: "Contact", href: "/contact" }
-  ];
-
-  const services = [
-    "AI-Powered Social Media",
-    "SEO & Content Strategy",
-    "PPC Advertising",
-    "Email Marketing",
-    "Conversion Optimization"
+    { icon: Facebook, href: config.facebook_url, label: "Facebook" },
+    { icon: Instagram, href: config.instagram_url, label: "Instagram" },
+    { icon: Linkedin, href: config.linkedin_url, label: "LinkedIn" },
+    { icon: Twitter, href: config.twitter_url, label: "Twitter" },
+    { icon: Youtube, href: config.youtube_url, label: "YouTube" }
   ];
 
   return (
@@ -45,12 +36,10 @@ const Footer = () => {
               transition={{ type: "spring", stiffness: 300 }}
             >
               <h3 className="text-2xl font-bold mb-4">
-                <span className="text-white">AI</span>
-                <span className="text-purple-400">AdMaxify</span>
+                <span className="text-white">{config.company_name}</span>
               </h3>
               <p className="text-gray-300 leading-relaxed">
-                Transforming businesses with AI-powered marketing solutions. 
-                We deliver measurable results and sustainable growth.
+                {config.company_description}
               </p>
             </motion.div>
             
@@ -61,7 +50,7 @@ const Footer = () => {
                 transition={{ type: "spring", stiffness: 400 }}
               >
                 <Mail size={18} className="text-purple-400" />
-                <span>hello@aiadmaxify.com</span>
+                <span>{config.contact_email}</span>
               </motion.div>
               <motion.div 
                 className="flex items-center space-x-3 text-gray-300"
@@ -69,7 +58,7 @@ const Footer = () => {
                 transition={{ type: "spring", stiffness: 400 }}
               >
                 <Phone size={18} className="text-purple-400" />
-                <span>+1 (555) 123-4567</span>
+                <span>{config.contact_phone}</span>
               </motion.div>
               <motion.div 
                 className="flex items-center space-x-3 text-gray-300"
@@ -77,7 +66,7 @@ const Footer = () => {
                 transition={{ type: "spring", stiffness: 400 }}
               >
                 <MapPin size={18} className="text-purple-400" />
-                <span>123 Innovation Drive, Tech City</span>
+                <span>{config.contact_address}</span>
               </motion.div>
             </div>
           </motion.div>
@@ -91,7 +80,7 @@ const Footer = () => {
           >
             <h4 className="text-lg font-semibold mb-6 text-purple-400">Quick Links</h4>
             <ul className="space-y-3">
-              {quickLinks.map((link, index) => (
+              {config.quick_links.map((link, index) => (
                 <motion.li 
                   key={index}
                   whileHover={{ scale: 1.05 }}
@@ -123,7 +112,7 @@ const Footer = () => {
           >
             <h4 className="text-lg font-semibold mb-6 text-purple-400">Our Services</h4>
             <ul className="space-y-3">
-              {services.map((service, index) => (
+              {config.services_list.map((service, index) => (
                 <motion.li 
                   key={index} 
                   className="text-gray-300 text-sm"
@@ -170,7 +159,7 @@ const Footer = () => {
             </div>
 
             <div>
-              <h4 className="text-lg font-semibold mb-4 text-purple-400">Newsletter</h4>
+              <h4 className="text-lg font-semibold mb-4 text-purple-400">{config.newsletter_title}</h4>
               <motion.div 
                 className="flex overflow-hidden rounded-lg"
                 whileHover={{ scale: 1.02 }}
@@ -178,7 +167,7 @@ const Footer = () => {
               >
                 <input
                   type="email"
-                  placeholder="Your email"
+                  placeholder={config.newsletter_placeholder}
                   className="flex-1 px-4 py-2 bg-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500 text-white min-w-0"
                 />
                 <motion.button 
@@ -205,16 +194,16 @@ const Footer = () => {
             whileHover={{ color: "#d8b4fe" }}
             transition={{ duration: 0.2 }}
           >
-            © 2024 AIAdMaxify. All rights reserved.
+            {config.copyright_text}
           </motion.p>
           <div className="flex space-x-6">
             <motion.div whileHover={{ scale: 1.05 }}>
-              <Link to="/privacy" className="text-gray-400 hover:text-purple-400 text-sm transition-colors">
+              <Link to={config.privacy_policy_link} className="text-gray-400 hover:text-purple-400 text-sm transition-colors">
                 Privacy Policy
               </Link>
             </motion.div>
             <motion.div whileHover={{ scale: 1.05 }}>
-              <Link to="/terms" className="text-gray-400 hover:text-purple-400 text-sm transition-colors">
+              <Link to={config.terms_of_service_link} className="text-gray-400 hover:text-purple-400 text-sm transition-colors">
                 Terms of Service
               </Link>
             </motion.div>

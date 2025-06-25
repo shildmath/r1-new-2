@@ -11,7 +11,7 @@ import { useAdminBookings } from "@/hooks/useAdminBookings";
 
 const AllBookings = () => {
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
-  const { refetch } = useAdminBookings();
+  const { refresh } = useAdminBookings();
 
   return (
     <SidebarProvider>
@@ -30,7 +30,7 @@ const AllBookings = () => {
             <CardContent className="pt-0">
               <ScrollArea className="max-h-[60vh] min-w-full md:min-w-[900px] px-1">
                 <div className="overflow-x-auto min-w-full">
-                  <AllBookingsTable onSelectBooking={setSelectedBooking} />
+                  <AllBookingsTable />
                 </div>
               </ScrollArea>
             </CardContent>
@@ -42,7 +42,7 @@ const AllBookings = () => {
         booking={selectedBooking}
         open={!!selectedBooking}
         onClose={() => setSelectedBooking(null)}
-        onUpdate={refetch}
+        onUpdate={refresh}
       />
     </SidebarProvider>
   );

@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import AdminSidebar from "@/components/AdminSidebar";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
@@ -14,7 +13,7 @@ export default function AllDealStatus() {
   const [date, setDate] = useState("");
   const [search, setSearch] = useState("");
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
-  const { bookings, isLoading, refetch } = useAdminBookings();
+  const { bookings, isLoading, refresh } = useAdminBookings();
 
   const exportHeaders = [
     "ID",
@@ -181,7 +180,7 @@ export default function AllDealStatus() {
         booking={selectedBooking}
         open={!!selectedBooking}
         onClose={() => setSelectedBooking(null)}
-        onUpdate={refetch}
+        onUpdate={refresh}
       />
     </div>
   );

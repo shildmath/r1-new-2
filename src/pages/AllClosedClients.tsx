@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import AdminSidebar from "@/components/AdminSidebar";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
@@ -13,7 +12,7 @@ export default function AllClosedClients() {
   const [search, setSearch] = useState("");
   const [date, setDate] = useState("");
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
-  const { bookings, isLoading, refetch } = useAdminBookings();
+  const { bookings, isLoading, refresh } = useAdminBookings();
 
   const closedClients = bookings.filter(
     (b) =>
@@ -182,7 +181,7 @@ export default function AllClosedClients() {
         booking={selectedBooking}
         open={!!selectedBooking}
         onClose={() => setSelectedBooking(null)}
-        onUpdate={refetch}
+        onUpdate={refresh}
       />
     </div>
   );

@@ -13,7 +13,7 @@ const CLOSER_LABELS = {
 };
 
 export default function AllBookingsTable() {
-  const { bookings, isLoading } = useAdminBookings();
+  const { bookings, isLoading, refresh } = useAdminBookings();
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
 
@@ -74,7 +74,12 @@ export default function AllBookingsTable() {
             </Button>
           </div>
         ))}
-        <AllBookingsDetailsModal booking={selectedBooking} open={detailsOpen} onClose={handleCloseDetails} />
+        <AllBookingsDetailsModal 
+          booking={selectedBooking} 
+          open={detailsOpen} 
+          onClose={handleCloseDetails}
+          onUpdate={refresh}
+        />
       </div>
     );
   }
@@ -137,7 +142,12 @@ export default function AllBookingsTable() {
           </table>
         )}
       </div>
-      <AllBookingsDetailsModal booking={selectedBooking} open={detailsOpen} onClose={handleCloseDetails} />
+      <AllBookingsDetailsModal 
+        booking={selectedBooking} 
+        open={detailsOpen} 
+        onClose={handleCloseDetails}
+        onUpdate={refresh}
+      />
     </div>
   );
 }

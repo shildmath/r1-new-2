@@ -351,6 +351,33 @@ export type Database = {
         }
         Relationships: []
       }
+      testimonial_industries: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          sequence_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          sequence_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          sequence_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       testimonial_stats: {
         Row: {
           average_roi: string

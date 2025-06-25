@@ -1,14 +1,18 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/ui/card";
 import { LayoutList } from "lucide-react";
 import AllBookingsTable from "@/components/AllBookingsTable";
+import AllBookingsDetailsModal from "@/components/AllBookingsDetailsModal";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AdminShadcnSidebar } from "@/components/AdminShadcnSidebar";
+import { useAdminBookings } from "@/hooks/useAdminBookings";
 
-// Enhanced responsive and scrollable admin bookings page
 const AllBookings = () => {
+  const [selectedBooking, setSelectedBooking] = useState<any>(null);
+  const { refetch } = useAdminBookings();
+
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full bg-gradient-to-br from-accent-light to-secondary">
@@ -26,13 +30,20 @@ const AllBookings = () => {
             <CardContent className="pt-0">
               <ScrollArea className="max-h-[60vh] min-w-full md:min-w-[900px] px-1">
                 <div className="overflow-x-auto min-w-full">
-                  <AllBookingsTable />
+                  <AllBookingsTable onSelectBooking={setSelectedBooking} />
                 </div>
               </ScrollArea>
             </CardContent>
           </Card>
         </main>
       </div>
+      
+      <AllBookingsDetailsModal
+        booking={selectedBooking}
+        open={!!selectedBooking}
+        onClose={() => setSelectedBooking(null)}
+        onUpdate={refetch}
+      />
     </SidebarProvider>
   );
 };

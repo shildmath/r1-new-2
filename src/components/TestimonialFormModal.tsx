@@ -1,226 +1,189 @@
 
-import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
-import { Testimonial, CreateTestimonialRequest, UpdateTestimonialRequest } from '@/types/testimonial';
-import { Star } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Testimonial, TestimonialIndustry } from "@/types/testimonial";
 
 interface TestimonialFormModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (testimonial: CreateTestimonialRequest | UpdateTestimonialRequest) => Promise<{ success: boolean; error?: string }>;
-  testimonial?: Testimonial;
+  onSubmit: (data: any) => void;
+  testimonial?: Testimonial | null;
   maxSequence: number;
+  industries: TestimonialIndustry[];
 }
-
-const industries = [
-  'Technology', 'Healthcare', 'Finance', 'E-commerce', 'Education',
-  'Real Estate', 'Manufacturing', 'Retail', 'Hospitality', 'Consulting',
-  'Marketing', 'Legal', 'Non-profit', 'Automotive', 'Food & Beverage'
-];
 
 const TestimonialFormModal: React.FC<TestimonialFormModalProps> = ({
   isOpen,
   onClose,
   onSubmit,
   testimonial,
-  maxSequence
+  maxSequence,
+  industries,
 }) => {
   const [formData, setFormData] = useState({
-    client_name: '',
-    company_name: '',
+    client_name: "",
+    company_name: "",
+    description: "",
     rating: 5,
-    description: '',
-    industry: 'Technology',
-    results: '',
-    profile_photo: '',
+    industry: "",
+    profile_photo: "",
+    results: "",
     sequence_order: maxSequence + 1,
-    is_active: true
   });
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (testimonial) {
       setFormData({
         client_name: testimonial.client_name,
         company_name: testimonial.company_name,
-        rating: testimonial.rating,
         description: testimonial.description,
+        rating: testimonial.rating,
         industry: testimonial.industry,
-        results: testimonial.results || '',
-        profile_photo: testimonial.profile_photo || '',
+        profile_photo: testimonial.profile_photo || "",
+        results: testimonial.results || "",
         sequence_order: testimonial.sequence_order,
-        is_active: testimonial.is_active
       });
     } else {
       setFormData({
-        client_name: '',
-        company_name: '',
+        client_name: "",
+        company_name: "",
+        description: "",
         rating: 5,
-        description: '',
-        industry: 'Technology',
-        results: '',
-        profile_photo: '',
+        industry: "",
+        profile_photo: "",
+        results: "",
         sequence_order: maxSequence + 1,
-        is_active: true
       });
     }
-  }, [testimonial, maxSequence, isOpen]);
+  }, [testimonial, maxSequence]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-
-    try {
-      const submitData = testimonial 
-        ? { ...formData, id: testimonial.id } as UpdateTestimonialRequest
-        : formData as CreateTestimonialRequest;
-
-      const result = await onSubmit(submitData);
-      
-      if (result.success) {
-        onClose();
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const renderStars = (rating: number, onRatingChange: (rating: number) => void) => {
-    return (
-      <div className="flex space-x-1">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <Star
-            key={star}
-            className={`w-6 h-6 cursor-pointer ${
-              star <= rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'
-            }`}
-            onClick={() => onRatingChange(star)}
-          />
-        ))}
-      </div>
-    );
+    onSubmit(formData);
+    onClose();
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {testimonial ? 'Edit Testimonial' : 'Add New Testimonial'}
+            {testimonial ? "Edit Testimonial" : "Add Testimonial"}
           </DialogTitle>
         </DialogHeader>
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="client_name">Client Name *</Label>
               <Input
                 id="client_name"
                 value={formData.client_name}
-                onChange={(e) => setFormData({ ...formData, client_name: e.target.value })}
+                onChange={(e) => setFormData(prev => ({ ...prev, client_name: e.target.value }))}
                 required
               />
             </div>
-
+            
             <div>
               <Label htmlFor="company_name">Company Name *</Label>
               <Input
                 id="company_name"
                 value={formData.company_name}
-                onChange={(e) => setFormData({ ...formData, company_name: e.target.value })}
+                onChange={(e) => setFormData(prev => ({ ...prev, company_name: e.target.value }))}
                 required
               />
             </div>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label>Rating *</Label>
-              {renderStars(formData.rating, (rating) => setFormData({ ...formData, rating }))}
-            </div>
-
-            <div>
-              <Label htmlFor="industry">Industry *</Label>
-              <Select value={formData.industry} onValueChange={(value) => setFormData({ ...formData, industry: value })}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {industries.map((industry) => (
-                    <SelectItem key={industry} value={industry}>
-                      {industry}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
+          
           <div>
             <Label htmlFor="description">Description *</Label>
             <Textarea
               id="description"
               value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
               rows={4}
               required
             />
           </div>
-
-          <div>
-            <Label htmlFor="results">Results</Label>
-            <Input
-              id="results"
-              value={formData.results}
-              onChange={(e) => setFormData({ ...formData, results: e.target.value })}
-              placeholder="e.g., 300% ROI increase"
-            />
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="rating">Rating</Label>
+              <Select value={formData.rating.toString()} onValueChange={(value) => setFormData(prev => ({ ...prev, rating: parseInt(value) }))}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {[1, 2, 3, 4, 5].map((rating) => (
+                    <SelectItem key={rating} value={rating.toString()}>
+                      {rating} Star{rating !== 1 ? 's' : ''}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <Label htmlFor="industry">Industry *</Label>
+              <Select value={formData.industry} onValueChange={(value) => setFormData(prev => ({ ...prev, industry: value }))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select Industry" />
+                </SelectTrigger>
+                <SelectContent>
+                  <ScrollArea className="h-48">
+                    {industries.map((industry) => (
+                      <SelectItem key={industry.id} value={industry.name}>
+                        {industry.name}
+                      </SelectItem>
+                    ))}
+                  </ScrollArea>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-
+          
           <div>
             <Label htmlFor="profile_photo">Profile Photo URL</Label>
             <Input
               id="profile_photo"
               value={formData.profile_photo}
-              onChange={(e) => setFormData({ ...formData, profile_photo: e.target.value })}
-              placeholder="https://example.com/photo.jpg"
+              onChange={(e) => setFormData(prev => ({ ...prev, profile_photo: e.target.value }))}
+              placeholder="/lovable-uploads/your-image.png"
             />
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="sequence_order">Sequence Order</Label>
-              <Input
-                id="sequence_order"
-                type="number"
-                value={formData.sequence_order}
-                onChange={(e) => setFormData({ ...formData, sequence_order: parseInt(e.target.value) || 0 })}
-                min="0"
-              />
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="is_active"
-                checked={formData.is_active}
-                onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
-              />
-              <Label htmlFor="is_active">Active</Label>
-            </div>
+          
+          <div>
+            <Label htmlFor="results">Results/Achievements</Label>
+            <Input
+              id="results"
+              value={formData.results}
+              onChange={(e) => setFormData(prev => ({ ...prev, results: e.target.value }))}
+              placeholder="e.g., 300% ROI increase"
+            />
           </div>
-
-          <div className="flex justify-end space-x-4">
+          
+          <div>
+            <Label htmlFor="sequence_order">Sequence Order</Label>
+            <Input
+              id="sequence_order"
+              type="number"
+              value={formData.sequence_order}
+              onChange={(e) => setFormData(prev => ({ ...prev, sequence_order: parseInt(e.target.value) }))}
+              min={1}
+            />
+          </div>
+          
+          <div className="flex justify-end space-x-2">
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit" disabled={loading}>
-              {loading ? 'Saving...' : testimonial ? 'Update' : 'Create'}
+            <Button type="submit">
+              {testimonial ? "Update" : "Add"} Testimonial
             </Button>
           </div>
         </form>

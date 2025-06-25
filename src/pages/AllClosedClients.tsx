@@ -1,18 +1,19 @@
+
 import React, { useState } from "react";
 import AdminSidebar from "@/components/AdminSidebar";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
-import { Filter, CheckCircle, XCircle, UserCheck2 } from "lucide-react";
+import { Filter, UserCheck2 } from "lucide-react";
 import { useAdminBookings } from "@/hooks/useAdminBookings";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import BookingExtraDetailsButton from "@/components/BookingExtraDetailsButton";
+import AllBookingsDetailsModal from "@/components/AllBookingsDetailsModal";
 import ExportButtons from "@/components/ExportButtons";
 
 export default function AllClosedClients() {
   const [search, setSearch] = useState("");
   const [date, setDate] = useState("");
-  const { bookings, isLoading } = useAdminBookings();
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
+  const { bookings, isLoading, refetch } = useAdminBookings();
 
   const closedClients = bookings.filter(
     (b) =>
@@ -159,7 +160,13 @@ export default function AllClosedClients() {
                           )}
                         </td>
                         <td className="p-2">
-                          <BookingExtraDetailsButton booking={b} ButtonLabel="Extra Details" />
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setSelectedBooking(b)}
+                          >
+                            Extra Details
+                          </Button>
                         </td>
                       </tr>
                     ))
@@ -170,6 +177,13 @@ export default function AllClosedClients() {
           </CardContent>
         </Card>
       </div>
+      
+      <AllBookingsDetailsModal
+        booking={selectedBooking}
+        open={!!selectedBooking}
+        onClose={() => setSelectedBooking(null)}
+        onUpdate={refetch}
+      />
     </div>
   );
 }

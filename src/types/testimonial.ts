@@ -2,11 +2,11 @@
 export interface Testimonial {
   id: string;
   client_name: string;
-  profile_photo?: string;
   company_name: string;
-  rating: number;
   description: string;
+  rating: number;
   industry: string;
+  profile_photo?: string;
   results?: string;
   sequence_order: number;
   is_active: boolean;
@@ -23,18 +23,37 @@ export interface TestimonialStats {
   updated_at: string;
 }
 
+export interface TestimonialIndustry {
+  id: string;
+  name: string;
+  sequence_order: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface CreateTestimonialRequest {
   client_name: string;
-  profile_photo?: string;
   company_name: string;
-  rating: number;
   description: string;
+  rating: number;
   industry: string;
+  profile_photo?: string;
   results?: string;
   sequence_order: number;
   is_active?: boolean;
 }
 
-export interface UpdateTestimonialRequest extends Partial<CreateTestimonialRequest> {
+export interface UpdateTestimonialRequest extends CreateTestimonialRequest {
+  id: string;
+}
+
+export interface CreateIndustryRequest {
+  name: string;
+  sequence_order: number;
+  is_active?: boolean;
+}
+
+export interface UpdateIndustryRequest extends CreateIndustryRequest {
   id: string;
 }

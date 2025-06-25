@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import AdminSidebar from "@/components/AdminSidebar";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
@@ -5,15 +6,15 @@ import { Filter, Handshake } from "lucide-react";
 import { useAdminBookings } from "@/hooks/useAdminBookings";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import BookingExtraDetailsButton from "@/components/BookingExtraDetailsButton";
+import AllBookingsDetailsModal from "@/components/AllBookingsDetailsModal";
 import ExportButtons from "@/components/ExportButtons";
 
 export default function AllDealStatus() {
   const [status, setStatus] = useState("");
   const [date, setDate] = useState("");
   const [search, setSearch] = useState("");
-  const { bookings, isLoading } = useAdminBookings();
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
+  const { bookings, isLoading, refetch } = useAdminBookings();
 
   const exportHeaders = [
     "ID",
@@ -92,7 +93,6 @@ export default function AllDealStatus() {
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-accent-light to-secondary">
       <AdminSidebar />
-      {/* Add overflow to make area scrollable */}
       <div className="flex-1 flex flex-col items-center p-6 gap-3 overflow-y-auto max-h-screen">
         <Card className="w-full max-w-6xl mb-8 shadow-xl border-2 border-accent/10 bg-white/95">
           <CardHeader className="flex flex-row items-center gap-3 pb-1">
@@ -159,7 +159,13 @@ export default function AllDealStatus() {
                         <td className="p-2">{b.closer_email ?? "-"}</td>
                         <td className="p-2">{b.deal_status ?? "Not Started Yet"}</td>
                         <td className="p-2">
-                          <BookingExtraDetailsButton booking={b} ButtonLabel="Extra Details" />
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setSelectedBooking(b)}
+                          >
+                            Extra Details
+                          </Button>
                         </td>
                       </tr>
                     ))
@@ -170,6 +176,13 @@ export default function AllDealStatus() {
           </CardContent>
         </Card>
       </div>
+      
+      <AllBookingsDetailsModal
+        booking={selectedBooking}
+        open={!!selectedBooking}
+        onClose={() => setSelectedBooking(null)}
+        onUpdate={refetch}
+      />
     </div>
   );
 }

@@ -6,8 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useTestimonials } from "@/hooks/useTestimonials";
+import { useTestimonialIndustries, useCreateIndustry, useUpdateIndustry, useDeleteIndustry } from "@/hooks/useTestimonialIndustries";
 import TestimonialFormModal from "@/components/TestimonialFormModal";
 import StatsFormModal from "@/components/StatsFormModal";
+import IndustryFormModal from "@/components/IndustryFormModal";
 import { exportTestimonialsToCSV, parseCSVToTestimonials } from "@/utils/testimonialCsvUtils";
 import { toast } from "sonner";
 import { 
@@ -22,7 +24,8 @@ import {
   Upload,
   Download,
   ArrowUp,
-  ArrowDown
+  ArrowDown,
+  Settings
 } from "lucide-react";
 
 const EditTestimonialsPage = () => {
@@ -39,9 +42,16 @@ const EditTestimonialsPage = () => {
     refetch
   } = useTestimonials();
 
+  const { data: industries = [] } = useTestimonialIndustries();
+  const createIndustryMutation = useCreateIndustry();
+  const updateIndustryMutation = useUpdateIndustry();
+  const deleteIndustryMutation = useDeleteIndustry();
+
   const [selectedTestimonial, setSelectedTestimonial] = useState(null);
+  const [selectedIndustry, setSelectedIndustry] = useState(null);
   const [isTestimonialModalOpen, setIsTestimonialModalOpen] = useState(false);
   const [isStatsModalOpen, setIsStatsModalOpen] = useState(false);
+  const [isIndustryModalOpen, setIsIndustryModalOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleCreateTestimonial = async (testimonialData: any) => {
@@ -88,6 +98,35 @@ const EditTestimonialsPage = () => {
     return result;
   };
 
+  const handleCreateIndustry = async (industryData: any) => {
+    try {
+      await createIndustryMutation.mutateAsync(industryData);
+      toast.success("Industry created successfully!");
+    } catch (error) {
+      toast.error("Failed to create industry");
+    }
+  };
+
+  const handleUpdateIndustry = async (industryData: any) => {
+    try {
+      await updateIndustryMutation.mutateAsync(industryData);
+      toast.success("Industry updated successfully!");
+    } catch (error) {
+      toast.error("Failed to update industry");
+    }
+  };
+
+  const handleDeleteIndustry = async (id: string) => {
+    if (confirm("Are you sure you want to delete this industry?")) {
+      try {
+        await deleteIndustryMutation.mutateAsync(id);
+        toast.success("Industry deleted successfully!");
+      } catch (error) {
+        toast.error("Failed to delete industry");
+      }
+    }
+  };
+
   const handleExportCSV = async () => {
     const allTestimonials = await fetchAllTestimonials();
     exportTestimonialsToCSV(allTestimonials);
@@ -117,7 +156,6 @@ const EditTestimonialsPage = () => {
     };
     reader.readAsText(file);
     
-    // Reset the input
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -143,6 +181,7 @@ const EditTestimonialsPage = () => {
   };
 
   const maxSequence = testimonials.reduce((max, t) => Math.max(max, t.sequence_order), 0);
+  const maxIndustrySequence = industries.reduce((max, i) => Math.max(max, i.sequence_order), 0);
 
   if (loading) {
     return (
@@ -164,7 +203,7 @@ const EditTestimonialsPage = () => {
           <div className="flex justify-between items-center mb-8">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Manage Testimonials</h1>
-              <p className="text-gray-600 mt-2">Add, edit, and manage client testimonials</p>
+              <p className="text-gray-600 mt-2">Add, edit, and manage client testimonials and industries</p>
             </div>
             <div className="flex space-x-4">
               <input
@@ -191,6 +230,17 @@ const EditTestimonialsPage = () => {
                 <span>Export CSV</span>
               </Button>
               <Button
+                variant="outline"
+                onClick={() => {
+                  setSelectedIndustry(null);
+                  setIsIndustryModalOpen(true);
+                }}
+                className="flex items-center space-x-2"
+              >
+                <Settings size={16} />
+                <span>Manage Industries</span>
+              </Button>
+              <Button
                 onClick={() => {
                   setSelectedTestimonial(null);
                   setIsTestimonialModalOpen(true);
@@ -202,6 +252,55 @@ const EditTestimonialsPage = () => {
               </Button>
             </div>
           </div>
+
+          {/* Industries Management */}
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Settings size={20} />
+                <span>Industries ({industries.length})</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-2 mb-4">
+                {industries.map((industry) => (
+                  <Badge key={industry.id} variant="outline" className="flex items-center space-x-2 px-3 py-1">
+                    <span>{industry.name}</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setSelectedIndustry(industry);
+                        setIsIndustryModalOpen(true);
+                      }}
+                      className="h-4 w-4 p-0"
+                    >
+                      <Edit size={12} />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDeleteIndustry(industry.id)}
+                      className="h-4 w-4 p-0 text-red-600 hover:text-red-800"
+                    >
+                      <Trash2 size={12} />
+                    </Button>
+                  </Badge>
+                ))}
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setSelectedIndustry(null);
+                  setIsIndustryModalOpen(true);
+                }}
+              >
+                <Plus size={16} className="mr-2" />
+                Add Industry
+              </Button>
+            </CardContent>
+          </Card>
 
           {/* Statistics Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
@@ -434,6 +533,7 @@ const EditTestimonialsPage = () => {
           onSubmit={selectedTestimonial ? handleUpdateTestimonial : handleCreateTestimonial}
           testimonial={selectedTestimonial}
           maxSequence={maxSequence}
+          industries={industries}
         />
 
         <StatsFormModal
@@ -441,6 +541,17 @@ const EditTestimonialsPage = () => {
           onClose={() => setIsStatsModalOpen(false)}
           onSubmit={handleUpdateStats}
           currentStats={stats}
+        />
+
+        <IndustryFormModal
+          isOpen={isIndustryModalOpen}
+          onClose={() => {
+            setIsIndustryModalOpen(false);
+            setSelectedIndustry(null);
+          }}
+          onSubmit={selectedIndustry ? handleUpdateIndustry : handleCreateIndustry}
+          industry={selectedIndustry}
+          maxSequence={maxIndustrySequence}
         />
       </main>
     </div>

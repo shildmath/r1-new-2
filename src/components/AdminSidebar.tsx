@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useLocation } from "react-router-dom";
 import clsx from "clsx";
@@ -23,6 +24,7 @@ const adminLinks = [
   { name: "Add Team Member", path: "/add-team-member" },
   { name: "Edit Contact", path: "/edit-contact" },
   { name: "Edit Strategy Call", path: "/edit-strategy-call" },
+  { name: "Edit Strategy Call Calendly", path: "/edit-strategy-call-calendly" },
   { name: "Edit Navbar", path: "/edit-navbar" },
   { name: "Edit Footer", path: "/edit-footer" },
   { name: "Contact Responses", path: "/contact-responses" },

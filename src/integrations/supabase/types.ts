@@ -408,6 +408,45 @@ export type Database = {
         }
         Relationships: []
       }
+      sales_representatives: {
+        Row: {
+          bio: string | null
+          calendly_link: string
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          profile_photo: string | null
+          sequence_order: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          bio?: string | null
+          calendly_link: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          profile_photo?: string | null
+          sequence_order?: number
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          bio?: string | null
+          calendly_link?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          profile_photo?: string | null
+          sequence_order?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       services: {
         Row: {
           created_at: string

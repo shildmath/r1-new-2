@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Save, Loader2, Mail, Phone, MapPin, Clock, MessageCircle, Users } from "lucide-react";
+import { Save, Loader2 } from "lucide-react";
 
 const EditContactPage = () => {
   const { data: config, isLoading } = useContactPageConfig();
@@ -82,49 +82,6 @@ const EditContactPage = () => {
     );
   }
 
-  const contactSections = [
-    {
-      icon: Mail,
-      title: 'Email Us',
-      titleField: 'email_us_title',
-      valueField: 'email_us_value',
-      descriptionField: 'email_us_description',
-      placeholder: 'info@company.com'
-    },
-    {
-      icon: Phone,
-      title: 'Call Us',
-      titleField: 'call_us_title',
-      valueField: 'call_us_value',
-      descriptionField: 'call_us_description',
-      placeholder: '+1 (555) 123-4567'
-    },
-    {
-      icon: MapPin,
-      title: 'Visit Office',
-      titleField: 'visit_office_title',
-      valueField: 'visit_office_value',
-      descriptionField: 'visit_office_description',
-      placeholder: '123 Main St, City, State'
-    },
-    {
-      icon: Clock,
-      title: 'Business Hours',
-      titleField: 'business_hours_title',
-      valueField: 'business_hours_value',
-      descriptionField: 'business_hours_description',
-      placeholder: 'Mon-Fri: 9AM-6PM EST'
-    },
-    {
-      icon: MessageCircle,
-      title: 'WhatsApp Message',
-      titleField: 'whatsapp_title',
-      valueField: 'whatsapp_value',
-      descriptionField: 'whatsapp_description',
-      placeholder: '+1 (555) 123-4567'
-    }
-  ];
-
   return (
     <div className="min-h-screen flex">
       <AdminSidebar />
@@ -151,78 +108,225 @@ const EditContactPage = () => {
             </Button>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            {contactSections.map((section, index) => (
-              <Card key={index}>
+          <div className="grid gap-6">
+            {/* Contact Directly Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Main Contact Section</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="contact_directly_title">Title</Label>
+                  <Input
+                    id="contact_directly_title"
+                    value={formData.contact_directly_title}
+                    onChange={(e) => handleInputChange('contact_directly_title', e.target.value)}
+                    placeholder="Prefer to contact us directly?"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="contact_directly_description">Description</Label>
+                  <Textarea
+                    id="contact_directly_description"
+                    value={formData.contact_directly_description}
+                    onChange={(e) => handleInputChange('contact_directly_description', e.target.value)}
+                    placeholder="Choose your preferred method"
+                    rows={2}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Contact Methods */}
+            <div className="grid md:grid-cols-2 gap-6">
+              {/* Email Us */}
+              <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <section.icon className="h-5 w-5" />
-                    {section.title}
-                  </CardTitle>
+                  <CardTitle>Email Us</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <Label htmlFor={section.titleField}>Title</Label>
+                    <Label htmlFor="email_us_title">Title</Label>
                     <Input
-                      id={section.titleField}
-                      value={formData[section.titleField as keyof typeof formData]}
-                      onChange={(e) => handleInputChange(section.titleField, e.target.value)}
-                      placeholder={section.title}
+                      id="email_us_title"
+                      value={formData.email_us_title}
+                      onChange={(e) => handleInputChange('email_us_title', e.target.value)}
+                      placeholder="Email Us"
                     />
                   </div>
                   <div>
-                    <Label htmlFor={section.valueField}>Value</Label>
+                    <Label htmlFor="email_us_value">Email Address</Label>
                     <Input
-                      id={section.valueField}
-                      value={formData[section.valueField as keyof typeof formData]}
-                      onChange={(e) => handleInputChange(section.valueField, e.target.value)}
-                      placeholder={section.placeholder}
+                      id="email_us_value"
+                      value={formData.email_us_value}
+                      onChange={(e) => handleInputChange('email_us_value', e.target.value)}
+                      placeholder="info@company.com"
                     />
                   </div>
                   <div>
-                    <Label htmlFor={section.descriptionField}>Description</Label>
+                    <Label htmlFor="email_us_description">Description</Label>
                     <Textarea
-                      id={section.descriptionField}
-                      value={formData[section.descriptionField as keyof typeof formData]}
-                      onChange={(e) => handleInputChange(section.descriptionField, e.target.value)}
-                      placeholder="Enter description"
+                      id="email_us_description"
+                      value={formData.email_us_description}
+                      onChange={(e) => handleInputChange('email_us_description', e.target.value)}
+                      placeholder="Send us an email anytime"
                       rows={2}
                     />
                   </div>
                 </CardContent>
               </Card>
-            ))}
-          </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5" />
-                Contact Directly Section
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="contact_directly_title">Section Title</Label>
-                <Input
-                  id="contact_directly_title"
-                  value={formData.contact_directly_title}
-                  onChange={(e) => handleInputChange('contact_directly_title', e.target.value)}
-                  placeholder="Prefer to contact us directly?"
-                />
-              </div>
-              <div>
-                <Label htmlFor="contact_directly_description">Section Description</Label>
-                <Textarea
-                  id="contact_directly_description"
-                  value={formData.contact_directly_description}
-                  onChange={(e) => handleInputChange('contact_directly_description', e.target.value)}
-                  placeholder="Choose your preferred method"
-                  rows={2}
-                />
-              </div>
-            </CardContent>
-          </Card>
+              {/* Call Us */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Call Us</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label htmlFor="call_us_title">Title</Label>
+                    <Input
+                      id="call_us_title"
+                      value={formData.call_us_title}
+                      onChange={(e) => handleInputChange('call_us_title', e.target.value)}
+                      placeholder="Call Us"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="call_us_value">Phone Number</Label>
+                    <Input
+                      id="call_us_value"
+                      value={formData.call_us_value}
+                      onChange={(e) => handleInputChange('call_us_value', e.target.value)}
+                      placeholder="+1 (555) 123-4567"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="call_us_description">Description</Label>
+                    <Textarea
+                      id="call_us_description"
+                      value={formData.call_us_description}
+                      onChange={(e) => handleInputChange('call_us_description', e.target.value)}
+                      placeholder="Available 24/7 for support"
+                      rows={2}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Visit Office */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Visit Office</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label htmlFor="visit_office_title">Title</Label>
+                    <Input
+                      id="visit_office_title"
+                      value={formData.visit_office_title}
+                      onChange={(e) => handleInputChange('visit_office_title', e.target.value)}
+                      placeholder="Visit Office"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="visit_office_value">Address</Label>
+                    <Textarea
+                      id="visit_office_value"
+                      value={formData.visit_office_value}
+                      onChange={(e) => handleInputChange('visit_office_value', e.target.value)}
+                      placeholder="123 Innovation Drive, Tech City"
+                      rows={2}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="visit_office_description">Description</Label>
+                    <Textarea
+                      id="visit_office_description"
+                      value={formData.visit_office_description}
+                      onChange={(e) => handleInputChange('visit_office_description', e.target.value)}
+                      placeholder="Come visit our headquarters"
+                      rows={2}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Business Hours */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Business Hours</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label htmlFor="business_hours_title">Title</Label>
+                    <Input
+                      id="business_hours_title"
+                      value={formData.business_hours_title}
+                      onChange={(e) => handleInputChange('business_hours_title', e.target.value)}
+                      placeholder="Business Hours"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="business_hours_value">Hours</Label>
+                    <Input
+                      id="business_hours_value"
+                      value={formData.business_hours_value}
+                      onChange={(e) => handleInputChange('business_hours_value', e.target.value)}
+                      placeholder="Mon-Fri: 9AM-6PM EST"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="business_hours_description">Description</Label>
+                    <Textarea
+                      id="business_hours_description"
+                      value={formData.business_hours_description}
+                      onChange={(e) => handleInputChange('business_hours_description', e.target.value)}
+                      placeholder="We are here to help"
+                      rows={2}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* WhatsApp */}
+              <Card className="md:col-span-2">
+                <CardHeader>
+                  <CardTitle>WhatsApp</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid md:grid-cols-3 gap-4">
+                    <div>
+                      <Label htmlFor="whatsapp_title">Title</Label>
+                      <Input
+                        id="whatsapp_title"
+                        value={formData.whatsapp_title}
+                        onChange={(e) => handleInputChange('whatsapp_title', e.target.value)}
+                        placeholder="WhatsApp Message"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="whatsapp_value">WhatsApp Number</Label>
+                      <Input
+                        id="whatsapp_value"
+                        value={formData.whatsapp_value}
+                        onChange={(e) => handleInputChange('whatsapp_value', e.target.value)}
+                        placeholder="+1 (555) 123-4567"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="whatsapp_description">Description</Label>
+                      <Input
+                        id="whatsapp_description"
+                        value={formData.whatsapp_description}
+                        onChange={(e) => handleInputChange('whatsapp_description', e.target.value)}
+                        placeholder="Quick chat via WhatsApp"
+                      />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
         </div>
       </main>
     </div>

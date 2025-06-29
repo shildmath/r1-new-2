@@ -348,7 +348,7 @@ const EditFooterPage = () => {
                       </Button>
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-4">
+                  <CardContent className="space-y-4 max-h-96 overflow-y-auto">
                     {formData.quick_links.map((link, index) => (
                       <div key={index} className="flex gap-2 items-end">
                         <div className="flex-1">
@@ -391,7 +391,7 @@ const EditFooterPage = () => {
                       </Button>
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-4">
+                  <CardContent className="space-y-4 max-h-96 overflow-y-auto">
                     {formData.services_list.map((service, index) => (
                       <div key={index} className="flex gap-2 items-center">
                         <Input

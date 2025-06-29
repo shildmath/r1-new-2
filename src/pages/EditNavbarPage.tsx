@@ -1,89 +1,156 @@
 
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import AdminSidebar from "@/components/AdminSidebar";
-import { getNavbarConfig, setNavbarConfig, NavbarConfig, NavbarItem } from "@/utils/navbarConfig";
+import { useNavbarConfig, useUpdateNavbarConfig } from "@/hooks/useNavbarConfig";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Plus, X, Save, Loader2 } from "lucide-react";
 
 const EditNavbarPage = () => {
-  const [config, setConfigState] = useState<NavbarConfig>(getNavbarConfig());
-  const [navItems, setNavItems] = useState<NavbarItem[]>(config.navItems);
-  const [brand, setBrand] = useState(config.brand);
-  const [saving, setSaving] = useState(false);
+  const { data: config, isLoading } = useNavbarConfig();
+  const updateNavbarConfig = useUpdateNavbarConfig();
+
+  const [formData, setFormData] = useState({
+    brand: '',
+    nav_items: [] as Array<{name: string; path: string}>,
+  });
 
   useEffect(() => {
-    setNavItems(config.navItems);
-    setBrand(config.brand);
+    if (config) {
+      setFormData({
+        brand: config.brand,
+        nav_items: config.nav_items,
+      });
+    }
   }, [config]);
 
-  const handleNavItemChange = (idx: number, field: keyof NavbarItem, value: string) => {
-    setNavItems(items =>
-      items.map((item, i) => (i === idx ? { ...item, [field]: value } : item))
-    );
+  const handleNavItemChange = (index: number, field: 'name' | 'path', value: string) => {
+    const newNavItems = [...formData.nav_items];
+    newNavItems[index] = { ...newNavItems[index], [field]: value };
+    setFormData(prev => ({ ...prev, nav_items: newNavItems }));
   };
 
-  const handleAddItem = () => {
-    setNavItems([...navItems, { name: "New", path: "/" }]);
+  const addNavItem = () => {
+    setFormData(prev => ({
+      ...prev,
+      nav_items: [...prev.nav_items, { name: '', path: '' }]
+    }));
   };
 
-  const handleRemoveItem = (idx: number) => {
-    setNavItems(navItems.filter((_, i) => i !== idx));
+  const removeNavItem = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      nav_items: prev.nav_items.filter((_, i) => i !== index)
+    }));
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setSaving(true);
-    const newConfig: NavbarConfig = { brand, navItems };
-    setNavbarConfig(newConfig);
-    setConfigState(newConfig);
-
-    // Notify other components to reload config
-    window.dispatchEvent(new Event("navbarConfigUpdated"));
-
-    setSaving(false);
+    if (config) {
+      updateNavbarConfig.mutate({
+        id: config.id,
+        ...formData
+      });
+    }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex">
+        <AdminSidebar />
+        <main className="flex-1 p-8 flex justify-center items-center">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex">
       <AdminSidebar />
-      <main className="flex-1 p-8 flex flex-col items-start">
-        <h1 className="text-3xl font-bold mb-8">Edit Navbar (Admin)</h1>
-        <form className="bg-white shadow-md rounded-lg px-8 py-6 w-full max-w-xl space-y-6" onSubmit={handleSave}>
-          <div>
-            <label className="block text-sm font-medium mb-1">Brand Name</label>
-            <Input value={brand} onChange={e => setBrand(e.target.value)} className="w-full" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-2">Navigation Items</label>
-            <div className="space-y-2">
-              {navItems.map((item, idx) => (
-                <div key={idx} className="flex items-center gap-2">
-                  <Input
-                    value={item.name}
-                    onChange={e => handleNavItemChange(idx, "name", e.target.value)}
-                    className="w-1/3"
-                    placeholder="Name"
-                  />
-                  <Input
-                    value={item.path}
-                    onChange={e => handleNavItemChange(idx, "path", e.target.value)}
-                    className="w-2/3"
-                    placeholder="Path"
-                  />
-                  <Button type="button" variant="destructive" onClick={() => handleRemoveItem(idx)} size="icon">
-                    &times;
-                  </Button>
-                </div>
-              ))}
-            </div>
-            <Button type="button" className="mt-3" onClick={handleAddItem}>Add Navigation Item</Button>
-          </div>
-          <div className="flex gap-3 justify-end">
-            <Button type="submit" disabled={saving}>
-              {saving ? "Saving..." : "Save Changes"}
+      <main className="flex-1 p-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex items-center justify-between mb-8">
+            <h1 className="text-3xl font-bold">Edit Navbar</h1>
+            <Button 
+              onClick={handleSubmit}
+              disabled={updateNavbarConfig.isPending}
+              className="bg-primary hover:bg-primary/90"
+            >
+              {updateNavbarConfig.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save className="mr-2 h-4 w-4" />
+                  Save Changes
+                </>
+              )}
             </Button>
           </div>
-        </form>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Navbar Configuration</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div>
+                <Label htmlFor="brand">Brand Name</Label>
+                <Input
+                  id="brand"
+                  value={formData.brand}
+                  onChange={(e) => setFormData(prev => ({ ...prev, brand: e.target.value }))}
+                  placeholder="Enter brand name"
+                />
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <Label>Navigation Items</Label>
+                  <Button onClick={addNavItem} size="sm">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Item
+                  </Button>
+                </div>
+                <div className="space-y-4">
+                  {formData.nav_items.map((item, index) => (
+                    <div key={index} className="flex gap-2 items-end">
+                      <div className="flex-1">
+                        <Label htmlFor={`name_${index}`}>Name</Label>
+                        <Input
+                          id={`name_${index}`}
+                          value={item.name}
+                          onChange={(e) => handleNavItemChange(index, 'name', e.target.value)}
+                          placeholder="Home"
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <Label htmlFor={`path_${index}`}>Path</Label>
+                        <Input
+                          id={`path_${index}`}
+                          value={item.path}
+                          onChange={(e) => handleNavItemChange(index, 'path', e.target.value)}
+                          placeholder="/"
+                        />
+                      </div>
+                      <Button 
+                        variant="destructive" 
+                        size="sm"
+                        onClick={() => removeNavItem(index)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </main>
     </div>
   );

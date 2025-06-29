@@ -184,6 +184,7 @@ export type Database = {
           call_us_value: string
           contact_directly_description: string
           contact_directly_title: string
+          created_at: string | null
           email_us_description: string
           email_us_title: string
           email_us_value: string
@@ -205,6 +206,7 @@ export type Database = {
           call_us_value?: string
           contact_directly_description?: string
           contact_directly_title?: string
+          created_at?: string | null
           email_us_description?: string
           email_us_title?: string
           email_us_value?: string
@@ -226,6 +228,7 @@ export type Database = {
           call_us_value?: string
           contact_directly_description?: string
           contact_directly_title?: string
+          created_at?: string | null
           email_us_description?: string
           email_us_title?: string
           email_us_value?: string
@@ -284,6 +287,7 @@ export type Database = {
           contact_email: string
           contact_phone: string
           copyright_text: string
+          created_at: string | null
           facebook_url: string
           id: string
           instagram_url: string
@@ -305,6 +309,7 @@ export type Database = {
           contact_email?: string
           contact_phone?: string
           copyright_text?: string
+          created_at?: string | null
           facebook_url?: string
           id?: string
           instagram_url?: string
@@ -326,6 +331,7 @@ export type Database = {
           contact_email?: string
           contact_phone?: string
           copyright_text?: string
+          created_at?: string | null
           facebook_url?: string
           id?: string
           instagram_url?: string
@@ -384,6 +390,30 @@ export type Database = {
           title?: string
           updated_at?: string
           year?: string
+        }
+        Relationships: []
+      }
+      navbar_config: {
+        Row: {
+          brand: string
+          created_at: string
+          id: string
+          nav_items: Json
+          updated_at: string
+        }
+        Insert: {
+          brand?: string
+          created_at?: string
+          id?: string
+          nav_items?: Json
+          updated_at?: string
+        }
+        Update: {
+          brand?: string
+          created_at?: string
+          id?: string
+          nav_items?: Json
+          updated_at?: string
         }
         Relationships: []
       }

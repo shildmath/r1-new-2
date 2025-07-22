@@ -42,65 +42,106 @@ const StrategyCallCalendly = () => {
     <>
       <Navbar />
       
-      {/* Hero Section */}
-      <section className="bg-gradient-primary text-white page-with-navbar section-padding overflow-hidden">
-        <div className="max-w-7xl mx-auto text-center">
+      {/* Hero Section - Enhanced Premium Design */}
+      <section className="bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 text-white page-with-navbar section-padding overflow-hidden relative">
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-20 left-10 w-96 h-96 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-20 right-10 w-80 h-80 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+          <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 rounded-full blur-2xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+        </div>
+        
+        <div className="max-w-7xl mx-auto text-center relative z-10">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
+            transition={{ duration: 1, ease: "easeOut" }}
           >
-            <Badge className="bg-accent text-white mb-6 text-lg px-4 py-2">
-              Free 30-Minute Consultation
-            </Badge>
-            <h1 className="text-4xl md:text-6xl font-serif font-bold mb-6">
-              Book Your Free <span className="gradient-text">Strategy Call</span>
-            </h1>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto mb-8">
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+            >
+              <Badge className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white mb-8 text-lg px-6 py-3 rounded-full shadow-2xl border border-cyan-400/30">
+                ✨ Free 30-Minute Premium Consultation
+              </Badge>
+            </motion.div>
+            
+            <motion.h1 
+              className="text-5xl md:text-7xl font-serif font-bold mb-8 bg-gradient-to-r from-white via-cyan-100 to-blue-100 bg-clip-text text-transparent"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1, delay: 0.4 }}
+            >
+              Book Your Free <span className="bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text">Strategy Call</span>
+            </motion.h1>
+            
+            <motion.p 
+              className="text-xl md:text-2xl text-gray-200 max-w-4xl mx-auto mb-10 leading-relaxed"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.6 }}
+            >
               Discover how AI-powered marketing can transform your business. Get a custom strategy, 
               competitor analysis, and ROI projections - completely free.
-            </p>
+            </motion.p>
             
-            <div className="flex flex-wrap justify-center gap-6 mt-8">
+            <motion.div 
+              className="flex flex-wrap justify-center gap-8 mt-12"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.8 }}
+            >
               <motion.div 
-                className="flex items-center space-x-2"
-                whileHover={{ scale: 1.05 }}
+                className="flex items-center space-x-3 bg-white/10 backdrop-blur-lg rounded-full px-6 py-3 border border-white/20"
+                whileHover={{ scale: 1.05, backgroundColor: "rgba(255,255,255,0.15)" }}
+                transition={{ duration: 0.3 }}
               >
-                <Calendar className="text-accent" size={20} />
-                <span>30-minute session</span>
+                <Calendar className="text-cyan-400" size={24} />
+                <span className="font-semibold">30-minute session</span>
               </motion.div>
               <motion.div 
-                className="flex items-center space-x-2"
-                whileHover={{ scale: 1.05 }}
+                className="flex items-center space-x-3 bg-white/10 backdrop-blur-lg rounded-full px-6 py-3 border border-white/20"
+                whileHover={{ scale: 1.05, backgroundColor: "rgba(255,255,255,0.15)" }}
+                transition={{ duration: 0.3 }}
               >
-                <Video className="text-accent" size={20} />
-                <span>Via Zoom or phone</span>
+                <Video className="text-cyan-400" size={24} />
+                <span className="font-semibold">Via Zoom or phone</span>
               </motion.div>
               <motion.div 
-                className="flex items-center space-x-2"
-                whileHover={{ scale: 1.05 }}
+                className="flex items-center space-x-3 bg-white/10 backdrop-blur-lg rounded-full px-6 py-3 border border-white/20"
+                whileHover={{ scale: 1.05, backgroundColor: "rgba(255,255,255,0.15)" }}
+                transition={{ duration: 0.3 }}
               >
-                <Clock className="text-accent" size={20} />
-                <span>Available 7 days a week</span>
+                <Clock className="text-cyan-400" size={24} />
+                <span className="font-semibold">Available 7 days a week</span>
               </motion.div>
-            </div>
+            </motion.div>
           </motion.div>
         </div>
       </section>
 
-      {/* What You'll Get Section */}
-      <section className="bg-white section-padding">
-        <div className="max-w-7xl mx-auto">
+      {/* What You'll Get Section - Enhanced Premium Design */}
+      <section className="bg-gradient-to-br from-gray-50 to-blue-50 section-padding relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-r from-blue-200/20 to-purple-200/20 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-80 h-80 bg-gradient-to-r from-purple-200/20 to-pink-200/20 rounded-full blur-3xl"></div>
+        
+        <div className="max-w-7xl mx-auto relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="text-center mb-16"
+            className="text-center mb-20"
           >
-            <h2 className="text-3xl md:text-5xl font-serif font-bold text-primary mb-6">
-              What You'll <span className="gradient-text">Receive</span>
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <motion.h2 
+              className="text-4xl md:text-6xl font-serif font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 bg-clip-text text-transparent mb-8"
+              initial={{ scale: 0.8 }}
+              whileInView={{ scale: 1 }}
+              transition={{ duration: 0.8 }}
+            >
+              What You'll <span className="bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text">Receive</span>
+            </motion.h2>
+            <p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
               This isn't just another sales call. We'll provide genuine value and actionable 
               insights you can implement immediately.
             </p>
@@ -110,25 +151,64 @@ const StrategyCallCalendly = () => {
             {benefits.map((benefit, index) => (
               <motion.div
                 key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                whileHover={{ y: -5 }}
+                initial={{ opacity: 0, y: 30, scale: 0.8 }}
+                whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ 
+                  duration: 0.8, 
+                  delay: index * 0.15,
+                  type: "spring",
+                  bounce: 0.4
+                }}
+                whileHover={{ 
+                  y: -15, 
+                  scale: 1.05,
+                  rotateY: 5,
+                  transition: { duration: 0.3 }
+                }}
+                className="group"
               >
-                <Card className="agency-card h-full text-center group">
-                  <CardHeader>
-                    <div className="w-16 h-16 bg-gradient-to-br from-accent to-primary rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
-                      <benefit.icon size={32} className="text-white" />
-                    </div>
-                    <CardTitle className="text-lg font-bold text-primary">
+                <Card className="bg-white/70 backdrop-blur-lg h-full text-center border border-gray-200/50 shadow-xl hover:shadow-3xl transition-all duration-500 relative overflow-hidden">
+                  {/* Hover Gradient Background */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  
+                  <CardHeader className="relative z-10">
+                    <motion.div 
+                      className="w-20 h-20 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-2xl relative"
+                      animate={{ 
+                        y: [0, -3, 0],
+                        rotate: [0, 1, -1, 0]
+                      }}
+                      transition={{ 
+                        duration: 4,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                        delay: index * 0.5
+                      }}
+                      whileHover={{ 
+                        scale: 1.15, 
+                        rotate: 10,
+                        transition: { duration: 0.3 }
+                      }}
+                    >
+                      <benefit.icon size={36} className="text-white" />
+                      
+                      {/* Sparkle Effect */}
+                      <div className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-400 rounded-full opacity-0 group-hover:opacity-100 animate-ping"></div>
+                    </motion.div>
+                    
+                    <CardTitle className="text-xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-4">
                       {benefit.title}
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
-                    <CardDescription className="text-gray-600">
+                  
+                  <CardContent className="relative z-10">
+                    <CardDescription className="text-gray-600 text-base leading-relaxed">
                       {benefit.description}
                     </CardDescription>
                   </CardContent>
+                  
+                  {/* Shimmer Effect */}
+                  <div className="absolute inset-0 -top-4 -bottom-4 -left-4 -right-4 bg-gradient-to-r from-transparent via-white/30 to-transparent skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out"></div>
                 </Card>
               </motion.div>
             ))}
@@ -136,69 +216,113 @@ const StrategyCallCalendly = () => {
         </div>
       </section>
 
-      {/* Sales Representatives Selection Section */}
-      <section className="bg-secondary section-padding">
-        <div className="max-w-4xl mx-auto">
+      {/* Sales Representatives Selection Section - Enhanced */}
+      <section className="bg-white section-padding relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-blue-50/30 to-purple-50/30"></div>
+        
+        <div className="max-w-6xl mx-auto relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="text-center mb-12"
+            className="text-center mb-16"
           >
-            <h2 className="text-3xl md:text-5xl font-serif font-bold text-primary mb-6">
-              Choose Your <span className="gradient-text">Sales Representative</span>
-            </h2>
-            <p className="text-xl text-gray-600">
-              Select the sales representative you'd like to book a consultation with.
+            <motion.h2 
+              className="text-4xl md:text-6xl font-serif font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 bg-clip-text text-transparent mb-8"
+              initial={{ scale: 0.8 }}
+              whileInView={{ scale: 1 }}
+              transition={{ duration: 0.8 }}
+            >
+              Choose Your <span className="bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text">Expert</span>
+            </motion.h2>
+            <p className="text-xl md:text-2xl text-gray-600 leading-relaxed">
+              Select the strategy expert you'd like to book a consultation with.
             </p>
           </motion.div>
 
           {isLoading ? (
             <div className="flex justify-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+              <motion.div 
+                className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full"
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+              />
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {salesReps?.map((rep, index) => (
                 <motion.div
                   key={rep.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                  whileHover={{ y: -5 }}
+                  initial={{ opacity: 0, y: 30, scale: 0.8 }}
+                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ 
+                    duration: 0.8, 
+                    delay: index * 0.15,
+                    type: "spring",
+                    bounce: 0.4
+                  }}
+                  whileHover={{ 
+                    y: -10, 
+                    scale: 1.03,
+                    transition: { duration: 0.3 }
+                  }}
+                  className="group"
                 >
-                  <Card className="agency-card h-full text-center group">
-                    <CardHeader>
+                  <Card className="bg-white/80 backdrop-blur-lg h-full text-center border border-gray-200/50 shadow-xl hover:shadow-3xl transition-all duration-500 relative overflow-hidden">
+                    {/* Hover Gradient Background */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    
+                    <CardHeader className="relative z-10 pb-4">
                       {rep.profile_photo && (
-                        <div className="w-20 h-20 rounded-full mx-auto mb-4 overflow-hidden">
+                        <motion.div 
+                          className="w-24 h-24 rounded-full mx-auto mb-6 overflow-hidden ring-4 ring-blue-100 group-hover:ring-blue-200 transition-all duration-300"
+                          whileHover={{ scale: 1.1, rotate: 5 }}
+                          transition={{ duration: 0.3 }}
+                        >
                           <img 
                             src={rep.profile_photo} 
                             alt={rep.name}
                             className="w-full h-full object-cover"
                           />
-                        </div>
+                        </motion.div>
                       )}
-                      <CardTitle className="text-xl font-bold text-primary">
+                      
+                      <CardTitle className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-2">
                         {rep.name}
                       </CardTitle>
-                      <CardDescription className="text-accent font-medium">
+                      <CardDescription className="text-blue-600 font-semibold text-lg">
                         {rep.title}
                       </CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-4">
+                    
+                    <CardContent className="space-y-6 relative z-10">
                       {rep.bio && (
-                        <p className="text-gray-600 text-sm">
+                        <p className="text-gray-600 text-base leading-relaxed">
                           {rep.bio}
                         </p>
                       )}
-                      <Button 
-                        onClick={() => handleCalendlyClick(rep.calendly_link)}
-                        className="w-full bg-gradient-to-r from-accent to-primary hover:from-primary hover:to-accent transition-all duration-300"
+                      
+                      <motion.div
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
                       >
-                        Book with {rep.name.split(' ')[0]}
-                        <ExternalLink className="ml-2 h-4 w-4" />
-                      </Button>
+                        <Button 
+                          onClick={() => handleCalendlyClick(rep.calendly_link)}
+                          className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-blue-600 hover:to-purple-600 text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 relative overflow-hidden group/button"
+                        >
+                          <span className="relative z-10 flex items-center justify-center">
+                            Book with {rep.name.split(' ')[0]}
+                            <ExternalLink className="ml-2 h-5 w-5" />
+                          </span>
+                          
+                          {/* Button Shimmer Effect */}
+                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12 -translate-x-full group-hover/button:translate-x-full transition-transform duration-700"></div>
+                        </Button>
+                      </motion.div>
                     </CardContent>
+                    
+                    {/* Card Shimmer Effect */}
+                    <div className="absolute inset-0 -top-4 -bottom-4 -left-4 -right-4 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out"></div>
                   </Card>
                 </motion.div>
               ))}

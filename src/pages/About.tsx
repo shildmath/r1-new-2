@@ -70,17 +70,21 @@ const About = () => {
         </div>
       </section>
 
-      {/* Stats Section - Luxury Cards */}
+      {/* Stats Section - Enhanced with Premium Design */}
       {stats && (
-        <section className="py-20 px-4 relative">
-          <div className="max-w-7xl mx-auto">
+        <section className="py-20 px-4 relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-blue-50/50 via-purple-50/30 to-pink-50/50"></div>
+          <div className="absolute top-10 right-10 w-96 h-96 bg-gradient-to-r from-blue-400/10 to-purple-400/10 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-10 left-10 w-80 h-80 bg-gradient-to-r from-purple-400/10 to-pink-400/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+          
+          <div className="max-w-7xl mx-auto relative z-10">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
               className="text-center mb-16"
             >
-              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+              <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 bg-clip-text text-transparent mb-4">
                 Numbers That Speak Volumes
               </h2>
               <p className="text-xl text-gray-600 max-w-2xl mx-auto">
@@ -88,28 +92,93 @@ const About = () => {
               </p>
             </motion.div>
             
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
               {[
-                { value: stats.happy_clients, label: "Happy Clients", color: "from-blue-500 to-blue-600" },
-                { value: stats.success_rate, label: "Success Rate", color: "from-green-500 to-green-600" },
-                { value: stats.awards_won, label: "Awards Won", color: "from-purple-500 to-purple-600" },
-                { value: stats.growth_rate, label: "Growth Rate", color: "from-orange-500 to-orange-600" }
+                { 
+                  value: stats.happy_clients, 
+                  label: "Happy Clients", 
+                  color: "from-blue-500 to-blue-600",
+                  icon: "👥",
+                  description: "Satisfied clients worldwide"
+                },
+                { 
+                  value: stats.success_rate, 
+                  label: "Success Rate", 
+                  color: "from-green-500 to-green-600",
+                  icon: "📈",
+                  description: "Project completion rate"
+                },
+                { 
+                  value: stats.awards_won, 
+                  label: "Awards Won", 
+                  color: "from-purple-500 to-purple-600",
+                  icon: "🏆",
+                  description: "Industry recognitions"
+                },
+                { 
+                  value: stats.growth_rate, 
+                  label: "Growth Rate", 
+                  color: "from-orange-500 to-orange-600",
+                  icon: "🚀",
+                  description: "Average client growth"
+                }
               ].map((stat, index) => (
                 <motion.div
                   key={index}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                  whileHover={{ scale: 1.05, y: -10 }}
-                  className="bg-white rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 border border-gray-100"
+                  initial={{ opacity: 0, scale: 0.8, y: 50 }}
+                  whileInView={{ opacity: 1, scale: 1, y: 0 }}
+                  transition={{ 
+                    duration: 0.8, 
+                    delay: index * 0.15,
+                    type: "spring",
+                    bounce: 0.4
+                  }}
+                  whileHover={{ 
+                    scale: 1.05, 
+                    y: -15,
+                    rotateY: 5,
+                    transition: { duration: 0.3 }
+                  }}
+                  className="group relative"
                 >
-                  <div className={`w-16 h-16 bg-gradient-to-r ${stat.color} rounded-2xl flex items-center justify-center mx-auto mb-6`}>
-                    <div className="text-white text-2xl font-bold">
-                      {stat.value.slice(0, 1)}
-                    </div>
+                  <div className="bg-white/80 backdrop-blur-lg rounded-3xl p-8 shadow-xl hover:shadow-3xl transition-all duration-500 border border-gray-100/50 relative overflow-hidden">
+                    {/* Hover Background Effect */}
+                    <div className={`absolute inset-0 bg-gradient-to-br ${stat.color} opacity-0 group-hover:opacity-5 transition-opacity duration-500 rounded-3xl`}></div>
+                    
+                    {/* Floating Icon Animation */}
+                    <motion.div 
+                      className={`w-20 h-20 bg-gradient-to-r ${stat.color} rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg relative z-10`}
+                      animate={{ 
+                        y: [0, -5, 0],
+                        rotate: [0, 2, -2, 0]
+                      }}
+                      transition={{ 
+                        duration: 3,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                        delay: index * 0.5
+                      }}
+                    >
+                      <span className="text-3xl">{stat.icon}</span>
+                    </motion.div>
+                    
+                    {/* Animated Counter */}
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      whileInView={{ scale: 1 }}
+                      transition={{ duration: 0.6, delay: index * 0.1 + 0.3 }}
+                      className="text-center relative z-10"
+                    >
+                      <div className="text-5xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-2">
+                        {stat.value}
+                      </div>
+                      <div className="text-lg font-semibold text-gray-700 mb-2">{stat.label}</div>
+                      <div className="text-sm text-gray-500">{stat.description}</div>
+                    </motion.div>
+                    
+                    {/* Shimmer Effect */}
+                    <div className="absolute inset-0 -top-4 -bottom-4 -left-4 -right-4 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out"></div>
                   </div>
-                  <div className="text-4xl font-bold text-gray-900 mb-2">{stat.value}</div>
-                  <div className="text-gray-600 font-medium">{stat.label}</div>
                 </motion.div>
               ))}
             </div>

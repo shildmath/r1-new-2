@@ -1,240 +1,258 @@
 
 import React, { useState } from 'react';
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import { motion } from 'framer-motion';
-import { Star, Filter, ChevronDown, Users, Award, TrendingUp, BarChart3 } from 'lucide-react';
 import { useTestimonials } from '@/hooks/useTestimonials';
 import { useTestimonialIndustries } from '@/hooks/useTestimonialIndustries';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Star, Quote, Users, TrendingUp, Award, Target } from 'lucide-react';
 
 const Testimonials = () => {
-  const [selectedIndustry, setSelectedIndustry] = useState('All');
-  const { testimonials, stats, loading } = useTestimonials();
-  const { data: industries = [] } = useTestimonialIndustries();
+  const { data: testimonials, isLoading } = useTestimonials();
+  const { data: industries } = useTestimonialIndustries();
+  const [selectedIndustry, setSelectedIndustry] = useState('All Industries');
 
-  const filteredTestimonials = testimonials.filter(testimonial => 
-    selectedIndustry === 'All' || testimonial.industry === selectedIndustry
+  const filteredTestimonials = testimonials?.filter(testimonial => 
+    selectedIndustry === 'All Industries' || testimonial.industry === selectedIndustry
   );
 
-  const activeIndustries = industries.filter(industry => industry.is_active);
+  const renderStars = (rating: number) => {
+    return Array.from({ length: 5 }, (_, i) => (
+      <Star
+        key={i}
+        className={`w-4 h-4 ${i < rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+      />
+    ));
+  };
 
-  if (loading) {
+  const stats = [
+    { value: "500+", label: "Happy Clients", icon: Users },
+    { value: "342%", label: "Average ROI", icon: TrendingUp },
+    { value: "97%", label: "Success Rate", icon: Target },
+    { value: "4.9/5", label: "Client Rating", icon: Award }
+  ];
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        duration: 0.5
+      }
+    }
+  };
+
+  if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Loading testimonials...</div>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+        <Navbar />
+        <div className="pt-20 flex justify-center items-center min-h-screen">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+        </div>
+        <Footer />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      <Navbar />
+      
       {/* Hero Section */}
-      <section className="relative py-20 bg-gradient-to-r from-blue-600 to-purple-600">
-        <div className="absolute inset-0 bg-black/20"></div>
-        <div className="relative container mx-auto px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
+      <section className="pt-20 pb-16 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <motion.div 
+            className="text-center"
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="text-center text-white"
           >
-            <h1 className="text-5xl md:text-6xl font-bold mb-6">
-              Success Stories
+            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
+              What Our Clients
+              <span className="block text-primary">Say About Us</span>
             </h1>
-            <p className="text-xl md:text-2xl max-w-3xl mx-auto opacity-90">
-              Real results from real businesses who transformed their marketing with our AI solutions
+            <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+              Real results from real businesses. Discover how our AI-powered marketing solutions have transformed companies across various industries.
             </p>
           </motion.div>
         </div>
       </section>
 
-      {/* Statistics Section */}
-      <section className="py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="text-center"
-            >
-              <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-8 rounded-2xl shadow-lg">
-                <Users className="h-12 w-12 mx-auto mb-4" />
-                <div className="text-4xl font-bold mb-2">{stats?.happy_clients || '500+'}</div>
-                <div className="text-blue-100">Happy Clients</div>
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="text-center"
-            >
-              <div className="bg-gradient-to-r from-green-500 to-green-600 text-white p-8 rounded-2xl shadow-lg">
-                <TrendingUp className="h-12 w-12 mx-auto mb-4" />
-                <div className="text-4xl font-bold mb-2">{stats?.average_roi || '342%'}</div>
-                <div className="text-green-100">Average ROI</div>
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="text-center"
-            >
-              <div className="bg-gradient-to-r from-purple-500 to-purple-600 text-white p-8 rounded-2xl shadow-lg">
-                <BarChart3 className="h-12 w-12 mx-auto mb-4" />
-                <div className="text-4xl font-bold mb-2">{stats?.success_rate || '97%'}</div>
-                <div className="text-purple-100">Success Rate</div>
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="text-center"
-            >
-              <div className="bg-gradient-to-r from-orange-500 to-orange-600 text-white p-8 rounded-2xl shadow-lg">
-                <Award className="h-12 w-12 mx-auto mb-4" />
-                <div className="text-4xl font-bold mb-2">{stats?.client_rating || '4.9/5'}</div>
-                <div className="text-orange-100">Client Rating</div>
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* Filter and Testimonials Section */}
-      <section className="py-16">
-        <div className="container mx-auto px-4">
-          {/* Filter */}
-          <div className="flex flex-col md:flex-row justify-between items-center mb-12">
-            <div className="mb-6 md:mb-0">
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
-                Client Testimonials
-              </h2>
-              <p className="text-gray-600">
-                Discover how we've helped businesses across various industries
-              </p>
-            </div>
-            
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="flex items-center space-x-2">
-                  <Filter className="h-4 w-4" />
-                  <span>{selectedIndustry}</span>
-                  <ChevronDown className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem onClick={() => setSelectedIndustry('All')}>
-                  All Industries
-                </DropdownMenuItem>
-                {activeIndustries.map((industry) => (
-                  <DropdownMenuItem
-                    key={industry.id}
-                    onClick={() => setSelectedIndustry(industry.name)}
-                  >
-                    {industry.name}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-
-          {/* Testimonials Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredTestimonials.map((testimonial, index) => (
+      {/* Stats Section */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-white">
+        <div className="max-w-7xl mx-auto">
+          <motion.div 
+            className="text-center mb-12"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              Trusted by Industry Leaders
+            </h2>
+            <p className="text-gray-600">
+              Join hundreds of satisfied clients who have achieved remarkable growth
+            </p>
+          </motion.div>
+          
+          <div className="grid md:grid-cols-4 gap-6">
+            {stats.map((stat, index) => (
               <motion.div
-                key={testimonial.id}
-                initial={{ opacity: 0, y: 20 }}
+                key={index}
+                initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className="group"
+                transition={{ duration: 0.6, delay: index * 0.1 }}
               >
-                <Card className="h-full hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
-                  <CardContent className="p-6">
-                    <div className="flex items-center space-x-4 mb-6">
-                      {testimonial.profile_photo ? (
-                        <img
-                          src={testimonial.profile_photo}
-                          alt={testimonial.client_name}
-                          className="w-16 h-16 rounded-full object-cover border-4 border-blue-100"
-                        />
-                      ) : (
-                        <div className="w-16 h-16 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center">
-                          <Users className="w-8 h-8 text-white" />
-                        </div>
-                      )}
-                      <div>
-                        <h3 className="font-semibold text-lg text-gray-900">
-                          {testimonial.client_name}
-                        </h3>
-                        <p className="text-gray-600">{testimonial.company_name}</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center space-x-2 mb-4">
-                      <div className="flex items-center">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            className={`w-5 h-5 ${
-                              i < testimonial.rating
-                                ? 'fill-yellow-400 text-yellow-400'
-                                : 'text-gray-300'
-                            }`}
-                          />
-                        ))}
-                      </div>
-                      <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                        {testimonial.industry}
-                      </Badge>
-                    </div>
-
-                    <blockquote className="text-gray-700 mb-4 italic">
-                      "{testimonial.description}"
-                    </blockquote>
-
-                    {testimonial.results && (
-                      <div className="mt-4">
-                        <Badge variant="outline" className="text-green-600 border-green-200 bg-green-50">
-                          <TrendingUp className="w-3 h-3 mr-1" />
-                          {testimonial.results}
-                        </Badge>
-                      </div>
-                    )}
+                <Card className="text-center p-6 hover:shadow-lg transition-all duration-300 hover:scale-105">
+                  <CardContent className="p-0">
+                    <stat.icon className="h-8 w-8 text-primary mx-auto mb-4" />
+                    <div className="text-3xl font-bold text-gray-900 mb-2">{stat.value}</div>
+                    <div className="text-gray-600">{stat.label}</div>
                   </CardContent>
                 </Card>
               </motion.div>
             ))}
           </div>
-
-          {filteredTestimonials.length === 0 && (
-            <div className="text-center py-12">
-              <Users className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-600 mb-2">
-                No testimonials found
-              </h3>
-              <p className="text-gray-500">
-                {selectedIndustry === 'All' 
-                  ? 'No testimonials available at the moment.' 
-                  : `No testimonials found for ${selectedIndustry} industry.`}
-              </p>
-            </div>
-          )}
         </div>
       </section>
+
+      {/* Filter Section */}
+      <section className="py-8 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <motion.div 
+            className="flex flex-col sm:flex-row justify-between items-center mb-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <h2 className="text-2xl font-bold text-gray-900 mb-4 sm:mb-0">
+              Client Success Stories
+            </h2>
+            <div className="flex items-center gap-4">
+              <label htmlFor="industry-filter" className="text-sm font-medium text-gray-700">
+                Filter by Industry:
+              </label>
+              <Select value={selectedIndustry} onValueChange={setSelectedIndustry}>
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue placeholder="Select industry" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="All Industries">All Industries</SelectItem>
+                  {industries?.map((industry) => (
+                    <SelectItem key={industry.id} value={industry.name}>
+                      {industry.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Testimonials Grid */}
+      <section className="pb-16 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <motion.div 
+            className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            {filteredTestimonials?.map((testimonial, index) => (
+              <motion.div
+                key={testimonial.id}
+                variants={itemVariants}
+                whileHover={{ scale: 1.02 }}
+                className="h-full"
+              >
+                <Card className="h-full p-6 hover:shadow-lg transition-all duration-300 group">
+                  <CardContent className="p-0 h-full flex flex-col">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center space-x-4">
+                        {testimonial.profile_photo && (
+                          <img 
+                            src={testimonial.profile_photo} 
+                            alt={testimonial.client_name}
+                            className="w-12 h-12 rounded-full object-cover"
+                          />
+                        )}
+                        <div>
+                          <h3 className="font-semibold text-gray-900">{testimonial.client_name}</h3>
+                          <p className="text-sm text-gray-600">{testimonial.company_name}</p>
+                        </div>
+                      </div>
+                      <Quote className="h-6 w-6 text-primary opacity-50 group-hover:opacity-100 transition-opacity" />
+                    </div>
+                    
+                    <div className="flex items-center mb-4">
+                      {renderStars(testimonial.rating)}
+                      <span className="ml-2 text-sm text-gray-600">({testimonial.rating}/5)</span>
+                    </div>
+                    
+                    <p className="text-gray-700 mb-4 flex-1">
+                      "{testimonial.description}"
+                    </p>
+                    
+                    <div className="flex items-center justify-between mt-auto">
+                      <span className="text-sm text-primary font-medium bg-primary/10 px-2 py-1 rounded">
+                        {testimonial.industry}
+                      </span>
+                      {testimonial.results && (
+                        <span className="text-sm text-green-600 font-medium">
+                          {testimonial.results}
+                        </span>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-primary text-white">
+        <div className="max-w-7xl mx-auto text-center">
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <h2 className="text-3xl font-bold mb-4">
+              Ready to Join Our Success Stories?
+            </h2>
+            <p className="text-xl mb-8">
+              Let's discuss how we can help transform your business with AI-powered marketing
+            </p>
+            <div className="flex flex-col sm:flex-row justify-center gap-4">
+              <Button size="lg" variant="secondary" className="px-8 py-3">
+                Start Your Journey
+              </Button>
+              <Button size="lg" variant="outline" className="px-8 py-3 border-white text-white hover:bg-white hover:text-primary">
+                View Case Studies
+              </Button>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      <Footer />
     </div>
   );
 };

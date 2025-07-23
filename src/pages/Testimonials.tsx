@@ -1,258 +1,257 @@
 
-import React, { useState } from 'react';
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import { motion } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
 import { useTestimonials } from '@/hooks/useTestimonials';
 import { useTestimonialIndustries } from '@/hooks/useTestimonialIndustries';
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Star, Quote, Users, TrendingUp, Award, Target } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Star, Quote, Users, TrendingUp, Award } from 'lucide-react';
+import { motion } from 'framer-motion';
+import Navbar from '@/components/Navbar';
+import { EnhancedFooter } from '@/components/EnhancedFooter';
 
 const Testimonials = () => {
-  const { data: testimonials, isLoading } = useTestimonials();
-  const { data: industries } = useTestimonialIndustries();
+  const { testimonials, stats, loading, error, fetchTestimonials } = useTestimonials();
+  const { industries, loading: industriesLoading } = useTestimonialIndustries();
   const [selectedIndustry, setSelectedIndustry] = useState('All Industries');
 
-  const filteredTestimonials = testimonials?.filter(testimonial => 
-    selectedIndustry === 'All Industries' || testimonial.industry === selectedIndustry
-  );
+  useEffect(() => {
+    fetchTestimonials(selectedIndustry);
+  }, [selectedIndustry, fetchTestimonials]);
 
-  const renderStars = (rating: number) => {
-    return Array.from({ length: 5 }, (_, i) => (
-      <Star
-        key={i}
-        className={`w-4 h-4 ${i < rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
-      />
-    ));
-  };
-
-  const stats = [
-    { value: "500+", label: "Happy Clients", icon: Users },
-    { value: "342%", label: "Average ROI", icon: TrendingUp },
-    { value: "97%", label: "Success Rate", icon: Target },
-    { value: "4.9/5", label: "Client Rating", icon: Award }
-  ];
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
-  };
-
-  const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: {
-        duration: 0.5
-      }
-    }
-  };
-
-  if (isLoading) {
+  if (loading || industriesLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      <div className="min-h-screen bg-gray-50">
         <Navbar />
-        <div className="pt-20 flex justify-center items-center min-h-screen">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+        <div className="flex justify-center items-center min-h-[60vh]">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
         </div>
-        <Footer />
+        <EnhancedFooter />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <div className="flex justify-center items-center min-h-[60vh]">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">Something went wrong</h2>
+            <p className="text-gray-600">{error}</p>
+          </div>
+        </div>
+        <EnhancedFooter />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="min-h-screen bg-gray-50">
       <Navbar />
       
       {/* Hero Section */}
-      <section className="pt-20 pb-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <motion.div 
-            className="text-center"
+      <section className="bg-gradient-to-br from-blue-600 to-purple-700 text-white py-20">
+        <div className="container mx-auto px-4">
+          <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
+            className="text-center"
           >
-            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-              What Our Clients
-              <span className="block text-primary">Say About Us</span>
+            <h1 className="text-4xl md:text-6xl font-bold mb-6">
+              Client Success Stories
             </h1>
-            <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-              Real results from real businesses. Discover how our AI-powered marketing solutions have transformed companies across various industries.
+            <p className="text-xl mb-8 max-w-3xl mx-auto">
+              Discover how businesses across industries have transformed their growth with our AI-powered marketing solutions
             </p>
           </motion.div>
         </div>
       </section>
 
       {/* Stats Section */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <motion.div 
-            className="text-center mb-12"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Trusted by Industry Leaders
-            </h2>
-            <p className="text-gray-600">
-              Join hundreds of satisfied clients who have achieved remarkable growth
-            </p>
-          </motion.div>
-          
-          <div className="grid md:grid-cols-4 gap-6">
-            {stats.map((stat, index) => (
+      {stats && (
+        <section className="py-16 bg-white">
+          <div className="container mx-auto px-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
               <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
+                transition={{ duration: 0.6, delay: 0.1 }}
+                className="text-center"
               >
-                <Card className="text-center p-6 hover:shadow-lg transition-all duration-300 hover:scale-105">
-                  <CardContent className="p-0">
-                    <stat.icon className="h-8 w-8 text-primary mx-auto mb-4" />
-                    <div className="text-3xl font-bold text-gray-900 mb-2">{stat.value}</div>
-                    <div className="text-gray-600">{stat.label}</div>
-                  </CardContent>
-                </Card>
+                <div className="bg-blue-100 rounded-full p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                  <Users className="h-8 w-8 text-blue-600" />
+                </div>
+                <div className="text-3xl font-bold text-gray-800 mb-2">{stats.total_clients}</div>
+                <div className="text-gray-600">Happy Clients</div>
               </motion.div>
-            ))}
+              
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                className="text-center"
+              >
+                <div className="bg-green-100 rounded-full p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                  <TrendingUp className="h-8 w-8 text-green-600" />
+                </div>
+                <div className="text-3xl font-bold text-gray-800 mb-2">{stats.average_rating}</div>
+                <div className="text-gray-600">Average Rating</div>
+              </motion.div>
+              
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.3 }}
+                className="text-center"
+              >
+                <div className="bg-purple-100 rounded-full p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                  <Award className="h-8 w-8 text-purple-600" />
+                </div>
+                <div className="text-3xl font-bold text-gray-800 mb-2">{stats.success_rate}%</div>
+                <div className="text-gray-600">Success Rate</div>
+              </motion.div>
+              
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+                className="text-center"
+              >
+                <div className="bg-orange-100 rounded-full p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                  <Star className="h-8 w-8 text-orange-600" />
+                </div>
+                <div className="text-3xl font-bold text-gray-800 mb-2">{stats.total_projects}</div>
+                <div className="text-gray-600">Projects Completed</div>
+              </motion.div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Filter Section */}
+      <section className="py-8 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row justify-between items-center">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4 md:mb-0">
+              Filter by Industry
+            </h2>
+            <Select value={selectedIndustry} onValueChange={setSelectedIndustry}>
+              <SelectTrigger className="w-full md:w-64">
+                <SelectValue placeholder="Select industry" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="All Industries">All Industries</SelectItem>
+                {industries.map((industry) => (
+                  <SelectItem key={industry.id} value={industry.name}>
+                    {industry.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
       </section>
 
-      {/* Filter Section */}
-      <section className="py-8 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <motion.div 
-            className="flex flex-col sm:flex-row justify-between items-center mb-8"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            <h2 className="text-2xl font-bold text-gray-900 mb-4 sm:mb-0">
-              Client Success Stories
-            </h2>
-            <div className="flex items-center gap-4">
-              <label htmlFor="industry-filter" className="text-sm font-medium text-gray-700">
-                Filter by Industry:
-              </label>
-              <Select value={selectedIndustry} onValueChange={setSelectedIndustry}>
-                <SelectTrigger className="w-[200px]">
-                  <SelectValue placeholder="Select industry" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="All Industries">All Industries</SelectItem>
-                  {industries?.map((industry) => (
-                    <SelectItem key={industry.id} value={industry.name}>
-                      {industry.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
       {/* Testimonials Grid */}
-      <section className="pb-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <motion.div 
-            className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-          >
-            {filteredTestimonials?.map((testimonial, index) => (
-              <motion.div
-                key={testimonial.id}
-                variants={itemVariants}
-                whileHover={{ scale: 1.02 }}
-                className="h-full"
-              >
-                <Card className="h-full p-6 hover:shadow-lg transition-all duration-300 group">
-                  <CardContent className="p-0 h-full flex flex-col">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center space-x-4">
-                        {testimonial.profile_photo && (
-                          <img 
-                            src={testimonial.profile_photo} 
-                            alt={testimonial.client_name}
-                            className="w-12 h-12 rounded-full object-cover"
-                          />
-                        )}
-                        <div>
-                          <h3 className="font-semibold text-gray-900">{testimonial.client_name}</h3>
-                          <p className="text-sm text-gray-600">{testimonial.company_name}</p>
+      <section className="py-16 bg-white">
+        <div className="container mx-auto px-4">
+          {testimonials.length === 0 ? (
+            <div className="text-center py-12">
+              <Quote className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-gray-600 mb-2">No testimonials found</h3>
+              <p className="text-gray-500">
+                {selectedIndustry === 'All Industries' 
+                  ? 'No testimonials available at the moment.' 
+                  : `No testimonials found for ${selectedIndustry}.`}
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {testimonials.map((testimonial, index) => (
+                <motion.div
+                  key={testimonial.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                >
+                  <Card className="h-full hover:shadow-lg transition-shadow duration-300">
+                    <CardContent className="p-6">
+                      <div className="flex items-center mb-4">
+                        <div className="flex">
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`h-4 w-4 ${
+                                i < testimonial.rating
+                                  ? 'text-yellow-400 fill-current'
+                                  : 'text-gray-300'
+                              }`}
+                            />
+                          ))}
+                        </div>
+                        <span className="ml-2 text-sm text-gray-600">
+                          {testimonial.rating}/5
+                        </span>
+                      </div>
+                      
+                      <blockquote className="text-gray-700 mb-4 italic">
+                        "{testimonial.content}"
+                      </blockquote>
+                      
+                      <div className="flex items-center">
+                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                          <span className="text-blue-600 font-semibold">
+                            {testimonial.client_name.charAt(0)}
+                          </span>
+                        </div>
+                        <div className="ml-3">
+                          <p className="font-semibold text-gray-800">
+                            {testimonial.client_name}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            {testimonial.company_name}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {testimonial.industry}
+                          </p>
                         </div>
                       </div>
-                      <Quote className="h-6 w-6 text-primary opacity-50 group-hover:opacity-100 transition-opacity" />
-                    </div>
-                    
-                    <div className="flex items-center mb-4">
-                      {renderStars(testimonial.rating)}
-                      <span className="ml-2 text-sm text-gray-600">({testimonial.rating}/5)</span>
-                    </div>
-                    
-                    <p className="text-gray-700 mb-4 flex-1">
-                      "{testimonial.description}"
-                    </p>
-                    
-                    <div className="flex items-center justify-between mt-auto">
-                      <span className="text-sm text-primary font-medium bg-primary/10 px-2 py-1 rounded">
-                        {testimonial.industry}
-                      </span>
-                      {testimonial.results && (
-                        <span className="text-sm text-green-600 font-medium">
-                          {testimonial.results}
-                        </span>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </motion.div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-primary text-white">
-        <div className="max-w-7xl mx-auto text-center">
-          <motion.div 
-            initial={{ opacity: 0, y: 30 }}
+      <section className="py-16 bg-gradient-to-r from-blue-600 to-purple-700 text-white">
+        <div className="container mx-auto px-4 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.8 }}
           >
-            <h2 className="text-3xl font-bold mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold mb-6">
               Ready to Join Our Success Stories?
             </h2>
-            <p className="text-xl mb-8">
-              Let's discuss how we can help transform your business with AI-powered marketing
+            <p className="text-xl mb-8 max-w-2xl mx-auto">
+              Let's discuss how we can help transform your business with AI-powered marketing solutions.
             </p>
-            <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Button size="lg" variant="secondary" className="px-8 py-3">
-                Start Your Journey
-              </Button>
-              <Button size="lg" variant="outline" className="px-8 py-3 border-white text-white hover:bg-white hover:text-primary">
-                View Case Studies
-              </Button>
-            </div>
+            <Button 
+              size="lg" 
+              className="bg-white text-blue-600 hover:bg-gray-100 font-semibold px-8 py-3"
+            >
+              Start Your Success Story
+            </Button>
           </motion.div>
         </div>
       </section>
 
-      <Footer />
+      <EnhancedFooter />
     </div>
   );
 };

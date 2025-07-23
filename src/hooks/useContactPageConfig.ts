@@ -22,6 +22,31 @@ export interface ContactPageConfig {
   whatsapp_description: string;
   contact_directly_title: string;
   contact_directly_description: string;
+  
+  // Form settings
+  form_title?: string;
+  form_subtitle?: string;
+  form_button_text?: string;
+  form_success_message?: string;
+  
+  // Page settings
+  page_title?: string;
+  page_subtitle?: string;
+  hero_background_color?: string;
+  
+  // CTA Section
+  cta_title?: string;
+  cta_subtitle?: string;
+  cta_primary_button?: string;
+  cta_secondary_button?: string;
+  
+  // Contact method colors
+  email_color?: string;
+  phone_color?: string;
+  office_color?: string;
+  hours_color?: string;
+  whatsapp_color?: string;
+  
   updated_at: string;
 }
 

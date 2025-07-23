@@ -42,7 +42,7 @@ const EditTestimonialsPage = () => {
     refetch
   } = useTestimonials();
 
-  const { data: industries = [] } = useTestimonialIndustries();
+  const { data: industries = [], refetch: refetchIndustries } = useTestimonialIndustries();
   const createIndustryMutation = useCreateIndustry();
   const updateIndustryMutation = useUpdateIndustry();
   const deleteIndustryMutation = useDeleteIndustry();
@@ -55,25 +55,44 @@ const EditTestimonialsPage = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleCreateTestimonial = async (testimonialData: any) => {
-    const result = await createTestimonial(testimonialData);
-    if (result.success) {
-      toast.success("Testimonial created successfully!");
-      refetch();
-    } else {
-      toast.error(result.error || "Failed to create testimonial");
+    try {
+      const result = await createTestimonial(testimonialData);
+      if (result.success) {
+        toast.success("Testimonial created successfully!");
+        refetch();
+        setIsTestimonialModalOpen(false);
+        setSelectedTestimonial(null);
+      } else {
+        toast.error(result.error || "Failed to create testimonial");
+      }
+      return result;
+    } catch (error) {
+      toast.error("Failed to create testimonial");
+      console.error("Error creating testimonial:", error);
+      return { success: false, error: "Failed to create testimonial" };
     }
-    return result;
   };
 
   const handleUpdateTestimonial = async (testimonialData: any) => {
-    const result = await updateTestimonial(testimonialData);
-    if (result.success) {
-      toast.success("Testimonial updated successfully!");
-      refetch();
-    } else {
-      toast.error(result.error || "Failed to update testimonial");
+    try {
+      const result = await updateTestimonial({
+        ...testimonialData,
+        id: selectedTestimonial?.id
+      });
+      if (result.success) {
+        toast.success("Testimonial updated successfully!");
+        refetch();
+        setIsTestimonialModalOpen(false);
+        setSelectedTestimonial(null);
+      } else {
+        toast.error(result.error || "Failed to update testimonial");
+      }
+      return result;
+    } catch (error) {
+      toast.error("Failed to update testimonial");
+      console.error("Error updating testimonial:", error);
+      return { success: false, error: "Failed to update testimonial" };
     }
-    return result;
   };
 
   const handleDeleteTestimonial = async (id: string) => {
@@ -92,6 +111,7 @@ const EditTestimonialsPage = () => {
     const result = await updateStats(statsData);
     if (result.success) {
       toast.success("Statistics updated successfully!");
+      setIsStatsModalOpen(false);
     } else {
       toast.error(result.error || "Failed to update statistics");
     }
@@ -102,17 +122,28 @@ const EditTestimonialsPage = () => {
     try {
       await createIndustryMutation.mutateAsync(industryData);
       toast.success("Industry created successfully!");
+      refetchIndustries();
+      setIsIndustryModalOpen(false);
+      setSelectedIndustry(null);
     } catch (error) {
       toast.error("Failed to create industry");
+      console.error("Error creating industry:", error);
     }
   };
 
   const handleUpdateIndustry = async (industryData: any) => {
     try {
-      await updateIndustryMutation.mutateAsync(industryData);
+      await updateIndustryMutation.mutateAsync({
+        ...industryData,
+        id: selectedIndustry?.id
+      });
       toast.success("Industry updated successfully!");
+      refetchIndustries();
+      setIsIndustryModalOpen(false);
+      setSelectedIndustry(null);
     } catch (error) {
       toast.error("Failed to update industry");
+      console.error("Error updating industry:", error);
     }
   };
 
@@ -121,8 +152,10 @@ const EditTestimonialsPage = () => {
       try {
         await deleteIndustryMutation.mutateAsync(id);
         toast.success("Industry deleted successfully!");
+        refetchIndustries();
       } catch (error) {
         toast.error("Failed to delete industry");
+        console.error("Error deleting industry:", error);
       }
     }
   };

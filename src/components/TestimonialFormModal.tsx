@@ -7,12 +7,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Switch } from "@/components/ui/switch";
 import { Testimonial, TestimonialIndustry } from "@/types/testimonial";
 
 interface TestimonialFormModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: any) => void;
+  onSubmit: (data: any) => Promise<any>;
   testimonial?: Testimonial | null;
   maxSequence: number;
   industries: TestimonialIndustry[];
@@ -35,7 +36,10 @@ const TestimonialFormModal: React.FC<TestimonialFormModalProps> = ({
     profile_photo: "",
     results: "",
     sequence_order: maxSequence + 1,
+    is_active: true,
   });
+
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (testimonial) {
@@ -48,6 +52,7 @@ const TestimonialFormModal: React.FC<TestimonialFormModalProps> = ({
         profile_photo: testimonial.profile_photo || "",
         results: testimonial.results || "",
         sequence_order: testimonial.sequence_order,
+        is_active: testimonial.is_active,
       });
     } else {
       setFormData({
@@ -59,14 +64,27 @@ const TestimonialFormModal: React.FC<TestimonialFormModalProps> = ({
         profile_photo: "",
         results: "",
         sequence_order: maxSequence + 1,
+        is_active: true,
       });
     }
-  }, [testimonial, maxSequence]);
+  }, [testimonial, maxSequence, isOpen]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
-    onClose();
+    setSubmitting(true);
+    
+    try {
+      await onSubmit(formData);
+      onClose();
+    } catch (error) {
+      console.error("Error submitting testimonial:", error);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleInputChange = (field: string, value: any) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   return (
@@ -84,7 +102,7 @@ const TestimonialFormModal: React.FC<TestimonialFormModalProps> = ({
               <Input
                 id="client_name"
                 value={formData.client_name}
-                onChange={(e) => setFormData(prev => ({ ...prev, client_name: e.target.value }))}
+                onChange={(e) => handleInputChange('client_name', e.target.value)}
                 required
               />
             </div>
@@ -94,7 +112,7 @@ const TestimonialFormModal: React.FC<TestimonialFormModalProps> = ({
               <Input
                 id="company_name"
                 value={formData.company_name}
-                onChange={(e) => setFormData(prev => ({ ...prev, company_name: e.target.value }))}
+                onChange={(e) => handleInputChange('company_name', e.target.value)}
                 required
               />
             </div>
@@ -105,7 +123,7 @@ const TestimonialFormModal: React.FC<TestimonialFormModalProps> = ({
             <Textarea
               id="description"
               value={formData.description}
-              onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+              onChange={(e) => handleInputChange('description', e.target.value)}
               rows={4}
               required
             />
@@ -114,7 +132,10 @@ const TestimonialFormModal: React.FC<TestimonialFormModalProps> = ({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="rating">Rating</Label>
-              <Select value={formData.rating.toString()} onValueChange={(value) => setFormData(prev => ({ ...prev, rating: parseInt(value) }))}>
+              <Select 
+                value={formData.rating.toString()} 
+                onValueChange={(value) => handleInputChange('rating', parseInt(value))}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -130,13 +151,16 @@ const TestimonialFormModal: React.FC<TestimonialFormModalProps> = ({
             
             <div>
               <Label htmlFor="industry">Industry *</Label>
-              <Select value={formData.industry} onValueChange={(value) => setFormData(prev => ({ ...prev, industry: value }))}>
+              <Select 
+                value={formData.industry} 
+                onValueChange={(value) => handleInputChange('industry', value)}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select Industry" />
                 </SelectTrigger>
                 <SelectContent>
                   <ScrollArea className="h-48">
-                    {industries.map((industry) => (
+                    {industries.filter(industry => industry.is_active).map((industry) => (
                       <SelectItem key={industry.id} value={industry.name}>
                         {industry.name}
                       </SelectItem>
@@ -152,7 +176,7 @@ const TestimonialFormModal: React.FC<TestimonialFormModalProps> = ({
             <Input
               id="profile_photo"
               value={formData.profile_photo}
-              onChange={(e) => setFormData(prev => ({ ...prev, profile_photo: e.target.value }))}
+              onChange={(e) => handleInputChange('profile_photo', e.target.value)}
               placeholder="/lovable-uploads/your-image.png"
             />
           </div>
@@ -162,7 +186,7 @@ const TestimonialFormModal: React.FC<TestimonialFormModalProps> = ({
             <Input
               id="results"
               value={formData.results}
-              onChange={(e) => setFormData(prev => ({ ...prev, results: e.target.value }))}
+              onChange={(e) => handleInputChange('results', e.target.value)}
               placeholder="e.g., 300% ROI increase"
             />
           </div>
@@ -173,17 +197,26 @@ const TestimonialFormModal: React.FC<TestimonialFormModalProps> = ({
               id="sequence_order"
               type="number"
               value={formData.sequence_order}
-              onChange={(e) => setFormData(prev => ({ ...prev, sequence_order: parseInt(e.target.value) }))}
-              min={1}
+              onChange={(e) => handleInputChange('sequence_order', parseInt(e.target.value))}
+              min={0}
             />
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="is_active"
+              checked={formData.is_active}
+              onCheckedChange={(checked) => handleInputChange('is_active', checked)}
+            />
+            <Label htmlFor="is_active">Active</Label>
           </div>
           
           <div className="flex justify-end space-x-2">
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit">
-              {testimonial ? "Update" : "Add"} Testimonial
+            <Button type="submit" disabled={submitting}>
+              {submitting ? 'Saving...' : (testimonial ? "Update" : "Add")} Testimonial
             </Button>
           </div>
         </form>

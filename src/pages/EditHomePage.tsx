@@ -1,9 +1,15 @@
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import AdminSidebar from "@/components/AdminSidebar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/hooks/use-toast";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { useHomePageConfig } from "@/hooks/useHomePageConfig";
+import { toast } from "sonner";
 import { 
   Plus, 
   Edit, 
@@ -14,147 +20,179 @@ import {
   Star,
   Users,
   Eye,
-  EyeOff
+  EyeOff,
+  Save
 } from "lucide-react";
 
 const EditHomePage = () => {
-  const { toast } = useToast();
+  const { config, isLoading, updateConfig } = useHomePageConfig();
   
-  // State for managing different sections
-  const [heroSection, setHeroSection] = useState({
-    title: "AI-Powered Marketing Solutions",
-    subtitle: "Transform Your Business with Advanced AI Technology",
-    description: "Drive exceptional growth with our cutting-edge AI marketing platform. Increase conversions, optimize campaigns, and maximize ROI with intelligent automation.",
-    ctaText: "Get Started Today",
-    ctaSecondaryText: "Learn More",
-    backgroundImage: "/hero-bg.jpg",
-    videoUrl: "",
-    rotatingImages: [
-      "/rotating-1.jpg",
-      "/rotating-2.jpg", 
-      "/rotating-3.jpg"
-    ]
+  const [heroData, setHeroData] = useState({
+    hero_title: '',
+    hero_subtitle: '',
+    hero_description: '',
+    hero_cta_text: '',
+    hero_cta_secondary_text: '',
+    hero_background_image: '',
+    hero_video_url: '',
+    hero_rotating_images: [] as string[]
   });
 
-  const [statsSection, setStatsSection] = useState({
-    isVisible: true,
-    title: "Numbers That Speak Volumes",
-    subtitle: "Our commitment to excellence is reflected in our outstanding results",
-    stats: [
-      { value: "500+", label: "Happy Clients", icon: "👥" },
-      { value: "95%", label: "Success Rate", icon: "📈" },
-      { value: "15", label: "Awards Won", icon: "🏆" },
-      { value: "300%", label: "Growth Rate", icon: "🚀" }
-    ]
+  const [statsData, setStatsData] = useState({
+    stats_title: '',
+    stats_subtitle: '',
+    stats_is_visible: true,
+    stats_data: [] as Array<{value: string; label: string; icon: string}>
   });
 
-  const [servicesSection, setServicesSection] = useState({
-    isVisible: true,
-    title: "Our Premium Services",
-    subtitle: "Comprehensive AI-powered solutions for your business growth",
-    selectedServices: [], // Will be populated from services table
-    displayLimit: 6
+  const [servicesData, setServicesData] = useState({
+    services_title: '',
+    services_subtitle: '',
+    services_is_visible: true,
+    services_display_limit: 6,
+    services_selected_ids: [] as string[]
   });
 
-  const [testimonialsSection, setTestimonialsSection] = useState({
-    isVisible: true,
-    title: "What Our Clients Say",
-    subtitle: "Real results from real businesses",
-    selectedTestimonials: [], // Will be populated from testimonials table
-    displayLimit: 3,
-    selectedIndustry: "All Industries"
+  const [testimonialsData, setTestimonialsData] = useState({
+    testimonials_title: '',
+    testimonials_subtitle: '',
+    testimonials_is_visible: true,
+    testimonials_display_limit: 3,
+    testimonials_selected_ids: [] as string[],
+    testimonials_selected_industry: ''
   });
 
-  const [featuresSection, setFeaturesSection] = useState({
-    isVisible: true,
-    title: "Why Choose AIAdMaxify",
-    features: [
-      {
-        id: 1,
-        title: "AI-Powered Analytics",
-        description: "Advanced machine learning algorithms analyze your data to provide actionable insights",
-        icon: "🧠",
-        isActive: true
-      },
-      {
-        id: 2,
-        title: "Real-Time Optimization",
-        description: "Continuous campaign optimization based on performance data and market trends",
-        icon: "⚡",
-        isActive: true
-      },
-      {
-        id: 3,
-        title: "24/7 Monitoring",
-        description: "Round-the-clock monitoring ensures your campaigns perform at their peak",
-        icon: "👁️",
-        isActive: true
-      }
-    ]
+  const [featuresData, setFeaturesData] = useState({
+    features_title: '',
+    features_is_visible: true,
+    features_data: [] as Array<{id: number; title: string; description: string; icon: string; isActive: boolean}>
   });
 
-  const [ctaSection, setCTASection] = useState({
-    isVisible: true,
-    title: "Ready to Transform Your Business?",
-    subtitle: "Join thousands of successful businesses using our AI platform",
-    primaryCTAText: "Start Free Trial",
-    secondaryCTAText: "Schedule Demo",
-    backgroundImage: "/cta-bg.jpg"
+  const [ctaData, setCTAData] = useState({
+    cta_title: '',
+    cta_subtitle: '',
+    cta_primary_text: '',
+    cta_secondary_text: '',
+    cta_is_visible: true,
+    cta_background_image: ''
   });
 
-  // Handler functions
-  const handleHeroUpdate = (field: string, value: any) => {
-    setHeroSection(prev => ({ ...prev, [field]: value }));
-    toast({ title: "Hero section updated", description: "Changes saved successfully" });
-  };
+  useEffect(() => {
+    if (config) {
+      setHeroData({
+        hero_title: config.hero_title,
+        hero_subtitle: config.hero_subtitle,
+        hero_description: config.hero_description,
+        hero_cta_text: config.hero_cta_text,
+        hero_cta_secondary_text: config.hero_cta_secondary_text,
+        hero_background_image: config.hero_background_image,
+        hero_video_url: config.hero_video_url,
+        hero_rotating_images: config.hero_rotating_images
+      });
 
-  const handleStatsUpdate = (stats: any) => {
-    setStatsSection(prev => ({ ...prev, stats }));
-    toast({ title: "Stats section updated", description: "Changes saved successfully" });
-  };
+      setStatsData({
+        stats_title: config.stats_title,
+        stats_subtitle: config.stats_subtitle,
+        stats_is_visible: config.stats_is_visible,
+        stats_data: config.stats_data
+      });
 
-  const handleServicesUpdate = (selectedServices: any) => {
-    setServicesSection(prev => ({ ...prev, selectedServices }));
-    toast({ title: "Services section updated", description: "Changes saved successfully" });
-  };
+      setServicesData({
+        services_title: config.services_title,
+        services_subtitle: config.services_subtitle,
+        services_is_visible: config.services_is_visible,
+        services_display_limit: config.services_display_limit,
+        services_selected_ids: config.services_selected_ids
+      });
 
-  const handleTestimonialsUpdate = (selectedTestimonials: any) => {
-    setTestimonialsSection(prev => ({ ...prev, selectedTestimonials }));
-    toast({ title: "Testimonials section updated", description: "Changes saved successfully" });
-  };
+      setTestimonialsData({
+        testimonials_title: config.testimonials_title,
+        testimonials_subtitle: config.testimonials_subtitle,
+        testimonials_is_visible: config.testimonials_is_visible,
+        testimonials_display_limit: config.testimonials_display_limit,
+        testimonials_selected_ids: config.testimonials_selected_ids,
+        testimonials_selected_industry: config.testimonials_selected_industry
+      });
 
-  const handleFeatureToggle = (featureId: number) => {
-    setFeaturesSection(prev => ({
-      ...prev,
-      features: prev.features.map(feature =>
-        feature.id === featureId 
-          ? { ...feature, isActive: !feature.isActive }
-          : feature
-      )
-    }));
-    toast({ title: "Feature updated", description: "Feature visibility toggled" });
+      setFeaturesData({
+        features_title: config.features_title,
+        features_is_visible: config.features_is_visible,
+        features_data: config.features_data
+      });
+
+      setCTAData({
+        cta_title: config.cta_title,
+        cta_subtitle: config.cta_subtitle,
+        cta_primary_text: config.cta_primary_text,
+        cta_secondary_text: config.cta_secondary_text,
+        cta_is_visible: config.cta_is_visible,
+        cta_background_image: config.cta_background_image
+      });
+    }
+  }, [config]);
+
+  const handleSaveChanges = async () => {
+    try {
+      await updateConfig({
+        ...heroData,
+        ...statsData,
+        ...servicesData,
+        ...testimonialsData,
+        ...featuresData,
+        ...ctaData
+      });
+      toast.success('Home page configuration updated successfully!');
+    } catch (error) {
+      toast.error('Failed to update home page configuration');
+      console.error('Error updating home page config:', error);
+    }
   };
 
   const handleSectionVisibilityToggle = (section: string) => {
     switch (section) {
       case 'stats':
-        setStatsSection(prev => ({ ...prev, isVisible: !prev.isVisible }));
+        setStatsData(prev => ({ ...prev, stats_is_visible: !prev.stats_is_visible }));
         break;
       case 'services':
-        setServicesSection(prev => ({ ...prev, isVisible: !prev.isVisible }));
+        setServicesData(prev => ({ ...prev, services_is_visible: !prev.services_is_visible }));
         break;
       case 'testimonials':
-        setTestimonialsSection(prev => ({ ...prev, isVisible: !prev.isVisible }));
+        setTestimonialsData(prev => ({ ...prev, testimonials_is_visible: !prev.testimonials_is_visible }));
         break;
       case 'features':
-        setFeaturesSection(prev => ({ ...prev, isVisible: !prev.isVisible }));
+        setFeaturesData(prev => ({ ...prev, features_is_visible: !prev.features_is_visible }));
         break;
       case 'cta':
-        setCTASection(prev => ({ ...prev, isVisible: !prev.isVisible }));
+        setCTAData(prev => ({ ...prev, cta_is_visible: !prev.cta_is_visible }));
         break;
     }
-    toast({ title: "Section visibility updated", description: "Changes saved successfully" });
   };
+
+  const handleFeatureToggle = (featureId: number) => {
+    setFeaturesData(prev => ({
+      ...prev,
+      features_data: prev.features_data.map(feature =>
+        feature.id === featureId 
+          ? { ...feature, isActive: !feature.isActive }
+          : feature
+      )
+    }));
+  };
+
+  const handleStatsUpdate = (newStats: Array<{value: string; label: string; icon: string}>) => {
+    setStatsData(prev => ({ ...prev, stats_data: newStats }));
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex">
+        <AdminSidebar />
+        <main className="flex-1 p-8 flex justify-center items-center">
+          <div className="text-lg">Loading home page configuration...</div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex">
@@ -167,10 +205,16 @@ const EditHomePage = () => {
               <h1 className="text-3xl font-bold text-gray-900">Edit Home Page</h1>
               <p className="text-gray-600 mt-2">Customize all elements of your home page</p>
             </div>
-            <Button className="bg-green-600 hover:bg-green-700">
-              <Eye className="w-4 h-4 mr-2" />
-              Preview Changes
-            </Button>
+            <div className="flex space-x-4">
+              <Button variant="outline" className="bg-green-600 hover:bg-green-700 text-white">
+                <Eye className="w-4 h-4 mr-2" />
+                Preview Changes
+              </Button>
+              <Button onClick={handleSaveChanges} className="bg-blue-600 hover:bg-blue-700">
+                <Save className="w-4 h-4 mr-2" />
+                Save All Changes
+              </Button>
+            </div>
           </div>
 
           {/* Hero Section */}
@@ -184,84 +228,88 @@ const EditHomePage = () => {
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2">Main Title</label>
-                  <input
-                    type="text"
-                    value={heroSection.title}
-                    onChange={(e) => handleHeroUpdate('title', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  <Label htmlFor="hero_title">Main Title</Label>
+                  <Input
+                    id="hero_title"
+                    value={heroData.hero_title}
+                    onChange={(e) => setHeroData(prev => ({ ...prev, hero_title: e.target.value }))}
+                    placeholder="AI-Powered Marketing Solutions"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2">Subtitle</label>
-                  <input
-                    type="text"
-                    value={heroSection.subtitle}
-                    onChange={(e) => handleHeroUpdate('subtitle', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  <Label htmlFor="hero_subtitle">Subtitle</Label>
+                  <Input
+                    id="hero_subtitle"
+                    value={heroData.hero_subtitle}
+                    onChange={(e) => setHeroData(prev => ({ ...prev, hero_subtitle: e.target.value }))}
+                    placeholder="Transform Your Business with Advanced AI Technology"
                   />
                 </div>
               </div>
               
               <div>
-                <label className="block text-sm font-medium mb-2">Description</label>
-                <textarea
-                  value={heroSection.description}
-                  onChange={(e) => handleHeroUpdate('description', e.target.value)}
+                <Label htmlFor="hero_description">Description</Label>
+                <Textarea
+                  id="hero_description"
+                  value={heroData.hero_description}
+                  onChange={(e) => setHeroData(prev => ({ ...prev, hero_description: e.target.value }))}
                   rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  placeholder="Drive exceptional growth with our cutting-edge AI marketing platform..."
                 />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2">Primary CTA Text</label>
-                  <input
-                    type="text"
-                    value={heroSection.ctaText}
-                    onChange={(e) => handleHeroUpdate('ctaText', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  <Label htmlFor="hero_cta_text">Primary CTA Text</Label>
+                  <Input
+                    id="hero_cta_text"
+                    value={heroData.hero_cta_text}
+                    onChange={(e) => setHeroData(prev => ({ ...prev, hero_cta_text: e.target.value }))}
+                    placeholder="Get Started Today"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2">Secondary CTA Text</label>
-                  <input
-                    type="text"
-                    value={heroSection.ctaSecondaryText}
-                    onChange={(e) => handleHeroUpdate('ctaSecondaryText', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  <Label htmlFor="hero_cta_secondary_text">Secondary CTA Text</Label>
+                  <Input
+                    id="hero_cta_secondary_text"
+                    value={heroData.hero_cta_secondary_text}
+                    onChange={(e) => setHeroData(prev => ({ ...prev, hero_cta_secondary_text: e.target.value }))}
+                    placeholder="Learn More"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2">Background Image URL</label>
-                  <input
-                    type="text"
-                    value={heroSection.backgroundImage}
-                    onChange={(e) => handleHeroUpdate('backgroundImage', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  <Label htmlFor="hero_background_image">Background Image URL</Label>
+                  <Input
+                    id="hero_background_image"
+                    value={heroData.hero_background_image}
+                    onChange={(e) => setHeroData(prev => ({ ...prev, hero_background_image: e.target.value }))}
+                    placeholder="/hero-bg.jpg"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2">Video URL (Optional)</label>
-                  <input
-                    type="text"
-                    value={heroSection.videoUrl}
-                    onChange={(e) => handleHeroUpdate('videoUrl', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  <Label htmlFor="hero_video_url">Video URL (Optional)</Label>
+                  <Input
+                    id="hero_video_url"
+                    value={heroData.hero_video_url}
+                    onChange={(e) => setHeroData(prev => ({ ...prev, hero_video_url: e.target.value }))}
+                    placeholder="https://youtube.com/watch?v=..."
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Rotating Images (One per line)</label>
-                <textarea
-                  value={heroSection.rotatingImages.join('\n')}
-                  onChange={(e) => handleHeroUpdate('rotatingImages', e.target.value.split('\n').filter(url => url.trim()))}
+                <Label htmlFor="hero_rotating_images">Rotating Images (One per line)</Label>
+                <Textarea
+                  id="hero_rotating_images"
+                  value={heroData.hero_rotating_images.join('\n')}
+                  onChange={(e) => setHeroData(prev => ({ 
+                    ...prev, 
+                    hero_rotating_images: e.target.value.split('\n').filter(url => url.trim())
+                  }))}
                   rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
                   placeholder="/image1.jpg&#10;/image2.jpg&#10;/image3.jpg"
                 />
               </div>
@@ -281,74 +329,74 @@ const EditHomePage = () => {
                   size="sm"
                   onClick={() => handleSectionVisibilityToggle('stats')}
                 >
-                  {statsSection.isVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  {statsSection.isVisible ? 'Hide' : 'Show'}
+                  {statsData.stats_is_visible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {statsData.stats_is_visible ? 'Hide' : 'Show'}
                 </Button>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2">Section Title</label>
-                  <input
-                    type="text"
-                    value={statsSection.title}
-                    onChange={(e) => setStatsSection(prev => ({ ...prev, title: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  <Label htmlFor="stats_title">Section Title</Label>
+                  <Input
+                    id="stats_title"
+                    value={statsData.stats_title}
+                    onChange={(e) => setStatsData(prev => ({ ...prev, stats_title: e.target.value }))}
+                    placeholder="Numbers That Speak Volumes"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2">Section Subtitle</label>
-                  <input
-                    type="text"
-                    value={statsSection.subtitle}
-                    onChange={(e) => setStatsSection(prev => ({ ...prev, subtitle: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  <Label htmlFor="stats_subtitle">Section Subtitle</Label>
+                  <Input
+                    id="stats_subtitle"
+                    value={statsData.stats_subtitle}
+                    onChange={(e) => setStatsData(prev => ({ ...prev, stats_subtitle: e.target.value }))}
+                    placeholder="Our commitment to excellence is reflected in our outstanding results"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {statsSection.stats.map((stat, index) => (
+                {statsData.stats_data.map((stat, index) => (
                   <div key={index} className="border border-gray-200 rounded-lg p-4">
                     <div className="space-y-2">
                       <div>
-                        <label className="block text-xs font-medium mb-1">Value</label>
-                        <input
-                          type="text"
+                        <Label className="text-xs font-medium">Value</Label>
+                        <Input
                           value={stat.value}
                           onChange={(e) => {
-                            const newStats = [...statsSection.stats];
+                            const newStats = [...statsData.stats_data];
                             newStats[index] = { ...stat, value: e.target.value };
                             handleStatsUpdate(newStats);
                           }}
-                          className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                          className="text-sm"
+                          placeholder="500+"
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-medium mb-1">Label</label>
-                        <input
-                          type="text"
+                        <Label className="text-xs font-medium">Label</Label>
+                        <Input
                           value={stat.label}
                           onChange={(e) => {
-                            const newStats = [...statsSection.stats];
+                            const newStats = [...statsData.stats_data];
                             newStats[index] = { ...stat, label: e.target.value };
                             handleStatsUpdate(newStats);
                           }}
-                          className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                          className="text-sm"
+                          placeholder="Happy Clients"
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-medium mb-1">Icon (Emoji)</label>
-                        <input
-                          type="text"
+                        <Label className="text-xs font-medium">Icon (Emoji)</Label>
+                        <Input
                           value={stat.icon}
                           onChange={(e) => {
-                            const newStats = [...statsSection.stats];
+                            const newStats = [...statsData.stats_data];
                             newStats[index] = { ...stat, icon: e.target.value };
                             handleStatsUpdate(newStats);
                           }}
-                          className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                          className="text-sm"
+                          placeholder="👥"
                         />
                       </div>
                     </div>
@@ -372,8 +420,8 @@ const EditHomePage = () => {
                     size="sm"
                     onClick={() => handleSectionVisibilityToggle('services')}
                   >
-                    {servicesSection.isVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    {servicesSection.isVisible ? 'Hide' : 'Show'}
+                    {servicesData.services_is_visible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {servicesData.services_is_visible ? 'Hide' : 'Show'}
                   </Button>
                   <Button size="sm">
                     <Edit className="h-4 w-4 mr-2" />
@@ -383,9 +431,35 @@ const EditHomePage = () => {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-8 text-gray-500">
-                <p>Click "Select Services" to choose which services to display on the home page</p>
-                <p className="text-sm mt-2">Currently showing: {servicesSection.selectedServices.length} services</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <Label htmlFor="services_title">Section Title</Label>
+                  <Input
+                    id="services_title"
+                    value={servicesData.services_title}
+                    onChange={(e) => setServicesData(prev => ({ ...prev, services_title: e.target.value }))}
+                    placeholder="Our Premium Services"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="services_subtitle">Section Subtitle</Label>
+                  <Input
+                    id="services_subtitle"
+                    value={servicesData.services_subtitle}
+                    onChange={(e) => setServicesData(prev => ({ ...prev, services_subtitle: e.target.value }))}
+                    placeholder="Comprehensive AI-powered solutions for your business growth"
+                  />
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="services_display_limit">Display Limit</Label>
+                <Input
+                  id="services_display_limit"
+                  type="number"
+                  value={servicesData.services_display_limit}
+                  onChange={(e) => setServicesData(prev => ({ ...prev, services_display_limit: parseInt(e.target.value) }))}
+                  placeholder="6"
+                />
               </div>
             </CardContent>
           </Card>
@@ -404,8 +478,8 @@ const EditHomePage = () => {
                     size="sm"
                     onClick={() => handleSectionVisibilityToggle('testimonials')}
                   >
-                    {testimonialsSection.isVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    {testimonialsSection.isVisible ? 'Hide' : 'Show'}
+                    {testimonialsData.testimonials_is_visible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {testimonialsData.testimonials_is_visible ? 'Hide' : 'Show'}
                   </Button>
                   <Button size="sm">
                     <Edit className="h-4 w-4 mr-2" />
@@ -415,9 +489,35 @@ const EditHomePage = () => {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-8 text-gray-500">
-                <p>Click "Select Testimonials" to choose which testimonials to display on the home page</p>
-                <p className="text-sm mt-2">Currently showing: {testimonialsSection.selectedTestimonials.length} testimonials</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <Label htmlFor="testimonials_title">Section Title</Label>
+                  <Input
+                    id="testimonials_title"
+                    value={testimonialsData.testimonials_title}
+                    onChange={(e) => setTestimonialsData(prev => ({ ...prev, testimonials_title: e.target.value }))}
+                    placeholder="What Our Clients Say"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="testimonials_subtitle">Section Subtitle</Label>
+                  <Input
+                    id="testimonials_subtitle"
+                    value={testimonialsData.testimonials_subtitle}
+                    onChange={(e) => setTestimonialsData(prev => ({ ...prev, testimonials_subtitle: e.target.value }))}
+                    placeholder="Real results from real businesses"
+                  />
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="testimonials_display_limit">Display Limit</Label>
+                <Input
+                  id="testimonials_display_limit"
+                  type="number"
+                  value={testimonialsData.testimonials_display_limit}
+                  onChange={(e) => setTestimonialsData(prev => ({ ...prev, testimonials_display_limit: parseInt(e.target.value) }))}
+                  placeholder="3"
+                />
               </div>
             </CardContent>
           </Card>
@@ -435,14 +535,23 @@ const EditHomePage = () => {
                   size="sm"
                   onClick={() => handleSectionVisibilityToggle('features')}
                 >
-                  {featuresSection.isVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  {featuresSection.isVisible ? 'Hide' : 'Show'}
+                  {featuresData.features_is_visible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {featuresData.features_is_visible ? 'Hide' : 'Show'}
                 </Button>
               </div>
             </CardHeader>
             <CardContent>
+              <div className="mb-4">
+                <Label htmlFor="features_title">Section Title</Label>
+                <Input
+                  id="features_title"
+                  value={featuresData.features_title}
+                  onChange={(e) => setFeaturesData(prev => ({ ...prev, features_title: e.target.value }))}
+                  placeholder="Why Choose AIAdMaxify"
+                />
+              </div>
               <div className="space-y-4">
-                {featuresSection.features.map((feature) => (
+                {featuresData.features_data.map((feature) => (
                   <div key={feature.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
                     <div className="flex items-center space-x-4">
                       <span className="text-2xl">{feature.icon}</span>
@@ -489,59 +598,59 @@ const EditHomePage = () => {
                   size="sm"
                   onClick={() => handleSectionVisibilityToggle('cta')}
                 >
-                  {ctaSection.isVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  {ctaSection.isVisible ? 'Hide' : 'Show'}
+                  {ctaData.cta_is_visible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {ctaData.cta_is_visible ? 'Hide' : 'Show'}
                 </Button>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2">CTA Title</label>
-                  <input
-                    type="text"
-                    value={ctaSection.title}
-                    onChange={(e) => setCTASection(prev => ({ ...prev, title: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  <Label htmlFor="cta_title">CTA Title</Label>
+                  <Input
+                    id="cta_title"
+                    value={ctaData.cta_title}
+                    onChange={(e) => setCTAData(prev => ({ ...prev, cta_title: e.target.value }))}
+                    placeholder="Ready to Transform Your Business?"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2">CTA Subtitle</label>
-                  <input
-                    type="text"
-                    value={ctaSection.subtitle}
-                    onChange={(e) => setCTASection(prev => ({ ...prev, subtitle: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  <Label htmlFor="cta_subtitle">CTA Subtitle</Label>
+                  <Input
+                    id="cta_subtitle"
+                    value={ctaData.cta_subtitle}
+                    onChange={(e) => setCTAData(prev => ({ ...prev, cta_subtitle: e.target.value }))}
+                    placeholder="Join thousands of successful businesses using our AI platform"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2">Primary Button Text</label>
-                  <input
-                    type="text"
-                    value={ctaSection.primaryCTAText}
-                    onChange={(e) => setCTASection(prev => ({ ...prev, primaryCTAText: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  <Label htmlFor="cta_primary_text">Primary Button Text</Label>
+                  <Input
+                    id="cta_primary_text"
+                    value={ctaData.cta_primary_text}
+                    onChange={(e) => setCTAData(prev => ({ ...prev, cta_primary_text: e.target.value }))}
+                    placeholder="Start Free Trial"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2">Secondary Button Text</label>
-                  <input
-                    type="text"
-                    value={ctaSection.secondaryCTAText}
-                    onChange={(e) => setCTASection(prev => ({ ...prev, secondaryCTAText: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  <Label htmlFor="cta_secondary_text">Secondary Button Text</Label>
+                  <Input
+                    id="cta_secondary_text"
+                    value={ctaData.cta_secondary_text}
+                    onChange={(e) => setCTAData(prev => ({ ...prev, cta_secondary_text: e.target.value }))}
+                    placeholder="Schedule Demo"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2">Background Image URL</label>
-                  <input
-                    type="text"
-                    value={ctaSection.backgroundImage}
-                    onChange={(e) => setCTASection(prev => ({ ...prev, backgroundImage: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  <Label htmlFor="cta_background_image">Background Image URL</Label>
+                  <Input
+                    id="cta_background_image"
+                    value={ctaData.cta_background_image}
+                    onChange={(e) => setCTAData(prev => ({ ...prev, cta_background_image: e.target.value }))}
+                    placeholder="/cta-bg.jpg"
                   />
                 </div>
               </div>
@@ -553,7 +662,8 @@ const EditHomePage = () => {
             <Button variant="outline">
               Cancel Changes
             </Button>
-            <Button className="bg-blue-600 hover:bg-blue-700">
+            <Button onClick={handleSaveChanges} className="bg-blue-600 hover:bg-blue-700">
+              <Save className="w-4 h-4 mr-2" />
               Save All Changes
             </Button>
           </div>

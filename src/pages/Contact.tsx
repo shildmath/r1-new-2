@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Phone, Mail, MapPin, Clock, MessageCircle, Send, User, MessageSquare } from 'lucide-react';
@@ -8,10 +7,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { useContactPageConfig } from '@/hooks/useContactPageConfig';
-import { ContactFormHandler } from '@/components/ContactFormHandler';
+import { useContactFormHandler } from '@/components/ContactFormHandler';
 
 const Contact = () => {
-  const { config } = useContactPageConfig();
+  const { data: config } = useContactPageConfig();
+  const { handleContactSubmission } = useContactFormHandler();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -30,16 +30,22 @@ const Contact = () => {
     setIsSubmitting(true);
     
     try {
-      // Handle form submission here
-      console.log('Form submitted:', formData);
+      const success = handleContactSubmission(
+        formData.name,
+        formData.email,
+        formData.phone,
+        formData.message,
+        'contact'
+      );
       
-      // Reset form after successful submission
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        message: ''
-      });
+      if (success) {
+        setFormData({
+          name: '',
+          email: '',
+          phone: '',
+          message: ''
+        });
+      }
     } catch (error) {
       console.error('Error submitting form:', error);
     } finally {
@@ -470,9 +476,6 @@ const Contact = () => {
           </motion.div>
         </div>
       </section>
-
-      {/* Contact Form Handler */}
-      <ContactFormHandler />
     </div>
   );
 };

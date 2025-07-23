@@ -8,11 +8,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Star, Quote, Users, TrendingUp, Award } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Navbar from '@/components/Navbar';
-import { EnhancedFooter } from '@/components/EnhancedFooter';
+import EnhancedFooter from '@/components/EnhancedFooter';
 
 const Testimonials = () => {
   const { testimonials, stats, loading, error, fetchTestimonials } = useTestimonials();
-  const { industries, loading: industriesLoading } = useTestimonialIndustries();
+  const { data: industries, isLoading: industriesLoading } = useTestimonialIndustries();
   const [selectedIndustry, setSelectedIndustry] = useState('All Industries');
 
   useEffect(() => {
@@ -83,7 +83,7 @@ const Testimonials = () => {
                 <div className="bg-blue-100 rounded-full p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
                   <Users className="h-8 w-8 text-blue-600" />
                 </div>
-                <div className="text-3xl font-bold text-gray-800 mb-2">{stats.total_clients}</div>
+                <div className="text-3xl font-bold text-gray-800 mb-2">{stats.happy_clients}</div>
                 <div className="text-gray-600">Happy Clients</div>
               </motion.div>
               
@@ -96,8 +96,8 @@ const Testimonials = () => {
                 <div className="bg-green-100 rounded-full p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
                   <TrendingUp className="h-8 w-8 text-green-600" />
                 </div>
-                <div className="text-3xl font-bold text-gray-800 mb-2">{stats.average_rating}</div>
-                <div className="text-gray-600">Average Rating</div>
+                <div className="text-3xl font-bold text-gray-800 mb-2">{stats.average_roi}</div>
+                <div className="text-gray-600">Average ROI</div>
               </motion.div>
               
               <motion.div
@@ -109,7 +109,7 @@ const Testimonials = () => {
                 <div className="bg-purple-100 rounded-full p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
                   <Award className="h-8 w-8 text-purple-600" />
                 </div>
-                <div className="text-3xl font-bold text-gray-800 mb-2">{stats.success_rate}%</div>
+                <div className="text-3xl font-bold text-gray-800 mb-2">{stats.success_rate}</div>
                 <div className="text-gray-600">Success Rate</div>
               </motion.div>
               
@@ -122,8 +122,8 @@ const Testimonials = () => {
                 <div className="bg-orange-100 rounded-full p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
                   <Star className="h-8 w-8 text-orange-600" />
                 </div>
-                <div className="text-3xl font-bold text-gray-800 mb-2">{stats.total_projects}</div>
-                <div className="text-gray-600">Projects Completed</div>
+                <div className="text-3xl font-bold text-gray-800 mb-2">{stats.client_rating}</div>
+                <div className="text-gray-600">Client Rating</div>
               </motion.div>
             </div>
           </div>
@@ -143,7 +143,7 @@ const Testimonials = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="All Industries">All Industries</SelectItem>
-                {industries.map((industry) => (
+                {industries?.map((industry) => (
                   <SelectItem key={industry.id} value={industry.name}>
                     {industry.name}
                   </SelectItem>
@@ -197,7 +197,7 @@ const Testimonials = () => {
                       </div>
                       
                       <blockquote className="text-gray-700 mb-4 italic">
-                        "{testimonial.content}"
+                        "{testimonial.description}"
                       </blockquote>
                       
                       <div className="flex items-center">
